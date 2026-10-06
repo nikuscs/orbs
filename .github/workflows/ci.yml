@@ -8,8 +8,7 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   changes:
@@ -22,14 +21,14 @@ jobs:
       ts: ${{ steps.filter.outputs.ts || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Filter paths
         id: filter
         if: github.event_name == 'pull_request'
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
             ts:
@@ -51,6 +50,8 @@ jobs:
     name: TS typecheck
     needs: changes
     if: needs.changes.outputs.ts == 'true'
+    permissions:
+      contents: read
     uses: ./.github/workflows/_check-ts.yml
     with:
       task: check
@@ -59,6 +60,8 @@ jobs:
     name: TS lint
     needs: changes
     if: needs.changes.outputs.ts == 'true'
+    permissions:
+      contents: read
     uses: ./.github/workflows/_check-ts.yml
     with:
       task: lint
@@ -67,6 +70,8 @@ jobs:
     name: TS test
     needs: changes
     if: needs.changes.outputs.ts == 'true'
+    permissions:
+      contents: read
     uses: ./.github/workflows/_check-ts.yml
     with:
       task: test
