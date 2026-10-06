@@ -1,0 +1,1 @@
+create table "judge" ("roomId" text not null primary key references "room" ("id") on delete cascade, "harnessInstanceId" text not null, "resume" text not null, "contextThrough" integer not null default 0, "updatedAt" text not null);

@@ -1,0 +1,26 @@
+{
+  "name": "@orbs/tooling",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./vitest/arch": {
+      "types": "./src/vitest/arch.ts",
+      "default": "./src/vitest/arch.ts"
+    }
+  },
+  "scripts": {
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "oxc-parser": "^0.151.0"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/node": "^26.6.2",
+    "oxlint": "1.85.0",
+    "typescript": "^7.0.2"
+  }
+}

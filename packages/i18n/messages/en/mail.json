@@ -1,0 +1,8 @@
+{
+  "mail_password_reset_action": "Choose a new password",
+  "mail_password_reset_intro": "Someone asked to reset the password for your Orbs account. If it was you, open this link:",
+  "mail_password_reset_subject": "Reset your Orbs password",
+  "mail_verification_action": "Verify email",
+  "mail_verification_intro": "Welcome to Orbs. Confirm this is your email address by opening this link:",
+  "mail_verification_subject": "Verify your Orbs email"
+}

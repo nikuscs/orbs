@@ -1,0 +1,27 @@
+{
+  "name": "@orbs/kysely-sqlite",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": {
+      "types": "./src/entry.server.ts",
+      "default": "./src/entry.server.ts"
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "dependencies": {
+    "kysely": "^0.29.6",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  }
+}

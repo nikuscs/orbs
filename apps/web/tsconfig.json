@@ -1,0 +1,29 @@
+{
+  "extends": "@orbs/typescript-config/react.json",
+  "compilerOptions": {
+    "strict": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "#/*": [
+        "../server/src/*"
+      ],
+      "#services/*": [
+        "../server/src/services/*"
+      ]
+    },
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "worker-configuration.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite/**/*.ts",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

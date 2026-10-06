@@ -1,0 +1,55 @@
+{
+  "name": "@orbs/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*.ts",
+    "#services/*": "./src/services/*.ts"
+  },
+  "exports": {
+    "./client": "./src/entry.client.ts",
+    "./rpc": "./src/rpc/rpc.router.ts",
+    "./daemon": "./src/entry.daemon.ts",
+    "./server": "./src/entry.server.ts",
+    "./cloudflare": "./src/entry.cloudflare.ts",
+    "./native": "./src/entry.native.ts"
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "oxlint src/ tests/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ tests/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "dependencies": {
+    "@ai-sdk/provider-utils": "^4.0.57",
+    "@better-auth/api-key": "1.7.6",
+    "@orbs/avatar-blobs": "workspace:*",
+    "@orbs/env": "workspace:*",
+    "@orbs/errors": "workspace:*",
+    "@orbs/i18n": "workspace:*",
+    "@orbs/kysely-sqlite": "workspace:*",
+    "@orbs/logger": "workspace:*",
+    "@orpc/ratelimit": "2.0.0-beta.39",
+    "@orpc/server": "2.0.0-beta.39",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "ai": "^6.0.209",
+    "better-auth": "1.7.6",
+    "emoji-regex": "10.6.0",
+    "kysely": "^0.29.6",
+    "kysely-d1": "^0.4.0",
+    "ts-pattern": "^5.6.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260925.1",
+    "@orbs/tooling": "workspace:*",
+    "@orbs/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "vitest": "5.0.1",
+    "wrangler": "^4.140.0"
+  }
+}

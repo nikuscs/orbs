@@ -1,0 +1,11 @@
+{
+  "extends": "@orbs/typescript-config/base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

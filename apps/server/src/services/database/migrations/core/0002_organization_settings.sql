@@ -1,0 +1,1 @@
+create table "organizationSettings" ("organizationId" text not null references "organization" ("id") on delete cascade, "key" text not null, "value" text not null, "updatedAt" date not null, "updatedBy" text references "user" ("id") on delete set null, primary key ("organizationId", "key"));

@@ -1,0 +1,27 @@
+{
+  "extends": "@orbs/typescript-config/base.json",
+  "compilerOptions": {
+    "types": [
+      "bun"
+    ],
+    "lib": [
+      "ESNext"
+    ],
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json",
+    "paths": {
+      "#/*": [
+        "./src/*"
+      ],
+      "#services/*": [
+        "./src/services/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

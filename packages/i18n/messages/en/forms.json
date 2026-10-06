@@ -1,0 +1,14 @@
+{
+  "forms_confirm_password": "Confirm Password",
+  "forms_confirm_password_placeholder": "Re-enter your new password",
+  "forms_email": "Email",
+  "forms_email_placeholder": "you@example.com",
+  "forms_hide_password": "Hide password",
+  "forms_name": "Name",
+  "forms_name_placeholder": "John Doe",
+  "forms_new_password": "New Password",
+  "forms_new_password_placeholder": "Enter your new password",
+  "forms_password": "Password",
+  "forms_password_placeholder": "••••••••",
+  "forms_show_password": "Show password"
+}

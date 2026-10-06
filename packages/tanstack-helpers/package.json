@@ -1,0 +1,31 @@
+{
+  "name": "@orbs/tanstack-helpers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./universal": {
+      "types": "./src/entry.universal.ts",
+      "default": "./src/entry.universal.ts"
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "dependencies": {
+    "@tanstack/router-core": "^1.171.32",
+    "schema-dts": "^2.0.0",
+    "type-fest": "^5.10.0"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}

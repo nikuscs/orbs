@@ -1,0 +1,90 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "i18n:compile": {
+      "outputs": [
+        "src/paraglide/**"
+      ],
+      "inputs": [
+        "messages/**",
+        "project.inlang/settings.json",
+        "scripts/**"
+      ]
+    },
+    "build:cloudflare": {
+      "dependsOn": [
+        "^build:cloudflare",
+        "@orbs/i18n#i18n:compile"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "build:bun": {
+      "dependsOn": [
+        "^build:bun",
+        "@orbs/i18n#i18n:compile"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "check": {
+      "dependsOn": [
+        "@orbs/i18n#i18n:compile"
+      ]
+    },
+    "dev:cloudflare": {
+      "dependsOn": [
+        "@orbs/i18n#i18n:compile"
+      ],
+      "persistent": true,
+      "cache": false
+    },
+    "dev:bun": {
+      "dependsOn": [
+        "@orbs/i18n#i18n:compile"
+      ],
+      "persistent": true,
+      "cache": false
+    },
+    "lint": {
+      "dependsOn": [
+        "@orbs/i18n#i18n:compile"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "../../oxlint.config.ts"
+      ]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "test": {
+      "outputs": []
+    },
+    "test:coverage": {
+      "outputs": [
+        "coverage/**"
+      ],
+      "cache": false
+    },
+    "preview:cloudflare": {
+      "dependsOn": [
+        "build:cloudflare"
+      ],
+      "persistent": true,
+      "cache": false
+    },
+    "start:bun": {
+      "persistent": true,
+      "cache": false
+    },
+    "deploy:cloudflare": {
+      "dependsOn": [
+        "@orbs/i18n#i18n:compile"
+      ],
+      "cache": false
+    }
+  }
+}

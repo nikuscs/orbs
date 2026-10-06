@@ -1,0 +1,17 @@
+.env*
+!.env.example
+.dev.vars*
+.prod.vars
+dist/
+.wrangler/
+data/
+*.log
+.DS_Store
+.cache/
+node_modules/
+.turbo/
+
+# Local agent work, never published
+.agents/plans/
+.agents/research/
+.agents/tasks.md

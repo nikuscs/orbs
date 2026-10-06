@@ -1,0 +1,14 @@
+{
+  "routing_driver": "Who answers",
+  "routing_driver_inherit": "Organization default ({driver})",
+  "routing_driver_jev": "Jev",
+  "routing_driver_roundtable": "Roundtable",
+  "routing_driver_judge": "Judge",
+  "routing_driver_jev_hint": "Jev picks who answers each message: fast and cheap.",
+  "routing_driver_roundtable_hint": "Every bot reads each message in turn and answers only when it has something to add; the leader answers when nobody does. Slower, closer to a real conversation.",
+  "routing_driver_judge_hint": "A model you choose reads the conversation and picks who answers each message; only those bots run. If it cannot decide, Jev picks.",
+  "routing_judge_model": "Judge model",
+  "routing_judge_model_hint": "Used by every room that Judge routes. A fast model keeps replies quick.",
+  "routing_judge_uses": "Judged by {model}, set in the organization settings.",
+  "routing_judge_missing": "No judge model is set in the organization settings yet, so Jev picks for now."
+}

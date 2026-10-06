@@ -1,0 +1,7 @@
+{
+  "settings_organization": "Definições da organização",
+  "settings_organization_hint": "Predefinições para todas as salas desta organização.",
+  "settings_organization_driver": "Quem responde nas salas que seguem o padrão",
+  "settings_organization_save": "Guardar",
+  "settings_organization_error": "As definições não foram guardadas. Tenta de novo."
+}

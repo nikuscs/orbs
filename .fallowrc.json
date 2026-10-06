@@ -1,0 +1,101 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+  "entry": [
+    "apps/web/src/application/server.tanstack.ts",
+    "apps/web/src/application/server.native.ts",
+    "apps/web/src/application/routes.ts",
+    "apps/web/src/application/router.tsx",
+    "apps/web/vite/**/*.ts",
+    "scripts/**/*.ts"
+  ],
+  "ignorePatterns": [
+    "apps/server/src/services/database/migrations/**",
+    "packages/i18n/src/paraglide/**",
+    "apps/web/src/application/routes.tree.ts",
+    "**/*.generated.ts"
+  ],
+  "ignoreExports": [
+    {
+      "file": "apps/web/src/components/ui/**",
+      "exports": [
+        "*"
+      ]
+    }
+  ],
+  "ignoreDependencies": [
+    "oxlint-tsgolint",
+    "babel-plugin-react-compiler",
+    "typescript",
+    "tailwindcss",
+    "turbo",
+    "~icons",
+    "@iconify-json/simple-icons",
+    "@svgr/core",
+    "@svgr/plugin-jsx",
+    "tailwind-scrollbar",
+    "@iconify-json/logos",
+    "@iconify-json/lucide",
+    "@iconify-json/svg-spinners"
+  ],
+  "rules": {
+    "unused-files": "error",
+    "unused-exports": "error",
+    "unused-types": "warn",
+    "unused-dependencies": "warn",
+    "unused-dev-dependencies": "warn",
+    "unresolved-imports": "warn",
+    "unlisted-dependencies": "warn",
+    "circular-dependencies": "error",
+    "boundary-violation": "error",
+    "stale-suppressions": "warn"
+  },
+  "workspaces": {
+    "patterns": [
+      "apps/*",
+      "packages/*"
+    ]
+  },
+  "usedClassMembers": [
+    {
+      "extends": "DurableObject",
+      "members": [
+        "fetch",
+        "webSocketMessage",
+        "webSocketClose",
+        "socketsClose",
+        "alarm",
+        "daemonHarnesses",
+        "daemonSkills",
+        "daemonModels",
+        "memoryStatus",
+        "memoryControl",
+        "memoryList",
+        "memoryExport",
+        "memoryWipe",
+        "memoryMutate",
+        "roomList",
+        "roomGet",
+        "roomTimeline",
+        "roomHistory",
+        "roomReactions",
+        "roomCreate",
+        "roomOpenTeam",
+        "roomOpenDirect",
+        "roomReset",
+        "roomDelete",
+        "botDelete",
+        "roomUpdate",
+        "roomArrange",
+        "roomSend",
+        "roomRerun",
+        "roomAddReaction",
+        "roomRemoveReaction",
+        "runStop",
+        "runDrafts",
+        "runRetry",
+        "runCancel",
+        "runApprove"
+      ]
+    }
+  ]
+}

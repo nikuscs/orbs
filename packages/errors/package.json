@@ -1,0 +1,26 @@
+{
+  "name": "@orbs/errors",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./universal": {
+      "types": "./src/entry.universal.ts",
+      "default": "./src/entry.universal.ts"
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@orpc/client": "2.0.0-beta.39",
+    "zod": "^4.6.5"
+  }
+}

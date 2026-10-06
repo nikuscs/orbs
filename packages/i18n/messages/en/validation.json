@@ -1,0 +1,17 @@
+{
+  "validation_email": "Please enter a valid email address.",
+  "validation_handle": "Use lowercase letters, numbers and single dashes.",
+  "validation_pick_one": "Pick at least one.",
+  "validation_number": "Please enter a valid number for {field}.",
+  "validation_required": "The {field} field is required.",
+  "validation_invalid_format": "Please enter a valid link.",
+  "validation_already_taken": "This value is already taken.",
+  "validation_must_be_positive": "Value must be greater than zero.",
+  "validation_must_be_positive_integer": "Value must be a positive whole number.",
+  "validation_invalid_gateway": "Invalid payment method selected.",
+  "validation_payment_gateway_not_allowed": "This payment method is not available for your organization.",
+  "validation_payment_amount_minimum": "Minimum payment for this method is {minimum}.",
+  "validation_file_size": "Please upload a smaller file.",
+  "validation_file_type": "Please upload a supported file type.",
+  "validation_judge_model": "Pick the model that judges who answers."
+}

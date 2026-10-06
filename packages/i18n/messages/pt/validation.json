@@ -1,0 +1,17 @@
+{
+  "validation_email": "Introduza um endereço de email válido.",
+  "validation_handle": "Use letras minúsculas, números e hífenes simples.",
+  "validation_pick_one": "Escolha pelo menos um.",
+  "validation_number": "Introduza um número válido para {field}.",
+  "validation_required": "O campo {field} é obrigatório.",
+  "validation_invalid_format": "Introduza uma ligação válida.",
+  "validation_already_taken": "Este valor já está em uso.",
+  "validation_must_be_positive": "O valor deve ser maior que zero.",
+  "validation_must_be_positive_integer": "O valor deve ser um número inteiro positivo.",
+  "validation_invalid_gateway": "Método de pagamento selecionado inválido.",
+  "validation_payment_gateway_not_allowed": "Este método de pagamento não está disponível para a sua organização.",
+  "validation_payment_amount_minimum": "O pagamento mínimo para este método é {minimum}.",
+  "validation_file_size": "Carregue um ficheiro menor.",
+  "validation_file_type": "Carregue um tipo de ficheiro suportado.",
+  "validation_judge_model": "Escolha o modelo que decide quem responde."
+}

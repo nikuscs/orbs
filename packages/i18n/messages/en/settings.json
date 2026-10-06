@@ -1,0 +1,7 @@
+{
+  "settings_organization": "Organization settings",
+  "settings_organization_hint": "Defaults for every room in this organization.",
+  "settings_organization_driver": "Who answers in rooms that follow the default",
+  "settings_organization_save": "Save",
+  "settings_organization_error": "The settings were not saved. Try again."
+}

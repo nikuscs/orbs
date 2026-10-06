@@ -1,0 +1,29 @@
+{
+  "extends": "@orbs/typescript-config/base.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "vite/client",
+      "vitest/globals",
+      "@cloudflare/workers-types",
+      "@types/bun"
+    ],
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json",
+    "paths": {
+      "#/*": [
+        "./src/*"
+      ],
+      "#services/*": [
+        "./src/services/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

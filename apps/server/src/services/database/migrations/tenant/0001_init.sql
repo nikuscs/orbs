@@ -1,0 +1,14 @@
+create table "room" ("id" text not null primary key, "kind" text not null, "name" text not null, "memberKey" text not null, "leaderBotId" text, "description" text not null default '', "stoppedThrough" integer, "createdAt" text not null);
+create index "room_kind_memberKey_idx" on "room" ("kind", "memberKey");
+create table "member" ("roomId" text not null references "room" ("id") on delete cascade, "botId" text not null, "freshFrom" integer not null default 0, "createdAt" text not null, primary key ("roomId", "botId"));
+create table "message" ("id" text not null primary key, "roomId" text not null references "room" ("id") on delete cascade, "seq" integer not null, "role" text not null, "authorId" text not null, "authorName" text not null, "runId" text, "parts" text not null, "route" text, "usage" text, "replyTo" text, "rerunOf" text, "createdAt" text not null);
+create unique index "message_roomId_seq_idx" on "message" ("roomId", "seq");
+create table "routing" ("messageId" text not null primary key references "message" ("id") on delete cascade, "dueAt" integer not null);
+create table "run" ("id" text not null primary key, "roomId" text not null references "room" ("id") on delete cascade, "botId" text not null, "botName" text not null, "homeDir" text not null, "harnessInstanceId" text not null, "modelProvider" text not null, "modelId" text not null, "thinkingLevel" text not null, "permission" text not null, "instructions" text not null, "roomInstructions" text not null, "inherit" text not null default '[]', "hop" integer not null, "triggerMessageId" text, "contextThrough" integer, "acceptedAt" text, "status" text not null, "activity" text not null default 'thinking', "activeTools" integer not null default 0, "waitedMs" integer not null default 0, "createdAt" text not null, "updatedAt" text not null);
+create index "run_roomId_status_idx" on "run" ("roomId", "status");
+create table "chunk" ("id" integer primary key autoincrement, "runId" text not null references "run" ("id") on delete cascade, "body" text not null);
+create index "chunk_runId_idx" on "chunk" ("runId");
+create table "approval" ("id" text not null primary key, "runId" text not null references "run" ("id") on delete cascade, "toolCallId" text not null, "toolName" text not null, "input" text not null, "status" text not null, "answeredBy" text, "expiresAt" integer not null, "createdAt" text not null, "updatedAt" text not null);
+create index "approval_runId_status_idx" on "approval" ("runId", "status");
+create table "harness" ("id" text not null primary key, "catalogue" text not null, "updatedAt" text not null);
+create table "binding" ("roomId" text not null references "room" ("id") on delete cascade, "botId" text not null, "harnessInstanceId" text not null, "resume" text not null, "contextThrough" integer not null default 0, "updatedAt" text not null, primary key ("roomId", "botId", "harnessInstanceId"));

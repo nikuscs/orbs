@@ -1,0 +1,54 @@
+{
+  "name": "@orbs/avatar-blobs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./decor": {
+      "types": "./src/decor.ts",
+      "default": "./src/decor.ts"
+    },
+    "./engine": {
+      "types": "./src/engine.ts",
+      "default": "./src/engine.ts"
+    },
+    "./expressions": {
+      "types": "./src/expressions.ts",
+      "default": "./src/expressions.ts"
+    },
+    "./gaze": {
+      "types": "./src/gaze.ts",
+      "default": "./src/gaze.ts"
+    },
+    "./math": {
+      "types": "./src/math.ts",
+      "default": "./src/math.ts"
+    },
+    "./player": {
+      "types": "./src/player.ts",
+      "default": "./src/player.ts"
+    },
+    "./skins": {
+      "types": "./src/skins.ts",
+      "default": "./src/skins.ts"
+    },
+    "./states": {
+      "types": "./src/states.ts",
+      "default": "./src/states.ts"
+    },
+    "./viewbox": {
+      "types": "./src/viewbox.ts",
+      "default": "./src/viewbox.ts"
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  }
+}

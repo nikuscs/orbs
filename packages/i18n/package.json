@@ -1,0 +1,50 @@
+{
+  "name": "@orbs/i18n",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./client": {
+      "types": "./src/entry.client.ts",
+      "default": "./src/entry.client.ts"
+    },
+    "./server": {
+      "types": "./src/entry.server.ts",
+      "default": "./src/entry.server.ts"
+    },
+    "./vite": {
+      "types": "./src/entry.vite.ts",
+      "default": "./src/entry.vite.ts"
+    },
+    "./config": {
+      "types": "./src/config.ts",
+      "default": "./src/config.ts"
+    },
+    "./runtime": {
+      "default": "./src/paraglide/runtime.js"
+    },
+    "./messages": {
+      "default": "./src/paraglide/messages.js"
+    },
+    "./validation": {
+      "types": "./src/validation.ts",
+      "default": "./src/validation.ts"
+    }
+  },
+  "scripts": {
+    "i18n:compile": "node ./scripts/compile.js",
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ scripts/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ scripts/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "dependencies": {
+    "@inlang/paraglide-js": "^2.25.4",
+    "ts-pattern": "^5.6.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@orbs/typescript-config": "workspace:*",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2"
+  }
+}

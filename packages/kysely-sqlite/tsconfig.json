@@ -1,0 +1,10 @@
+{
+  "extends": "@orbs/typescript-config/base.json",
+  "compilerOptions": {
+    "types": ["node", "@types/bun"],
+    "noEmit": true,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

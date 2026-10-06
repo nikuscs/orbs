@@ -1,0 +1,39 @@
+{
+  "name": "orbs",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@orbs/server": "workspace:*",
+    "@vitest/coverage-v8": "5.0.1",
+    "oxlint": "1.85.0",
+    "oxlint-plugin-arch": "0.5.0",
+    "oxlint-tsgolint": "^7.0.2003",
+    "tailwindcss": "^4.3.3",
+    "turbo": "^2.11.4",
+    "typescript": "^6.0.3",
+    "vitest": "5.0.1"
+  },
+  "scripts": {
+    "dev:cloudflare": "turbo run dev:cloudflare --log-prefix=none",
+    "dev:bun": "turbo run dev:bun --log-prefix=none",
+    "build:cloudflare": "turbo run build:cloudflare",
+    "build:bun": "turbo run build:bun",
+    "build:web": "turbo run build:cloudflare build:bun --filter=@orbs/web",
+    "build:daemon": "turbo run build:bun --filter=@orbs/daemon",
+    "start:bun": "turbo run start:bun --log-prefix=none",
+    "preview:cloudflare": "turbo run preview:cloudflare --log-prefix=none",
+    "deploy:cloudflare": "turbo run deploy:cloudflare",
+    "check": "turbo run check",
+    "test": "turbo run test",
+    "test:ci": "turbo run test -- --bail=1",
+    "test:coverage": "vitest run --coverage",
+    "lint": "turbo run lint --continue && oxlint scripts -c ./oxlint.config.ts --disable-nested-config",
+    "lint:fix": "turbo run lint:fix --continue && oxlint scripts -c ./oxlint.config.ts --disable-nested-config --fix"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "@orbs/daemon",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*.ts",
+    "#services/*": "./src/services/*.ts"
+  },
+  "scripts": {
+    "dev:cloudflare": "bun --watch --no-clear-screen src/main.ts",
+    "dev:bun": "bun --watch --no-clear-screen src/main.ts",
+    "build:bun": "bun build src/main.ts --compile --outfile dist/orbs-daemon",
+    "start:bun": "bun src/main.ts",
+    "check": "tsc --noEmit",
+    "lint": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
+    "lint:fix": "oxlint src/ -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.1.0",
+    "@orbs/env": "workspace:*",
+    "@orbs/errors": "workspace:*",
+    "@orbs/logger": "workspace:*",
+    "@orbs/server": "workspace:*",
+    "ai": "^6.0.209",
+    "ts-pattern": "^5.6.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "1.0.3",
+    "@earendil-works/pi-coding-agent": "1.0.3",
+    "@orbs/typescript-config": "workspace:*",
+    "@types/bun": "latest",
+    "typebox": "1.3.27",
+    "typescript": "^7.0.2"
+  }
+}

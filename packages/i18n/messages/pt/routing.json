@@ -1,0 +1,14 @@
+{
+  "routing_driver": "Quem responde",
+  "routing_driver_inherit": "Padrão da organização ({driver})",
+  "routing_driver_jev": "Jev",
+  "routing_driver_roundtable": "Mesa redonda",
+  "routing_driver_judge": "Juiz",
+  "routing_driver_jev_hint": "O Jev escolhe quem responde a cada mensagem: rápido e barato.",
+  "routing_driver_roundtable_hint": "Cada bot lê cada mensagem à vez e só responde quando tem algo a acrescentar; o líder responde quando ninguém o faz. Mais lento, mais perto de uma conversa real.",
+  "routing_driver_judge_hint": "Um modelo à tua escolha lê a conversa e escolhe quem responde a cada mensagem; só esses bots correm. Se não conseguir decidir, escolhe o Jev.",
+  "routing_judge_model": "Modelo do juiz",
+  "routing_judge_model_hint": "Usado em todas as salas encaminhadas pelo Juiz. Um modelo rápido mantém as respostas rápidas.",
+  "routing_judge_uses": "Decidido por {model}, definido nas definições da organização.",
+  "routing_judge_missing": "Ainda não há modelo do juiz nas definições da organização, por isso escolhe o Jev por agora."
+}

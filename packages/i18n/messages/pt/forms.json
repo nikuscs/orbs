@@ -1,0 +1,14 @@
+{
+  "forms_confirm_password": "Confirmar password",
+  "forms_confirm_password_placeholder": "Introduza novamente a nova password",
+  "forms_email": "Email",
+  "forms_email_placeholder": "utilizador@exemplo.com",
+  "forms_hide_password": "Ocultar password",
+  "forms_name": "Nome",
+  "forms_name_placeholder": "João Silva",
+  "forms_new_password": "Nova password",
+  "forms_new_password_placeholder": "Introduza a nova password",
+  "forms_password": "Password",
+  "forms_password_placeholder": "••••••••",
+  "forms_show_password": "Mostrar password"
+}

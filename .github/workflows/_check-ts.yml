@@ -1,0 +1,69 @@
+name: Check TS
+run-name: ${{ inputs.task }}
+
+# Reusable TypeScript gate.
+on:
+  workflow_call:
+    inputs:
+      task:
+        description: Turbo task to run (check, lint, test)
+        type: string
+        required: true
+      timeout:
+        description: Job timeout in minutes
+        type: number
+        required: false
+        default: 15
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ inputs.task }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # `wrangler types` derives the Env interface from .env, which is gitignored.
+      # Without it every binding the Worker reads is missing and the typecheck fails.
+      - name: Seed Worker env names
+        run: cp apps/web/.env.example apps/web/.env
+
+      - name: Restore Turbo cache
+        uses: actions/cache/restore@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ inputs.task }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-${{ inputs.task }}-
+            turbo-${{ runner.os }}-
+
+      - name: Run ${{ inputs.task }}
+        env:
+          TASK: ${{ inputs.task }}
+        run: bunx turbo run "$TASK" --concurrency=100% --continue
+
+      - name: Lint loose scripts
+        if: inputs.task == 'lint'
+        run: bunx oxlint scripts -c ./oxlint.config.ts --disable-nested-config
+
+      - name: Save Turbo cache
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/save@v5
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ inputs.task }}-${{ github.sha }}
