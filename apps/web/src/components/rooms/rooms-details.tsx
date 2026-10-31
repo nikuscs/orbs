@@ -1,4 +1,5 @@
 import { botUsageLabel } from '@repo/client/client';
+import { useIsMobile } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { getLocale } from '@repo/i18n/runtime';
 import { BotAvatar } from '@repo/ui/bots/bot-avatar';
@@ -11,6 +12,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useHydrated, useMatch, useMatchRoute } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
 import { match, P } from 'ts-pattern';
+import { RoomsChatContextItem } from '@/components/rooms/rooms-chat-context';
 import { RoomsDetailsBot } from '@/components/rooms/rooms-details-bot';
 import { RoomsDetailsMedia } from '@/components/rooms/rooms-details-media';
 import { RoutinesList } from '@/components/routines/routines-list';
@@ -192,6 +194,7 @@ interface RoomsDetailsFactsProps {
 
 function RoomsDetailsFacts({ bot, chat }: RoomsDetailsFactsProps) {
   const hydrated = useHydrated();
+  const isMobile = useIsMobile();
   const date = new Intl.DateTimeFormat(getLocale(), { dateStyle: 'medium', timeStyle: 'short' });
   const lastActivity = chat.lastMessage && hydrated ? date.format(new Date(chat.lastMessage.createdAt)) : '';
 
@@ -203,6 +206,7 @@ function RoomsDetailsFacts({ bot, chat }: RoomsDetailsFactsProps) {
   return (
     <RoomsDetailsSection title={m.rooms_details_general()}>
       <ItemGroup variant="outline">
+        {isMobile ? <RoomsChatContextItem bot={bot} chat={chat} /> : null}
         {facts.map((fact) => (
           <Item key={fact.label} size="sm">
             <ItemContent>

@@ -435,6 +435,9 @@ export function chatContextView({ contextWindow, estimatedTokens }: UniversalTyp
     used,
     label: shown ? m.rooms_context_full({ percent: shown }) : m.rooms_context_tokens_only({ used }),
     tokens: contextWindow ? m.rooms_context_tokens({ used, total: chatTokens(contextWindow) }) : m.rooms_context_tokens_only({ used }),
-    isNearFull: percent !== null && percent >= CHAT.contextWarningPercent,
+    tone: match(percent)
+      .with(P.number.gte(CHAT.contextCriticalPercent), () => 'destructive' as const)
+      .with(P.number.gte(CHAT.contextWarningPercent), () => 'warning' as const)
+      .otherwise(() => 'muted' as const),
   };
 }

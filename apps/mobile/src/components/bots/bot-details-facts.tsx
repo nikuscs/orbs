@@ -1,5 +1,6 @@
 import { getLocale, m } from '@repo/i18n/client';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
+import { ChatContextRow } from '@/components/chat/chat-context-row';
 import { Item, ItemContent, ItemGroup, ItemTitle, ItemValue } from '@/components/ui/item';
 import type { Bot, ConversationListItem } from '@repo/contracts/universal';
 
@@ -19,6 +20,7 @@ export function BotDetailsFacts({ bot, chat }: BotDetailsFactsProps) {
   return (
     <BotDetailsSection title={m.rooms_details_general()}>
       <ItemGroup>
+        <ChatContextRow chat={chat} />
         {facts.map((fact) => (
           <Item key={fact.label} size="sm">
             <ItemContent>

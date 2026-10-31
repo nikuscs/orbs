@@ -14,7 +14,6 @@ import { PromptAttachment, PromptAttachments, PromptDock, PromptDrawer, PromptJu
 import { PromptField, PromptMention } from '@/components/ui/prompt-field';
 import { Text } from '@/components/ui/text';
 import { useToast } from '@/hooks/use-toast';
-import { ChatContextButton } from './chat-context-button';
 import { ChatMentions } from './chat-mentions';
 import { ChatQueue } from './chat-queue';
 import type { RpcSession } from '@/types/rpc.types';
@@ -236,23 +235,15 @@ export function ChatComposer({
         <PromptField
           accessibilityLabel={m.rooms_chat_placeholder({ bot: bot.name })}
           actions={(
-            <>
-              <ChatContextButton
-                botId={bot.id}
-                conversationId={conversationId}
-                isBusy={isBusy}
-                latestEntryId={latestEntryId}
-              />
-              <Button
-                accessibilityLabel={action.label}
-                disabled={!isStopping && !canSend}
-                size="icon-sm"
-                variant="default"
-                onPress={handlePress}
-              >
-                {action.icon}
-              </Button>
-            </>
+            <Button
+              accessibilityLabel={action.label}
+              disabled={!isStopping && !canSend}
+              size="icon-sm"
+              variant="default"
+              onPress={handlePress}
+            >
+              {action.icon}
+            </Button>
           )}
           header={attachments}
           isEmpty={text === ''}

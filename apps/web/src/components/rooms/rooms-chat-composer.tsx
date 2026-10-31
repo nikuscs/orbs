@@ -300,13 +300,15 @@ export function RoomsChatComposer({
           />
         </Suspense>
         <InputGroupAddon align="inline-end">
-          <RoomsChatContext
-            bot={bot}
-            conversationId={conversationId}
-            isBusy={isBusy}
-            isCompacting={isCompacting}
-            latestEntryId={latestEntryId}
-          />
+          {isMobile ? null : (
+            <RoomsChatContext
+              bot={bot}
+              conversationId={conversationId}
+              isBusy={isBusy}
+              isCompacting={isCompacting}
+              latestEntryId={latestEntryId}
+            />
+          )}
           <PromptInputSubmit
             aria-label={isStopping ? m.rooms_chat_stop() : m.rooms_chat_send()}
             disabled={isCompacting || files.uploading || isSendingFiles || (!isBusy && !text.trim() && files.readyIds.length === 0)}

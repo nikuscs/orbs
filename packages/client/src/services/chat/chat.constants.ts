@@ -1,5 +1,6 @@
 export const CHAT = {
-  contextWarningPercent: 80,
+  contextWarningPercent: 60,
+  contextCriticalPercent: 80,
   attachmentScheme: 'attachment:',
   entryPrefix: 'entry-',
   liveMessageId: 'live',
