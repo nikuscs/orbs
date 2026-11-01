@@ -21,8 +21,14 @@ import type { ComponentProps } from 'react';
 
 const ROOMS_CHAT_CONTEXT_TONES = {
   muted: 'text-muted-foreground',
-  warning: 'text-warning',
+  warning: 'text-warning/70',
   destructive: 'text-destructive',
+} satisfies Record<ChatContextView['tone'], string>;
+
+const ROOMS_CHAT_CONTEXT_HOVER_TONES = {
+  muted: 'group-hover:text-foreground',
+  warning: 'group-hover:text-warning/70',
+  destructive: 'group-hover:text-destructive',
 } satisfies Record<ChatContextView['tone'], string>;
 
 interface RoomsChatContextProps {
@@ -49,24 +55,21 @@ export function RoomsChatContext({ bot, conversationId, latestEntryId, isBusy, i
     return null;
   }
 
-  const { percent, shown, used, label, tone } = usage.context;
+  const { percent, used, label, tone } = usage.context;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <PromptInputButton
           aria-label={label}
-          size={percent === null || tone !== 'muted' ? 'sm' : 'icon-sm'}
+          className="group"
+          size={percent === null ? 'sm' : 'icon-sm'}
           title={label}
         >
-          <span className={cn('flex items-center gap-1.5 text-xs tabular-nums', ROOMS_CHAT_CONTEXT_TONES[tone])}>
+          <span className={cn('flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums transition-colors', ROOMS_CHAT_CONTEXT_HOVER_TONES[tone])}>
             {compacting ? <IconSpinner aria-hidden className="size-4 animate-spin" /> : null}
-            {percent === null ? `~${used}` : (
-              <>
-                {compacting ? null : <RoomsChatContextRing percent={percent} />}
-                {tone === 'muted' ? null : shown}
-              </>
-            )}
+            {percent === null ? `~${used}` : null}
+            {percent === null || compacting ? null : <RoomsChatContextRing percent={percent} />}
           </span>
         </PromptInputButton>
       </PopoverTrigger>
