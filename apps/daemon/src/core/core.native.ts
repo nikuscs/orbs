@@ -4,7 +4,7 @@ import { RPCLink } from '@orpc/client/fetch';
 import { OpenAPIHandler } from '@orpc/openapi/fetch';
 import { onError } from '@orpc/server';
 import { RPCHandler as FetchRPCHandler } from '@orpc/server/fetch';
-import { CORSPlugin, RequestHeadersPlugin } from '@orpc/server/plugins';
+import { CORSPlugin, RequestHeadersPlugin, ResponseHeadersPlugin } from '@orpc/server/plugins';
 import { RPCHandler as WebsocketRPCHandler } from '@orpc/server/websocket';
 import { artifactGet, SERVER_PROTOCOL, serverOrigin } from '@repo/contracts/universal';
 import { env } from '@repo/env/server';
@@ -49,6 +49,7 @@ import {
   workspacePathsRootNative,
 } from '@repo/server/native';
 import { coreHandler, makeCredentialsService, makeSecretService, makeServices, makeSettingsService, router } from '@repo/server/server';
+import { coreFilesRange } from './core-files.native';
 import type * as CoreTypes from '../types/core.types';
 import type { RouterClient } from '@orpc/server';
 import type { RPCHandlerOptions } from '@orpc/server/fetch';
@@ -222,7 +223,7 @@ async function coreNativeServices(resources: AsyncDisposableStack): Promise<Core
 }
 
 function coreNativeRpc(services: CoreTypes.CoreServices, isLocal: boolean) {
-  const plugins = [new RequestHeadersPlugin()];
+  const plugins = [new RequestHeadersPlugin(), new ResponseHeadersPlugin()];
   const cors = new CORSPlugin({ origin: env.DAEMON_ALLOWED_ORIGINS });
 
   const interceptors: RPCHandlerOptions<object>['interceptors'] = [onError((error, { path }) => {
@@ -270,10 +271,10 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
     'no-store',
   ));
 
-  const handleFiles = coreNativeOrigin(async (request, server) => coreNativeReply(
+  const handleFiles = coreNativeOrigin(async (request, server) => coreFilesRange(coreNativeReply(
     await rpc.files.handle(request, { prefix: '/files', context: { ...rpc.context, peerAddress: peer(request, server) } }),
     'private, max-age=31536000, immutable',
-  ));
+  )));
 
   return Bun.serve({
     hostname: env.DAEMON_HOST,

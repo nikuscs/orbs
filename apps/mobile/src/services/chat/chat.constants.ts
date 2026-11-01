@@ -24,3 +24,5 @@ export const CHAT_TYPING = {
 } as const;
 
 export const CHAT_PANE = { barHeight: 56 } as const;
+
+export const CHAT_MEDIA = { seekStepSeconds: 5, closeDragPx: 120, maxZoom: 4, playbackEvent: 'chat.playback' } as const;

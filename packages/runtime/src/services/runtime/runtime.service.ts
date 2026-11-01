@@ -19,6 +19,7 @@ import { runtimeActionCreateRoutine } from './runtime-action.create-routine';
 import { runtimeActionCreateTodo } from './runtime-action.create-todo';
 import { runtimeActionExecuteCommand } from './runtime-action.execute-command';
 import { runtimeActionExpireAttachments } from './runtime-action.expire-attachments';
+import { runtimeActionRegisterAttachmentTools } from './runtime-action.register-attachment-tools';
 import { runtimeActionRegisterBotTools } from './runtime-action.register-bot-tools';
 import { runtimeActionRemoveAttachment } from './runtime-action.remove-attachment';
 import { runtimeActionRemoveRoutine } from './runtime-action.remove-routine';
@@ -74,6 +75,7 @@ import { runtimeSkillsExtension } from './runtime-skills.extension';
 import { runtimeWatchMerge } from './runtime-watch-merge.utils';
 import { RUNTIME_ALARM_HEARTBEAT_MS } from './runtime.constants';
 import type { ConversationIndexSummary } from '../../types/conversation-index.types';
+import type { RuntimeAttachmentToolsRegisterParams } from '../../types/runtime-attachment-tools.types';
 import type { RuntimeBotToolsRegisterParams } from '../../types/runtime-bot-tools.types';
 import type * as RuntimeTypes from '../../types/runtime.types';
 import type { Context } from '@earendil-works/chord/context';
@@ -156,6 +158,7 @@ export function makeRuntimeService({
       updateArtifact: runtimeBotCall(directory, runtimeActionUpdateArtifact),
       createArtifact: runtimeBotCall(directory, runtimeActionCreateArtifact),
       registerBotTools: (params: RuntimeBotToolsRegisterParams) => runtimeActionRegisterBotTools(shared, params),
+      registerAttachmentTools: (params: RuntimeAttachmentToolsRegisterParams) => runtimeActionRegisterAttachmentTools(shared, params),
       removeRoutine: runtimeBotCall(directory, runtimeActionRemoveRoutine),
       runRoutine: runtimeBotCall(directory, runtimeActionRunRoutine),
       updateRoutine: runtimeBotCall(directory, runtimeActionUpdateRoutine),

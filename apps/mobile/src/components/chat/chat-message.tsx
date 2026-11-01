@@ -129,6 +129,7 @@ export function ChatMessage({
       .with({ kind: 'files' }, (files) => (
         <ChatFiles
           botId={bot.id}
+          entryId={message.metadata?.entryIds[0]}
           files={files.files}
           key={files.key}
           session={session}
@@ -178,6 +179,7 @@ export function ChatMessage({
           <Message
             className={isSending ? 'opacity-60' : undefined}
             from={from}
+            isGrouped={!bubbles.parts.some((part) => part.kind === 'files')}
             key={bubbles.key}
             onLongPress={isLive || isSending ? undefined : onLongPress}
           >

@@ -164,6 +164,17 @@ export interface ChatSubagentParams {
   subagent: ToolTypes.ToolSubagent;
 }
 
+export interface ChatAttachmentUrlParams {
+  botId: string;
+  attachmentId: string;
+}
+
+export interface ChatViewerParams {
+  bot: UniversalTypes.Bot;
+  entryId?: number;
+  attachmentId: string;
+}
+
 export interface ChatAroundParams {
   bot: UniversalTypes.Bot;
   bots: UniversalTypes.Bot[];

@@ -2,6 +2,7 @@ import { m } from '@repo/i18n/client';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { LabChat } from '@/components/lab/lab-chat';
 import { LayoutShellDashboard } from '@/components/layout/layout-shell-dashboard';
+import { labMediaVideo } from '@/services/lab/lab-media.utils';
 import { labChatQueryClient } from '@/services/lab/lab.client';
 import { labChatFixture } from '@/services/lab/lab.utils';
 import { layoutSidebarsOpen } from '@/services/layout/layout.client';
@@ -25,7 +26,7 @@ export const Route = createFileRoute('/lab/chat')({
       context.queryClient.ensureQueryData(rpc.bots.list.queryOptions()),
     ]);
 
-    const fixture = labChatFixture(Date.now());
+    const fixture = labChatFixture(Date.now(), await labMediaVideo());
 
     return {
       breadcrumb: m.layout_lab_chat_breadcrumb(),

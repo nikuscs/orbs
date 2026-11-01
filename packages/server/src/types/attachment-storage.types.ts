@@ -11,6 +11,15 @@ export interface AttachmentStorageParams {
   attachment: Attachment;
 }
 
+export interface AttachmentStorageReadParams extends AttachmentStorageParams {
+  range?: string;
+}
+
+export type AttachmentStorageRange =
+  | { kind: 'full' }
+  | { kind: 'partial'; start: number; end: number }
+  | { kind: 'unsatisfiable' };
+
 export interface AttachmentStorageWriteParams extends AttachmentStorageParams {
   file: File;
 }

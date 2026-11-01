@@ -1,4 +1,4 @@
-import { toolBlocks } from '@repo/client/client';
+import { CHAT, toolBlocks } from '@repo/client/client';
 import { useChatHideVerbose } from '@repo/client/react';
 import { useLongPress } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
@@ -13,6 +13,7 @@ import { RoomsChatFailure } from '@repo/ui/rooms/rooms-chat-failure';
 import { RoomsChatFiles } from '@repo/ui/rooms/rooms-chat-files';
 import { RoomsChatReasoning } from '@repo/ui/rooms/rooms-chat-reasoning';
 import { RoomsChatTools } from '@repo/ui/rooms/rooms-chat-tools';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { isFileUIPart } from 'ai';
 import { Fragment, useState } from 'react';
 import { match } from 'ts-pattern';
@@ -56,6 +57,9 @@ export function RoomsChatMessage({
   const reply = message.metadata?.replyTo;
   const [sheet, setSheet] = useState(false);
   const press = useLongPress(() => setSheet(true));
+  const navigate = useNavigate();
+  const { handle } = useParams({ from: '/_chat/rooms/direct/$handle', shouldThrow: false }) ?? {};
+  const entryId = message.metadata?.entryIds[0];
 
   const { hideVerbose } = useChatHideVerbose();
   const blocks = toolBlocks({ parts: message.parts, hideVerbose });
@@ -103,7 +107,23 @@ export function RoomsChatMessage({
     </div>
   );
 
-  const filesView = files.length > 0 ? <RoomsChatFiles botId={botId} files={files} /> : null;
+  const filesView = files.length > 0 ? (
+    <RoomsChatFiles
+      botId={botId}
+      files={files}
+      onOpen={handle && entryId ? (file) => {
+        if (file.url.startsWith(CHAT.attachmentScheme)) {
+          void navigate({
+            to: '/rooms/direct/$handle/media/$attachmentId',
+            params: { handle, attachmentId: file.url.slice(CHAT.attachmentScheme.length) },
+            search: { entryId },
+            resetScroll: false,
+          });
+        }
+      } : undefined}
+    />
+  ) : null;
+
   const filesContent = filesView && !actionsBlock && (actions || reactions) ? withActions(filesView) : filesView;
 
   return segments.map((segment) => {

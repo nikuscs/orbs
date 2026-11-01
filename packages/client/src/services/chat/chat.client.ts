@@ -1,12 +1,14 @@
 import { queryOptions, experimental_streamedQuery as streamedQuery } from '@tanstack/react-query';
+import { match, P } from 'ts-pattern';
 import { watchConversationContexts } from '../../contexts';
 import { readConversation, watchConversation } from '../../conversation';
 import { watchConversations } from '../../conversations';
 import { watchNotifications } from '../../notifications';
 import { CHAT } from './chat.constants';
-import type { ChatHistoryParams } from '../../types/chat.types';
+import type { ChatAttachmentUrlParams, ChatHistoryParams } from '../../types/chat.types';
 import type { RpcContextValue } from '../../types/rpc.types';
 import type * as UniversalTypes from '@repo/contracts/universal';
+import type { QueryClient } from '@tanstack/react-query';
 
 export const chatQueries = {
   view({ client, rpc }: RpcContextValue, target: UniversalTypes.ConversationTarget) {
@@ -85,4 +87,24 @@ export const chatQueries = {
       staleTime: 0,
     });
   },
+
+  attachmentUrl({ client, rpc }: RpcContextValue, input: ChatAttachmentUrlParams) {
+    return queryOptions({
+      queryKey: [...rpc.attachments.download.queryKey({ input }), CHAT.attachmentUrlKey],
+      queryFn: async ({ signal }) => URL.createObjectURL(await client.attachments.download(input, { signal })),
+      staleTime: Number.POSITIVE_INFINITY,
+    });
+  },
 };
+
+export function chatAttachmentUrlRelease(queryClient: QueryClient) {
+  return queryClient.getQueryCache().subscribe((event) => {
+    if (event.type !== 'removed' || event.query.queryKey.at(-1) !== CHAT.attachmentUrlKey) {
+      return;
+    }
+
+    match(event.query.state.data)
+      .with(P.string, (url) => URL.revokeObjectURL(url))
+      .otherwise(() => undefined);
+  });
+}

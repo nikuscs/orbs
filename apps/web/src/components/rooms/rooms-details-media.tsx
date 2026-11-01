@@ -1,4 +1,5 @@
 import { CHAT, ROOMS } from '@repo/client/client';
+import { chatQueries, useRpc } from '@repo/client/react';
 import { useChatAttachmentUrl } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { EmptyCompact } from '@repo/ui/empty';
@@ -6,8 +7,10 @@ import { FormErrors } from '@repo/ui/forms/form';
 import { Item, ItemContent, ItemGroup, ItemLink, ItemMedia, ItemTitle } from '@repo/ui/item';
 import { RoomsDetailsSection } from '@repo/ui/rooms/rooms-details-section';
 import { Skeleton } from '@repo/ui/skeleton';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
+import { useInView } from 'motion/react';
+import { useRef } from 'react';
 import { rpc } from '@/services/rpc/rpc.client';
 import IconFileText from '~icons/lucide/file-text';
 import IconImages from '~icons/lucide/images';
@@ -98,33 +101,53 @@ interface RoomsDetailsMediaItemProps {
 }
 
 function RoomsDetailsMediaItem({ botId, file }: RoomsDetailsMediaItemProps) {
+  const rpcs = useRpc();
+  const queryClient = useQueryClient();
   const image = file.mediaType.startsWith('image/');
-  const url = useChatAttachmentUrl(botId, `${CHAT.attachmentScheme}${file.id}`);
+  const thumbnailRef = useRef<HTMLImageElement>(null);
+  const isInView = useInView(thumbnailRef, { once: true });
+  const url = useChatAttachmentUrl(botId, `${CHAT.attachmentScheme}${file.id}`, image && isInView);
 
-  const thumbnail = image ? (
-    <img
-      alt=""
-      loading="lazy"
-      src={url}
-    />
-  ) : <IconFileText />;
+  const download = async () => {
+    const link = document.createElement('a');
+    link.href = await queryClient.fetchQuery(chatQueries.attachmentUrl(rpcs, { botId, attachmentId: file.id }));
+    link.download = file.name;
+    link.click();
+  };
 
   return (
     <Item size="sm">
       <ItemMedia variant={image ? 'image' : 'icon'}>
-        {thumbnail}
+        {image ? (
+          <img
+            alt=""
+            ref={thumbnailRef}
+            src={url}
+          />
+        ) : <IconFileText />}
       </ItemMedia>
       <ItemContent className="min-w-0">
         <ItemTitle className="w-full">
-          <ItemLink
-            download={image ? undefined : file.name}
-            href={url}
-            rel="noreferrer"
-            target={image ? '_blank' : undefined}
-            title={file.name}
-          >
-            {file.name}
-          </ItemLink>
+          {image ? (
+            <ItemLink
+              href={url}
+              rel="noreferrer"
+              target="_blank"
+              title={file.name}
+            >
+              {file.name}
+            </ItemLink>
+          ) : (
+            <ItemLink asChild title={file.name}>
+              <button
+                className="cursor-pointer text-left"
+                type="button"
+                onClick={() => void download()}
+              >
+                {file.name}
+              </button>
+            </ItemLink>
+          )}
         </ItemTitle>
       </ItemContent>
     </Item>

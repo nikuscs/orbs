@@ -7,6 +7,26 @@ export const ATTACHMENT = {
   maxPerMessage: 4,
   pendingTtlMs: 24 * 60 * 60 * 1000,
   mediaTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf', 'text/plain', 'text/markdown', 'text/csv', 'application/json'],
+  sendToolName: 'bot_send_file',
+  sendMaxBytes: 50 * 1024 * 1024,
+  sendTypes: {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    pdf: 'application/pdf',
+    txt: 'text/plain',
+    md: 'text/markdown',
+    csv: 'text/csv',
+    json: 'application/json',
+    mp4: 'video/mp4',
+    mov: 'video/quicktime',
+    mp3: 'audio/mpeg',
+    m4a: 'audio/mp4',
+    wav: 'audio/wav',
+    aac: 'audio/aac',
+  },
 } as const;
 
 export const attachmentTarget = z.object({
@@ -40,6 +60,10 @@ export const attachmentList = attachmentTarget.extend({
 
 export const attachmentPage = z.object({ items: z.array(attachment), next: z.uuid().optional() });
 export const attachmentIds = z.array(z.uuid()).max(ATTACHMENT.maxPerMessage).refine((ids) => new Set(ids).size === ids.length);
+
+export const attachmentSent = z.object({ attachment });
+
+export const attachmentView = z.object({ entryId: z.number().int().positive().optional() });
 
 export const attachmentMessage = z.object({
   content: z.string(),

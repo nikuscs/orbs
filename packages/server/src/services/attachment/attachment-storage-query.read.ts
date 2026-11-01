@@ -3,10 +3,10 @@ import { constants } from 'node:fs';
 import { open } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { match } from 'ts-pattern';
-import { attachmentStorageDirectory, attachmentStoragePath } from './attachment-storage.utils';
-import type { AttachmentStorageDeps, AttachmentStorageParams } from '../../types/attachment-storage.types';
+import { attachmentStorageDirectory, attachmentStoragePath, attachmentStorageRange, attachmentStorageReadFully } from './attachment-storage.utils';
+import type { AttachmentStorageDeps, AttachmentStorageReadParams } from '../../types/attachment-storage.types';
 
-export async function attachmentStorageQueryRead(deps: AttachmentStorageDeps, params: AttachmentStorageParams) {
+export async function attachmentStorageQueryRead(deps: AttachmentStorageDeps, params: AttachmentStorageReadParams) {
   const path = await attachmentStoragePath(deps, params);
 
   try {
@@ -21,8 +21,24 @@ export async function attachmentStorageQueryRead(deps: AttachmentStorageDeps, pa
           throw new Errors.NOT_FOUND({ resource: 'attachment' });
         })
         .exhaustive();
-      const bytes = new Uint8Array(await file.readFile());
-      return new File([bytes], params.attachment.name, { type: params.attachment.mediaType });
+
+      const range = attachmentStorageRange(params.range, stat.size);
+
+      const [start, length] = match(range)
+        .with({ kind: 'partial' }, (part) => [part.start, part.end - part.start + 1])
+        .with({ kind: 'unsatisfiable' }, () => [0, 0])
+        .with({ kind: 'full' }, () => [0, stat.size])
+        .exhaustive();
+
+      const bytes = new Uint8Array(length);
+
+      await attachmentStorageReadFully(file, bytes, start);
+
+      return {
+        file: new File([bytes], params.attachment.name, { type: params.attachment.mediaType }),
+        range,
+        size: stat.size,
+      };
     } finally {
       await file.close();
     }

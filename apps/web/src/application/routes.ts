@@ -15,7 +15,9 @@ export const routes = rootRoute('root.tsx', [
           route('/$todoId/delete', 'rooms/rooms.direct.$handle.todos.$todoId.delete.tsx'),
         ]),
         route('/routines', 'rooms/rooms.direct.$handle.routines.tsx'),
-        route('/media', 'rooms/rooms.direct.$handle.media.tsx'),
+        route('/media', 'rooms/rooms.direct.$handle.media.tsx', [
+          route('/$attachmentId', 'rooms/rooms.direct.$handle.media.$attachmentId.tsx'),
+        ]),
         route('/activity', 'rooms/rooms.direct.$handle.activity.tsx', [
           route('/$runId', 'rooms/rooms.direct.$handle.activity.$runId.tsx'),
         ]),
