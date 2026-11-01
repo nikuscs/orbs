@@ -45,8 +45,7 @@ function ChatContextSheetContent({ session, botId, conversationId }: ChatContext
     return null;
   }
 
-  const { percent, shown, tokens, isNearFull } = usage.context;
-  const tone = isNearFull ? 'warning' : 'muted';
+  const { percent, shown, tokens, tone } = usage.context;
 
   return (
     <ActionSheet>
@@ -55,20 +54,20 @@ function ChatContextSheetContent({ session, botId, conversationId }: ChatContext
           <Text variant="heading">{m.rooms_context_title()}</Text>
           {shown ? (
             <View className="flex-row items-center gap-1">
-              {isNearFull ? (
+              {tone === 'muted' ? null : (
                 <Icon
                   icon={TriangleAlert}
                   size="sm"
                   tone={tone}
                 />
-              ) : null}
-              <Text tone={tone} variant="muted">{shown}</Text>
+              )}
+              <Text tone={tone} variant="item-description">{shown}</Text>
             </View>
           ) : null}
         </View>
         {percent === null ? null : (
           <View className="h-1 overflow-hidden rounded-full bg-secondary">
-            <View className={cn('h-full rounded-full', isNearFull ? 'bg-warning' : 'bg-foreground')} style={{ width: `${percent}%` }} />
+            <View className={cn('h-full rounded-full', { muted: 'bg-foreground', warning: 'bg-warning', destructive: 'bg-destructive' }[tone])} style={{ width: `${percent}%` }} />
           </View>
         )}
         <Text variant="muted">{tokens}</Text>

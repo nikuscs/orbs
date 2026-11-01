@@ -113,7 +113,7 @@ export interface ChatContextView {
   used: string;
   label: string;
   tokens: string;
-  isNearFull: boolean;
+  tone: 'muted' | 'warning' | 'destructive';
 }
 
 export interface ChatReactionsParams {

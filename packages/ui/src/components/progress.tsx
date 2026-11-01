@@ -10,6 +10,7 @@ const progressIndicatorVariants = cva({
     variant: {
       default: 'bg-primary',
       warning: 'bg-warning',
+      destructive: 'bg-destructive',
     },
   },
   defaultVariants: { variant: 'default' },
