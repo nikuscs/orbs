@@ -19,7 +19,8 @@ export const commandExecute = commandList.extend({
   arguments: commandArguments.optional(),
 });
 
-export const commandExecuteResult = z.void();
+export const commandExecuteResult = z.object({ compacted: z.boolean().optional() });
 
 export type Command = z.infer<typeof command>;
 export type CommandExecuteInput = z.infer<typeof commandExecute>;
+export type CommandExecuteResult = z.infer<typeof commandExecuteResult>;

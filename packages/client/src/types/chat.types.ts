@@ -6,6 +6,7 @@ import type { UIMessage } from 'ai';
 export type ChatApprovalDecision = 'approve' | 'always' | 'deny';
 
 export type ChatActivity = 'idle' | 'queued' | 'thinking' | 'working' | 'writing' | 'compacting' | 'failed';
+export type ChatCompaction = 'blocking' | 'background';
 
 export interface ChatUsage {
   input: number;
@@ -105,6 +106,7 @@ export interface ChatContextUsageParams {
   botId: string;
   conversationId: number;
   revision?: number;
+  onCompacted?: (message: string) => void;
 }
 
 export interface ChatContextView {
