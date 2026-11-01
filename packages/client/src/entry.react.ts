@@ -26,6 +26,7 @@ export * from './hooks/use-chat-subagent';
 export * from './hooks/use-chat-reactions';
 export * from './hooks/use-chat-reset';
 export * from './hooks/use-chat-room';
+export * from './hooks/use-chat-viewer';
 export * from './hooks/use-chat-send';
 export * from './hooks/use-chat-settings';
 export * from './hooks/use-rpc';

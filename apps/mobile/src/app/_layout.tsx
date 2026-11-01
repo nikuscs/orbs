@@ -85,7 +85,8 @@ function RootLayoutStack() {
           <Stack.Screen name="bots/[botId]/details" options={{ headerShown: true, title: '', headerBackButtonDisplayMode: 'minimal' }} />
           <Stack.Screen name="bots/[botId]/todos/index" options={{ headerShown: true, title: m.rooms_todos(), headerBackButtonDisplayMode: 'minimal' }} />
           <Stack.Screen name="bots/[botId]/routines/index" options={{ headerShown: true, title: m.rooms_routines(), headerBackButtonDisplayMode: 'minimal' }} />
-          <Stack.Screen name="bots/[botId]/media" options={{ headerShown: true, title: m.rooms_tab_media(), headerBackButtonDisplayMode: 'minimal' }} />
+          <Stack.Screen name="bots/[botId]/media/index" options={{ headerShown: true, title: m.rooms_tab_media(), headerBackButtonDisplayMode: 'minimal' }} />
+          <Stack.Screen name="bots/[botId]/media/[attachmentId]/index" options={DIALOG} />
           <Stack.Screen name="bots/[botId]/edit" options={{ headerShown: true, title: m.rooms_action_edit_bot(), headerBackButtonDisplayMode: 'minimal' }} />
           <Stack.Screen name="bots/[botId]/skills" options={{ headerShown: true, title: m.bots_skills(), headerBackButtonDisplayMode: 'minimal' }} />
           <Stack.Screen name="bots/[botId]/mcp" options={{ headerShown: true, title: m.bots_mcp(), headerBackButtonDisplayMode: 'minimal' }} />

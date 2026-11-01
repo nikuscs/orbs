@@ -88,6 +88,7 @@ export async function makeServices({
     });
 
     runtime.actions.registerBotTools({ bots });
+    runtime.actions.registerAttachmentTools({ attachments });
 
     const notifications = makeNotificationService({
       database,

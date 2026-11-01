@@ -55,12 +55,13 @@ interface MessageProps extends ViewProps {
   from: MessageFrom;
   /** Opens the message actions, like a long press in Messages. */
   onLongPress?: () => void;
+  isGrouped?: boolean;
 }
 
-export function Message({ from, onLongPress, className, children, ...props }: MessageProps) {
+export function Message({ from, onLongPress, isGrouped = true, className, children, ...props }: MessageProps) {
   return (
     <View {...props} className={cn(messageVariants({ from }), className)}>
-      <Pressable className={messageStackVariants({ from })} delayLongPress={300} disabled={!onLongPress} onLongPress={onLongPress}>
+      <Pressable accessible={isGrouped} className={messageStackVariants({ from })} delayLongPress={300} disabled={!onLongPress} onLongPress={onLongPress}>
         {children}
       </Pressable>
     </View>

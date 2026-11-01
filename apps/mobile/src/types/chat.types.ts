@@ -70,3 +70,13 @@ export type ChatMessageSegment =
   | { key: string; kind: 'reasoning'; text: string; isStreaming: boolean }
   | { key: string; kind: 'failure'; text: string }
   | { key: string; kind: 'subagent'; part: ClientTypes.ToolPart; subagent: ClientTypes.ToolSubagent };
+
+export interface ChatPlayback {
+  pause: () => void;
+}
+
+export interface ChatMediaRouteParams extends ChatSearchParams {
+  botId: string;
+  attachmentId: string;
+  entryId?: string;
+}

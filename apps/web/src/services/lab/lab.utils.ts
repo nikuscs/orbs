@@ -2,6 +2,7 @@ import { CHAT, mentionHref, ROOMS } from '@repo/client/client';
 import { ENTRY } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { labArtifacts } from './lab-artifacts.utils';
+import { labMediaLandscape, labMediaVoice } from './lab-media.utils';
 import { LAB_CHAT } from './lab.constants';
 import type { LabChatFixture, LabSubagentViewParams } from '@/types/lab.types';
 import type { ChatMessage, ChatPart } from '@repo/client/client';
@@ -99,7 +100,7 @@ function labSubagentView({ conversationId, task, replies, isRunning, createdAt }
   return JSON.parse(JSON.stringify(view));
 }
 
-export function labChatFixture(now: number): LabChatFixture {
+export function labChatFixture(now: number, video: ChatPart | null): LabChatFixture {
   const labAgo = (minutesAgo: number) => now - minutesAgo * LAB_CHAT.minuteMs;
   const yesterday = 26 * 60;
 
@@ -281,6 +282,32 @@ export function labChatFixture(now: number): LabChatFixture {
     labMessage(19, labAgo(19), atlas, 'assistant', [
       labText('I tried to open a pull request with the recap.'),
       { type: 'data-failure', data: { text: 'The model provider returned 529 Overloaded. Try again in a minute.' } },
+    ]),
+    labMessage(40, labAgo(18), null, 'user', [labText('Send me everything the venue sent: photos, the walkthrough and the voicemail.')]),
+    labMessage(41, labAgo(17), atlas, 'assistant', [
+      ...LAB_CHAT.media.landscapes.slice(0, 1).map(labMediaLandscape),
+      labText('This is the north terrace, from their gallery.'),
+    ]),
+    labMessage(42, labAgo(16), atlas, 'assistant', [
+      ...LAB_CHAT.media.landscapes.map(labMediaLandscape),
+      labText('Six photos in total: hall, garden, entrance, parking and the west view.'),
+    ]),
+    labMessage(43, labAgo(15), atlas, 'assistant', [
+      ...LAB_CHAT.media.landscapes.slice(1, 4).map(labMediaLandscape),
+      labText('Three from the evening visit.'),
+    ]),
+    labMessage(44, labAgo(14), atlas, 'assistant', [
+      ...(video ? [video] : []),
+      labText('The walkthrough, from the entrance to the terrace.'),
+    ]),
+    labMessage(45, labAgo(13), atlas, 'assistant', [
+      { type: 'file', mediaType: 'audio/wav', filename: 'voicemail.wav', url: labMediaVoice() },
+      labText('Here is the voicemail. She confirms the 14th and asks for the final headcount by Friday.'),
+    ]),
+    labMessage(46, labAgo(12), atlas, 'assistant', [
+      { type: 'file', mediaType: 'text/csv', filename: 'guest-list.csv', url: `data:text/csv;charset=utf-8,${encodeURIComponent(LAB_CHAT.csv)}` },
+      { type: 'file', mediaType: 'audio/mpeg', filename: 'missing-clip.mp3', url: 'data:audio/mpeg;base64,' },
+      labText('The guest list, and a clip that could not be loaded.'),
     ]),
     labMessage(20, labAgo(5), null, 'user', [labText('Try again, and ask me before you push anything.')]),
   ];

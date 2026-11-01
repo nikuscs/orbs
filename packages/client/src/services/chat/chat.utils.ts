@@ -1,4 +1,4 @@
-import { ATTACHMENT, attachmentMessage, ENTRY, entryOwnerNote, entryPeerMessage, entryRoutineRun, entrySubagentReport, REACTION, REPLY, replyMessage, replySilent, toolCallJson } from '@repo/contracts/universal';
+import { ATTACHMENT, attachmentMessage, attachmentSent, ENTRY, entryOwnerNote, entryPeerMessage, entryRoutineRun, entrySubagentReport, REACTION, REPLY, replyMessage, replySilent, toolCallJson } from '@repo/contracts/universal';
 import { getLocale, m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
 import { mentionHref, mentionSubmission } from '../mention/mention.utils';
@@ -304,9 +304,19 @@ function chatToolResult(messages: ChatTypes.ChatMessage[], entry: ChatTypes.Chat
         const part = message.parts[index];
 
         if (index !== -1 && part.type === 'dynamic-tool') {
-          message.parts[index] = result.isError
-            ? { type: 'dynamic-tool', toolName: part.toolName, toolCallId: part.toolCallId, input: part.input, state: 'output-error', errorText: output, toolMetadata: details }
-            : { type: 'dynamic-tool', toolName: part.toolName, toolCallId: part.toolCallId, input: part.input, state: 'output-available', output, toolMetadata: details };
+          const sent = part.toolName === ATTACHMENT.sendToolName && !result.isError ? attachmentSent.safeParse(result.details).data : undefined;
+
+          message.parts[index] = match({ sent, isError: result.isError })
+            .returnType<ChatTypes.ChatPart>()
+            .with({ sent: P.nonNullable }, ({ sent: { attachment } }) => ({
+              type: 'file',
+              mediaType: attachment.mediaType,
+              filename: attachment.name,
+              url: `${CHAT.attachmentScheme}${attachment.id}`,
+            }))
+            .with({ isError: true }, () => ({ type: 'dynamic-tool', toolName: part.toolName, toolCallId: part.toolCallId, input: part.input, state: 'output-error', errorText: output, toolMetadata: details }))
+            .otherwise(() => ({ type: 'dynamic-tool', toolName: part.toolName, toolCallId: part.toolCallId, input: part.input, state: 'output-available', output, toolMetadata: details }));
+
           return;
         }
       }

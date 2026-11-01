@@ -149,3 +149,34 @@ export function roomsTimeLabel({ createdAt, previous, now, locale }: RoomsTypes.
 
   return m.rooms_time_on({ date: day.format(date), time });
 }
+
+export function roomsFileKind(mediaType: string): RoomsTypes.RoomsFileRow['kind'] {
+  return match(mediaType.split('/', 1)[0])
+    .with('image', () => 'images' as const)
+    .with('video', () => 'video' as const)
+    .with('audio', () => 'audio' as const)
+    .otherwise(() => 'file' as const);
+}
+
+export function roomsFileRows(files: RoomsTypes.RoomsFilePart[]): RoomsTypes.RoomsFileRow[] {
+  const images = files.filter((file) => roomsFileKind(file.mediaType) === 'images');
+
+  return files.flatMap((file): RoomsTypes.RoomsFileRow[] => match(roomsFileKind(file.mediaType))
+    .with('images', () => (file === images[0] ? [{
+      key: file.url,
+      kind: 'images' as const,
+      files: images.slice(0, ROOMS.galleryTiles),
+      hidden: Math.max(0, images.length - ROOMS.galleryTiles),
+    }] : []))
+    .otherwise((kind) => [{ key: file.url, kind, file }]));
+}
+
+export function roomsFileImages(message: ChatMessage | undefined): RoomsTypes.RoomsFilePart[] {
+  return (message?.parts ?? []).flatMap((part) => (part.type === 'file' && roomsFileKind(part.mediaType) === 'images' ? [part] : []));
+}
+
+export function roomsMediaTime(seconds: number): string {
+  const whole = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+
+  return `${String(Math.floor(whole / 60))}:${String(whole % 60).padStart(2, '0')}`;
+}

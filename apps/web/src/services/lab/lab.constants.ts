@@ -12,6 +12,20 @@ export const LAB_CHAT = {
     routine: 'b1e2703d-8f92-43a4-8f60-7b8c9d0e1f2a',
   },
   minuteMs: 60_000,
+  media: {
+    sampleRate: 8000,
+    audioSeconds: 6,
+    videoSeconds: 3,
+    videoFps: 24,
+    landscapes: [
+      { name: 'north-terrace.svg', sky: '#d9e2e8', far: '#a9b9ae', near: '#7d9486', sun: '#f1ead8' },
+      { name: 'hall-wide.svg', sky: '#ebe3d6', far: '#c9b8a2', near: '#9a8670', sun: '#f6f0e6' },
+      { name: 'garden.svg', sky: '#dfe8dc', far: '#b5c8ad', near: '#8aa37f', sun: '#f4f1e2' },
+      { name: 'entrance.svg', sky: '#5d6470', far: '#474d57', near: '#2f343b', sun: '#d9cfb8' },
+      { name: 'parking.svg', sky: '#e4e4ea', far: '#c3c3cf', near: '#9d9db0', sun: '#f5f2ea' },
+      { name: 'west-view.svg', sky: '#e8ddd0', far: '#c7ad94', near: '#a3826a', sun: '#fbf3e4' },
+    ],
+  },
   page: `<meta name="emoji" content="🚀">
 <title>Launch status page</title>
 <div class="o-stack">

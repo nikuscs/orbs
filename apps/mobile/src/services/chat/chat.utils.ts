@@ -1,8 +1,13 @@
-import { botUsageLabel, htmlReplySegments, toolBlocks } from '@repo/client/client';
+import { botUsageLabel, CHAT, htmlReplySegments, toolBlocks } from '@repo/client/client';
 import { getLocale, m } from '@repo/i18n/client';
+import { DeviceEventEmitter } from 'react-native';
 import { match } from 'ts-pattern';
+import { connectionFileSource } from '@/services/connection/connection.client';
+import { CHAT_MEDIA } from './chat.constants';
 import type * as ChatTypes from '@/types/chat.types';
-import type { ChatMessage } from '@repo/client/client';
+import type { RpcSession } from '@/types/rpc.types';
+import type { ChatMessage, RoomsFilePart } from '@repo/client/client';
+import type { ImageURISource } from 'react-native';
 
 export function chatMessageDetails(message: ChatMessage): string[] {
   const date = new Intl.DateTimeFormat(getLocale(), { dateStyle: 'medium', timeStyle: 'short' });
@@ -94,3 +99,12 @@ export function chatMessageSegments(message: ChatMessage, hideVerbose: boolean):
   return segments;
 }
 
+export function chatFileSource(session: RpcSession, botId: string, file: RoomsFilePart): ImageURISource {
+  return file.url.startsWith(CHAT.attachmentScheme)
+    ? connectionFileSource(session, { botId, attachmentId: file.url.slice(CHAT.attachmentScheme.length) })
+    : { uri: file.url };
+}
+
+export function chatPlaybackStart(player: ChatTypes.ChatPlayback) {
+  DeviceEventEmitter.emit(CHAT_MEDIA.playbackEvent, player);
+}

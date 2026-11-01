@@ -131,6 +131,7 @@
     "./rooms/rooms-chat-status": "./src/components/rooms/rooms-chat-status.tsx",
     "./rooms/rooms-chat-tools": "./src/components/rooms/rooms-chat-tools.tsx",
     "./rooms/rooms-chat-unread": "./src/components/rooms/rooms-chat-unread.tsx",
+    "./rooms/rooms-chat-viewer": "./src/components/rooms/rooms-chat-viewer.tsx",
     "./rooms/rooms-details-section": "./src/components/rooms/rooms-details-section.tsx",
     "./rooms/rooms-drag-card": "./src/components/rooms/rooms-drag-card.tsx",
     "./rooms/rooms-mute-menu": "./src/components/rooms/rooms-mute-menu.tsx",

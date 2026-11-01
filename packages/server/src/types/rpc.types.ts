@@ -21,10 +21,10 @@ import type { SidebarSectionService } from '../services/sidebar-section/sidebar-
 import type { SkillService } from '../services/skill/skill.service';
 import type { TodoService } from '../services/todo/todo.service';
 import type { ToolService } from '../services/tool/tool.service';
-import type { RequestHeadersPluginContext } from '@orpc/server/plugins';
+import type { RequestHeadersPluginContext, ResponseHeadersPluginContext } from '@orpc/server/plugins';
 import type { ProviderService, RuntimeService } from '@repo/runtime/server';
 
-export interface RpcContext extends RequestHeadersPluginContext {
+export interface RpcContext extends RequestHeadersPluginContext, ResponseHeadersPluginContext {
   server: ServerService;
   onboarding: OnboardingService;
   limits: LimitService;

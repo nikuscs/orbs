@@ -22,6 +22,7 @@ export const ROOMS = {
   quoteDelayMs: 1200,
   unreadSeenMs: 2500,
   mediaRecentMs: 7 * 24 * 60 * 60 * 1000,
+  galleryTiles: 4,
   routinesRefreshMs: 60_000,
   todosRefreshMs: 15_000,
   draftKeyPrefix: 'bots.draft.',
