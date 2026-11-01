@@ -1,13 +1,14 @@
 import { m } from '@repo/i18n/client';
 import Electrobun, { ApplicationMenu, BrowserView, BrowserWindow, PATHS, Screen, Tray, Utils } from 'electrobun/main';
 import { DESKTOP_BUILD } from './desktop-build';
+import { desktopMediaOpen } from './desktop-media';
 import { desktopNetworkFind, desktopNetworkHost, desktopNetworkProbe, desktopNetworkSelf, desktopNetworkTailscale } from './desktop-network';
 import { desktopNotify } from './desktop-notify';
 import { desktopProcessRuns, desktopServerLeftovers, desktopServerPairLink, desktopServerStart } from './desktop-server';
 import { desktopLoginEnabled, desktopLoginSet, desktopSettingsPrompt, desktopSettingsRead, desktopSettingsWrite, desktopStateRead, desktopStateWrite } from './desktop-settings';
 import { desktopWindowAppearance, desktopWindowTitleBarDoubleClick, desktopWindowToolbar } from './desktop-window';
 import { DESKTOP } from './desktop.constants';
-import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopPairMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage } from './types/desktop.types';
+import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopOpenMediaMessage, desktopPairMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage } from './types/desktop.types';
 import type * as DesktopTypes from './types/desktop.types';
 import type { ElectrobunEvent } from 'electrobun/main';
 
@@ -149,6 +150,7 @@ function desktopMainOpen(url: string): void {
     const theme = desktopThemeMessage.safeParse(event).data?.data.detail.theme;
     const notify = desktopNotifyMessage.safeParse(event).data?.data.detail.notify;
     const copy = desktopCopyMessage.safeParse(event).data?.data.detail.copy;
+    const media = desktopOpenMediaMessage.safeParse(event).data?.data.detail.openMedia;
 
     if (theme && pointer) {
       desktopWindowAppearance(pointer, theme);
@@ -160,6 +162,10 @@ function desktopMainOpen(url: string): void {
 
     if (copy !== undefined) {
       Utils.clipboardWriteText(copy);
+    }
+
+    if (media) {
+      void desktopMediaOpen(media).catch((error: unknown) => desktopError(error instanceof Error ? error.message : String(error)));
     }
 
     if (pointer && desktopTitleBarMessage.safeParse(event).success) {

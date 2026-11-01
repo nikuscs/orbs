@@ -10,7 +10,7 @@ interface Window {
   __electrobunWindowId?: number;
   __botsAddresses?: string[];
   __botsHost?: string;
-  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true }) => void;
+  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true } | { openMedia: { name: string; data: string } }) => void;
 }
 
 interface Navigator {

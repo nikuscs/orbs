@@ -31,6 +31,12 @@ export const desktopPairMessage = z.object({ data: z.object({ detail: z.object({
 
 export const desktopCopyMessage = z.object({ data: z.object({ detail: z.object({ copy: z.string() }) }) });
 
+const desktopOpenMedia = z.object({ name: z.string().max(255), data: z.base64() });
+
+export type DesktopOpenMedia = z.infer<typeof desktopOpenMedia>;
+
+export const desktopOpenMediaMessage = z.object({ data: z.object({ detail: z.object({ openMedia: desktopOpenMedia }) }) });
+
 export const desktopTitleBarMessage = z.object({ data: z.object({ detail: z.object({ titleBar: z.literal('double-click') }) }) });
 
 export const desktopNewWindow = z.object({ data: z.object({ detail: z.object({ url: z.url({ protocol: /^https?$/u }) }) }) });

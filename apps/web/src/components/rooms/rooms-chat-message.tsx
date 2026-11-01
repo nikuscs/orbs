@@ -21,6 +21,7 @@ import { RoomsChatArtifact } from '@/components/rooms/rooms-chat-artifact';
 import { RoomsChatEvents } from '@/components/rooms/rooms-chat-events';
 import { RoomsChatMention } from '@/components/rooms/rooms-chat-mention';
 import { RoomsChatSubagent } from '@/components/rooms/rooms-chat-subagent';
+import { roomsMediaPlayElsewhere } from '@/services/rooms/rooms.client';
 import type { ChatMessage, ToolBot } from '@repo/client/client';
 import type * as ReactTypes from 'react';
 
@@ -121,6 +122,7 @@ export function RoomsChatMessage({
           });
         }
       } : undefined}
+      onPlayElsewhere={roomsMediaPlayElsewhere()}
     />
   ) : null;
 

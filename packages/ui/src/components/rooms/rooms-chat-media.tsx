@@ -1,4 +1,4 @@
-import { roomsMediaTime } from '@repo/client/client';
+import { CHAT, roomsMediaTime } from '@repo/client/client';
 import { useChatAttachmentUrl } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { useRef, useState } from 'react';
@@ -7,14 +7,20 @@ import IconLucideLoaderCircle from '~icons/lucide/loader-circle';
 import IconLucidePause from '~icons/lucide/pause';
 import IconLucidePlay from '~icons/lucide/play';
 import { cn } from '../../lib/cn';
+import { ROOMS_CHAT_MEDIA } from '../../services/rooms/rooms.constants';
 import { messageSurface } from '../ai/message';
 import { Button } from '../button';
+import type { RoomsMediaSource } from '../../types/rooms.types';
 import type { RoomsFilePart } from '@repo/client/client';
 import type { SyntheticEvent } from 'react';
 
 interface RoomsChatMediaProps {
   botId: string
   file: RoomsFilePart
+}
+
+interface RoomsChatVideoProps extends RoomsChatMediaProps {
+  onPlayElsewhere?: (media: RoomsMediaSource) => Promise<void>
 }
 
 function roomsChatMediaSolo(event: SyntheticEvent<HTMLMediaElement>) {
@@ -33,12 +39,36 @@ function RoomsChatMediaProblem({ name }: { name: string }) {
   );
 }
 
-export function RoomsChatVideo({ botId, file }: RoomsChatMediaProps) {
+export function RoomsChatVideo({ botId, file, onPlayElsewhere }: RoomsChatVideoProps) {
   const [isRequested, setIsRequested] = useState(false);
   const [isFailed, setIsFailed] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const loaded = useChatAttachmentUrl(botId, file.url, isRequested);
   const url = isRequested ? loaded : undefined;
   const name = file.filename ?? '';
+  const attachmentId = file.url.startsWith(CHAT.attachmentScheme) ? file.url.slice(CHAT.attachmentScheme.length) : undefined;
+
+  if (onPlayElsewhere && attachmentId && !isFailed && !ROOMS_CHAT_MEDIA.inlineVideoTypes.includes(file.mediaType)) {
+    return (
+      <button
+        className={cn(messageSurface, 'flex h-8 max-w-full cursor-pointer items-center gap-1.5 rounded-full px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-progress')}
+        disabled={isOpening}
+        type="button"
+        onClick={() => {
+          setIsOpening(true);
+          onPlayElsewhere({
+            botId,
+            attachmentId,
+            name,
+          }).catch(() => setIsFailed(true)).finally(() => setIsOpening(false));
+        }}
+      >
+        {isOpening ? <IconLucideLoaderCircle className="size-4 shrink-0 animate-spin text-muted-foreground motion-reduce:animate-none" /> : <IconLucidePlay className="size-4 shrink-0 fill-current text-muted-foreground" />}
+        <span className="max-w-56 truncate">{name}</span>
+        <span className="shrink-0 text-muted-foreground">{m.rooms_media_open_player()}</span>
+      </button>
+    );
+  }
 
   if (isFailed) {
     return <RoomsChatMediaProblem name={name} />;

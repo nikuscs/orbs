@@ -29,6 +29,7 @@ export const DESKTOP = {
   mainWindow: { width: 1280, height: 840, trafficLights: { x: -6, y: -5 } },
   tray: { image: 'views://server/web/dist/client/img/brand/tray.svg', width: 19, height: 16 },
   login: { env: 'DESKTOP_LOGIN', agents: 'Library/LaunchAgents' },
+  media: { folder: 'orbs-media', fallbackName: 'video.mp4', open: '/usr/bin/open', player: 'QuickTime Player' },
   headless: { env: 'DESKTOP_HEADLESS' },
   notify: {
     frameworks: {

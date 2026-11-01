@@ -172,6 +172,7 @@
   "rooms_media_play": "Play {name}",
   "rooms_media_pause": "Pause {name}",
   "rooms_media_seek": "Position in {name}",
+  "rooms_media_open_player": "Open in QuickTime",
   "rooms_media_unavailable": "{name} could not be loaded.",
   "rooms_media_viewer_count": "{index} of {total}",
   "rooms_media_viewer_from": "From {name} · {time}",

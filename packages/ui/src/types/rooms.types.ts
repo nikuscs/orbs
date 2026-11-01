@@ -7,3 +7,9 @@ export interface RoomsPairLinkParams {
 }
 
 export type RoomsDetailsPage = 'todos' | 'routines' | 'media';
+
+export interface RoomsMediaSource {
+  botId: string;
+  attachmentId: string;
+  name: string;
+}
