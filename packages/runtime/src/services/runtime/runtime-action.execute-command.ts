@@ -52,22 +52,22 @@ export async function runtimeActionExecuteCommand(
 
   const conversation = await runtimeQueryConversation(deps, params);
 
-  if (params.name === 'compact') {
-    return runtimeCommandCompact(await conversation.compact(params.arguments, context));
-  }
+  return match(params.name)
+    .with('compact', async () => runtimeCommandCompact(await conversation.compact(params.arguments, context)))
+    .otherwise(async (name) => {
+      await match(name)
+        .with('reset', () => conversation.reset(params.arguments, context))
+        .with('retry', () => runtimeActionRetry(deps, {
+          conversationId: conversation.id,
+          // SAFETY: a task ID is only a lookup key; retry accepts it only when it is this conversation's latest failed generation.
+          taskId: runtimeCommandId(params.arguments) as PiDurableTypes.TaskId<JsonValue>,
+          context,
+        }))
+        .with('cancel', () => runtimeCommandCancel(conversation.id, params.arguments))
+        .otherwise(() => {
+          throw new Errors.NOT_FOUND({ resource: 'command', resourceId: name });
+        });
 
-  await match(params.name)
-    .with('reset', () => conversation.reset(params.arguments, context))
-    .with('retry', () => runtimeActionRetry(deps, {
-      conversationId: conversation.id,
-      // SAFETY: a task ID is only a lookup key; retry accepts it only when it is this conversation's latest failed generation.
-      taskId: runtimeCommandId(params.arguments) as PiDurableTypes.TaskId<JsonValue>,
-      context,
-    }))
-    .with('cancel', () => runtimeCommandCancel(conversation.id, params.arguments))
-    .otherwise(() => {
-      throw new Errors.NOT_FOUND({ resource: 'command', resourceId: params.name });
+      return {};
     });
-
-  return {};
 }

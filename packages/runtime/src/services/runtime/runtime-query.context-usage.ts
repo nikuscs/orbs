@@ -44,13 +44,16 @@ export async function runtimeQueryContextUsage(
     .with(P.nonNullable, ({ provider, modelId }) => deps.models.getModel(provider, modelId))
     .otherwise(() => undefined);
 
-  const transcriptTokens = view.messages.reduce((tokens, message) => tokens + estimateMessageTokens(message), 0);
+  const recentTokens = view.contributions.slice(view.head === undefined ? 1 : 2).flat().reduce(
+    (tokens, message) => tokens + estimateMessageTokens(message),
+    0,
+  );
 
   return {
     contextWindow: match(model?.contextWindow)
       .with(P.number.positive(), (value) => value)
       .otherwise(() => null),
     estimatedTokens: runtimeContextUsageTokens(view),
-    compactable: transcriptTokens > DEFAULT_COMPACTION_POLICY.keepRecentTokens,
+    compactable: recentTokens >= DEFAULT_COMPACTION_POLICY.keepRecentTokens,
   };
 }
