@@ -25,7 +25,7 @@ export function roomsPairLink({ sender, peer, conversationId }: RoomsPairLinkPar
 }
 
 export function roomsMediaPlayElsewhere() {
-  const host = Object.hasOwn(globalThis, 'window') ? window.__electrobunSendToHost : undefined;
+  const host = window.__electrobunSendToHost;
 
   if (!host || document.createElement('video').canPlayType(ROOMS.mediaH264) !== '') {
     return undefined;
