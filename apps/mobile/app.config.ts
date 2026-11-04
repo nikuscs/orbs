@@ -63,7 +63,7 @@ export default (): ExpoConfig => ({
   android: {
     package: bundleIdentifier,
   },
-  experiments: { typedRoutes: true },
+  experiments: { typedRoutes: true, reactCompiler: true },
   owner: appEnv.MOBILE_EAS_OWNER,
   extra: {
     appName: name,
