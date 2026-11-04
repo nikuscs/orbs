@@ -2,9 +2,9 @@ import { chatResetCommand, mentionLinks, mentionQuery, mentionSegments, roomsMes
 import { useChatAttachmentsNative } from '@repo/client/native';
 import { useChatSend } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowUp, Plus, Square } from 'lucide-react-native';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { View } from 'react-native';
 import { match } from 'ts-pattern';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ import type { RpcSession } from '@/types/rpc.types';
 import type * as ClientTypes from '@repo/client/client';
 import type { Bot } from '@repo/contracts/universal';
 import type { Dispatch, SetStateAction } from 'react';
-import type { LayoutChangeEvent } from 'react-native';
+import type { LayoutChangeEvent, TextInputInstance } from 'react-native';
 
 interface ChatComposerProps {
   session: RpcSession;
@@ -68,6 +68,22 @@ export function ChatComposer({
   const [quotedKey, setQuotedKey] = useState<string>();
   const [prefilled, setPrefilled] = useState<string>();
   const files = useChatAttachmentsNative({ botId: bot.id, onProblem: (message) => toast.show({ message }) });
+  const field = useRef<TextInputInstance>(null);
+  const replyToEntryId = replyTo?.metadata?.entryId;
+
+  const focusedReplyId = useRef<number>(undefined);
+
+  useFocusEffect(() => {
+    if (replyToEntryId === focusedReplyId.current) {
+      return;
+    }
+
+    focusedReplyId.current = replyToEntryId;
+
+    if (replyToEntryId !== undefined) {
+      field.current?.focus();
+    }
+  });
 
   const chat = useChatSend({
     botId: bot.id,
@@ -129,7 +145,6 @@ export function ChatComposer({
 
   async function send() {
     const attachmentIds = files.readyIds;
-    const replyToEntryId = replyTo?.metadata?.entryId;
     const draft = { text, picked };
 
     const restore = () => {
@@ -268,6 +283,7 @@ export function ChatComposer({
             </Menu>
           )}
           placeholder={m.rooms_chat_placeholder({ bot: bot.name })}
+          ref={field}
           onChangeText={setText}
           onSelectionChange={(event) => setCursor(event.nativeEvent.selection.end)}
         >

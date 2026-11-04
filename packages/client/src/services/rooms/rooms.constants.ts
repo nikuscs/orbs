@@ -23,6 +23,7 @@ export const ROOMS = {
   unreadSeenMs: 2500,
   mediaRecentMs: 7 * 24 * 60 * 60 * 1000,
   galleryTiles: 4,
+  image: { box: 256, minRatio: 9 / 16, maxRatio: 2, loadingRatio: 4 / 3 },
   routinesRefreshMs: 60_000,
   todosRefreshMs: 15_000,
   draftKeyPrefix: 'bots.draft.',

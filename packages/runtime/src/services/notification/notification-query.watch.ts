@@ -6,6 +6,7 @@ import {
   notificationCommitIsRelevant,
   notificationPendingItems,
   notificationRecentAppend,
+  notificationReplyIsForOwner,
   notificationToolTaskIds,
 } from './notification.utils';
 import type * as NotificationTypes from '../../types/notification.types';
@@ -72,8 +73,11 @@ export async function notificationQueryWatch(deps: NotificationTypes.Notificatio
       .otherwise(async () => {
         const attention = notificationCommitAttention(batch.flatMap(({ publication }) => publication.changes));
 
+        const ownerFlags = await Promise.all(attention.replies.map((entry) => notificationReplyIsForOwner(deps, entry, context)));
+        const replies = attention.replies.filter((_entry, index) => ownerFlags[index]);
+
         const items: NotificationTypes.NotificationItem[] = [
-          ...attention.replies.map((entry) => ({ kind: 'reply' as const, botId, conversationId: entry.conversationId, entryId: entry.id })),
+          ...replies.map((entry) => ({ kind: 'reply' as const, botId, conversationId: entry.conversationId, entryId: entry.id })),
           ...attention.failures.map((task) => ({ kind: 'failure' as const, botId, conversationId: task.conversationId, taskId: task.id })),
         ];
 

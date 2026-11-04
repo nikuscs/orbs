@@ -70,6 +70,11 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
     quote.dismiss();
   }
 
+  function reply(message: ChatMessage) {
+    setReplyTo(message);
+    composer.current?.focus();
+  }
+
   function send() {
     panes.closeAll();
 
@@ -109,7 +114,7 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
       host={panes}
       insetBottom={composerHeight}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-12 pt-3 *:pointer-events-auto">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-12 items-center justify-center px-14 *:pointer-events-auto max-md:bg-background/80 max-md:backdrop-blur-md md:h-auto md:pt-3">
         <RoomsChatPill activity={activity} bot={bot} />
       </div>
       {around ? (
@@ -121,7 +126,7 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
           key={around}
           view={view}
           onLatest={leaveFocus}
-          onReply={setReplyTo}
+          onReply={reply}
         />
       ) : (
         <RoomsChatTranscript
@@ -144,7 +149,7 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
           older={room.older}
           reactions={room.reactions}
           unread={chat.hasUnread || unread.throughEntryId < view.latestEntryId ? unread : undefined}
-          onReply={setReplyTo}
+          onReply={reply}
         />
       )}
       {quote.selection ? (

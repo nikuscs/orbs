@@ -65,6 +65,7 @@ export interface ChatQueued {
   submissionId: number;
   mode: 'steer' | 'followUp';
   text: string;
+  skills: string[];
 }
 
 export interface ChatOutgoing {
@@ -82,7 +83,7 @@ export interface ChatOutgoingParams {
   queued: ChatQueued[];
 }
 
-type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
+export type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
 
 export type ChatInputContent = ChatQueuedInput['content'] | Extract<ChatPiMessage, { role: 'user' | 'toolResult' }>['content'];
 

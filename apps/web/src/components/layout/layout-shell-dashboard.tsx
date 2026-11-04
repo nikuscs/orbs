@@ -28,7 +28,7 @@ export function LayoutShellDashboard({ children, aside, asidePathname, sidebars,
         <LayoutAppSidebar collapsible="icon" connection={connection} />
         {aside ? (
           <>
-            <Sidebar.SidebarTrigger className="absolute top-3 left-3 z-30 md:hidden desktop:top-16" />
+            <Sidebar.SidebarTrigger className="absolute top-[calc(env(safe-area-inset-top)+0.375rem)] left-[calc(env(safe-area-inset-left)+0.5rem)] z-30 size-9 md:hidden desktop:top-16" variant="floating" />
             <div className="flex min-h-0 min-w-0 flex-1">
               <Sidebar.SidebarProvider
                 className="min-h-0 min-w-0"

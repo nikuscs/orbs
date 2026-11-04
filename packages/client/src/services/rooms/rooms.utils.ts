@@ -171,6 +171,14 @@ export function roomsFileRows(files: RoomsTypes.RoomsFilePart[]): RoomsTypes.Roo
     .otherwise((kind) => [{ key: file.url, kind, file }]));
 }
 
+export function roomsImageFrame(size?: { width: number, height: number }) {
+  const { box, minRatio, maxRatio, loadingRatio } = ROOMS.image;
+  const ratio = size && size.width > 0 && size.height > 0 ? size.width / size.height : loadingRatio;
+  const aspectRatio = Math.min(maxRatio, Math.max(minRatio, ratio));
+
+  return { width: Math.round(aspectRatio >= 1 ? box : box * aspectRatio), aspectRatio };
+}
+
 export function roomsFileImages(message: ChatMessage | undefined): RoomsTypes.RoomsFilePart[] {
   return (message?.parts ?? []).flatMap((part) => (part.type === 'file' && roomsFileKind(part.mediaType) === 'images' ? [part] : []));
 }

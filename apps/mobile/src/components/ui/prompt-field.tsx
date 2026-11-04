@@ -3,8 +3,8 @@ import { cn } from '@/lib/cn';
 import { GlassSurface } from './glass-surface';
 import { Text } from './text';
 import { TextField } from './text-field';
-import type { ReactNode } from 'react';
-import type { TextInputProps } from 'react-native';
+import type { ReactNode, Ref } from 'react';
+import type { TextInputInstance, TextInputProps } from 'react-native';
 
 // Pads one 22pt line to the 32pt action button, so a single line stays centered while longer text grows upward.
 const PROMPT_FIELD_LINE_PADDING = 5;
@@ -21,6 +21,7 @@ interface PromptFieldProps extends TextInputProps {
   header?: ReactNode;
   /** Shows the placeholder, which stays on one line: iOS wraps a multiline input's own placeholder. */
   isEmpty: boolean;
+  ref?: Ref<TextInputInstance>;
 }
 
 /** The chat composer's growing glass input. */

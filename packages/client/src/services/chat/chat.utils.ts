@@ -158,9 +158,16 @@ export function chatQueued(state: UniversalTypes.ConversationState | undefined):
     .with({ mode: P.union('steer', 'followUp') }, (queued) => [{
       submissionId: queued.id,
       mode: queued.mode,
-      text: chatContentText(queued.content),
+      ...chatQueuedText(queued),
     }])
     .otherwise(() => []));
+}
+
+function chatQueuedText({ entry, content }: ChatTypes.ChatQueuedInput): Pick<ChatTypes.ChatQueued, 'text' | 'skills'> {
+  const attachment = entry?.kind === ATTACHMENT.entryKind ? attachmentMessage.safeParse(entry.data).data : undefined;
+  const reply = entry?.kind === REPLY.entryKind ? replyMessage.safeParse(entry.data).data : undefined;
+
+  return { text: (attachment ?? reply)?.content ?? chatContentText(content), skills: attachment?.skills ?? [] };
 }
 
 export function chatOutgoingMessages(outgoing: ChatTypes.ChatOutgoing[], params: ChatTypes.ChatOutgoingParams): ChatTypes.ChatMessage[] {
