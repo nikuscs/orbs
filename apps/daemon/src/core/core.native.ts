@@ -266,12 +266,12 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
   const rpc = coreNativeRpc(services, false);
   const peer = (request: Request, server: Server<undefined>) => server.requestIP(request)?.address ?? null;
 
-  const handleRpc = coreNativeOrigin(async (request, server) => coreNativeReply(
+  const handleRpc = coreNativeOrigin(services, async (request, server) => coreNativeReply(
     await rpc.http.handle(request, { prefix: '/rpc', context: { ...rpc.context, peerAddress: peer(request, server) } }),
     'no-store',
   ));
 
-  const handleFiles = coreNativeOrigin(async (request, server) => coreFilesRange(coreNativeReply(
+  const handleFiles = coreNativeOrigin(services, async (request, server) => coreFilesRange(coreNativeReply(
     await rpc.files.handle(request, { prefix: '/files', context: { ...rpc.context, peerAddress: peer(request, server) } }),
     'private, max-age=31536000, immutable',
   )));
@@ -282,7 +282,7 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
     maxRequestBodySize: 12 * 1024 * 1024,
     routes: {
       '/rpc': {
-        GET: coreNativeOrigin((request, server) => (server.upgrade(request, { data: undefined }) ? undefined : new Response(null, { status: 426 }))),
+        GET: coreNativeOrigin(services, (request, server) => (server.upgrade(request, { data: undefined }) ? undefined : new Response(null, { status: 426 }))),
         POST: handleRpc,
         OPTIONS: handleRpc,
       },
@@ -400,18 +400,25 @@ async function coreNativeLocal(services: CoreTypes.CoreServices) {
   return server;
 }
 
-function coreNativeOrigin<T extends Request>(handler: CoreTypes.CoreHandler<T>): CoreTypes.CoreHandler<T> {
+function coreNativeOrigin<T extends Request>(services: CoreTypes.CoreServices, handler: CoreTypes.CoreHandler<T>): CoreTypes.CoreHandler<T> {
   return (request, server) => {
     const origin = request.headers.get('origin');
-    const hostname = URL.parse(origin ?? '')?.hostname.replace(/^\[|\]$/gu, '') ?? '';
+    const parsed = URL.parse(origin ?? '');
+    const hostname = parsed?.hostname.replace(/^\[|\]$/gu, '') ?? '';
 
     const isAllowed = origin === null
-      || env.DAEMON_ALLOWED_ORIGINS.includes(URL.parse(origin)?.origin ?? origin)
+      || env.DAEMON_ALLOWED_ORIGINS.includes(parsed?.origin ?? origin)
       || isIP(hostname) !== 0
       || hostname === 'localhost'
       || hostname.endsWith('.localhost');
 
-    return isAllowed ? handler(request, server) : new Response(null, { status: 403 });
+    if (isAllowed) {
+      return handler(request, server);
+    }
+
+    return services.server.queries.info().then(({ addresses }) => (addresses.some(({ url }) => url === parsed?.origin)
+      ? handler(request, server)
+      : new Response(null, { status: 403 })));
   };
 }
 
