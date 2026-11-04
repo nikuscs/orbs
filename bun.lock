@@ -68,7 +68,7 @@
     },
     "apps/mobile": {
       "name": "@repo/mobile",
-      "version": "0.0.2",
+      "version": "0.1.1",
       "dependencies": {
         "@expo-google-fonts/inter": "catalog:mobile",
         "@expo/ui": "catalog:mobile",
