@@ -5,7 +5,8 @@ import { useCSSVariable } from 'uniwind';
 import { cn } from '@/lib/cn';
 import { textBaseVariants, textContext } from './text';
 import type { VariantProps } from 'cva';
-import type { TextInputProps } from 'react-native';
+import type { Ref } from 'react';
+import type { TextInputInstance, TextInputProps } from 'react-native';
 
 const textFieldVariants = cva({
   composes: textBaseVariants,
@@ -18,6 +19,7 @@ const TEXT_FIELD_SINGLE_LINE = { lineHeight: undefined } as const;
 
 interface TextFieldProps extends TextInputProps, VariantProps<typeof textFieldVariants> {
   placeholderTone?: 'muted-foreground' | 'glass-muted' | 'destructive';
+  ref?: Ref<TextInputInstance>;
 }
 
 export function TextField({ className, size, tone, placeholderTone = 'muted-foreground', style, ...props }: TextFieldProps) {

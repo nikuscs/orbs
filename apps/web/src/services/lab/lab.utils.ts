@@ -377,7 +377,7 @@ export function labChatFixture(now: number, video: ChatPart | null): LabChatFixt
     draft,
     artifacts: [artifact, blocks, page],
     activity: 'working',
-    queued: [{ submissionId: 1, mode: 'followUp', text: 'Also send the recap to Ledger when it is merged.' }],
+    queued: [{ submissionId: 1, mode: 'followUp', text: 'Also send the recap to Ledger when it is merged.', skills: [] }],
     reactions: new Map([
       [4, { entryId: 4, emojis: ['🔥'], botReactions: [{ botId: scout.id, emojis: ['🔥', '👀'] }] }],
       [17, { entryId: 17, emojis: ['❤️'], botReactions: [] }],

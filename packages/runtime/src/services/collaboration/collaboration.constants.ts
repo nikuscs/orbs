@@ -1,5 +1,5 @@
 import { defineDoc, defineDocFamily } from '@earendil-works/pi-durable';
-import { ENTRY } from '@repo/contracts/universal';
+import { ATTACHMENT, ENTRY, REPLY } from '@repo/contracts/universal';
 import type * as CollaborationTypes from '../../types/collaboration.types';
 
 export const collaborationCall = defineDoc({
@@ -57,4 +57,5 @@ export const COLLABORATION = {
   message: ENTRY.peerMessage,
   reply: ENTRY.peerReply,
   note: ENTRY.ownerNote,
+  turnInputs: new Set<string>(['pi.user', ENTRY.routineRun, REPLY.entryKind, ATTACHMENT.entryKind, ENTRY.peerMessage, ENTRY.peerReply, ENTRY.ownerNote]),
 } as const;

@@ -2,24 +2,33 @@ import { useChatContextUsage } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
 import { PromptInputButton } from '@repo/ui/ai/prompt-input';
 import { Button } from '@repo/ui/button';
+import { ButtonLoading } from '@repo/ui/button-loading';
 import { cn } from '@repo/ui/cn';
 import { Item, ItemActions, ItemContent, ItemLink, ItemTitle, ItemValue } from '@repo/ui/item';
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@repo/ui/popover';
 import { Progress } from '@repo/ui/progress';
 import { useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import IconChevronRight from '~icons/lucide/chevron-right';
 import IconFoldVertical from '~icons/lucide/fold-vertical';
 import IconRotateCcw from '~icons/lucide/rotate-ccw';
 import IconTriangleAlert from '~icons/lucide/triangle-alert';
+import IconSpinner from '~icons/svg-spinners/90-ring-with-bg';
 import type { ChatContextView, RoomsChat } from '@repo/client/client';
 import type { Bot } from '@repo/contracts/universal';
 import type { ComponentProps } from 'react';
 
 const ROOMS_CHAT_CONTEXT_TONES = {
   muted: 'text-muted-foreground',
-  warning: 'text-warning',
+  warning: 'text-warning/70',
   destructive: 'text-destructive',
+} satisfies Record<ChatContextView['tone'], string>;
+
+const ROOMS_CHAT_CONTEXT_HOVER_TONES = {
+  muted: 'group-hover:text-foreground',
+  warning: 'group-hover:text-warning/70',
+  destructive: 'group-hover:text-destructive',
 } satisfies Record<ChatContextView['tone'], string>;
 
 interface RoomsChatContextProps {
@@ -37,29 +46,30 @@ export function RoomsChatContext({ bot, conversationId, latestEntryId, isBusy, i
     botId: bot.id,
     conversationId,
     revision: isBusy ? undefined : latestEntryId,
+    onCompacted: (message) => toast.success(message),
   });
 
-  if (!usage.context) {
+  const compacting = isCompacting || usage.isCompacting;
+
+  if (!usage.context || !(usage.isCompactable || compacting)) {
     return null;
   }
 
-  const { percent, shown, used, label, tone } = usage.context;
+  const { percent, used, label, tone } = usage.context;
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <PromptInputButton
           aria-label={label}
-          size={percent === null || tone !== 'muted' ? 'sm' : 'icon-sm'}
+          className="group"
+          size={percent === null ? 'sm' : 'icon-sm'}
           title={label}
         >
-          <span className={cn('flex items-center gap-1.5 text-xs tabular-nums', ROOMS_CHAT_CONTEXT_TONES[tone])}>
-            {percent === null ? `~${used}` : (
-              <>
-                <RoomsChatContextRing percent={percent} />
-                {tone === 'muted' ? null : shown}
-              </>
-            )}
+          <span className={cn('flex items-center gap-1.5 text-xs text-muted-foreground tabular-nums transition-colors', ROOMS_CHAT_CONTEXT_HOVER_TONES[tone])}>
+            {compacting ? <IconSpinner aria-hidden className="size-4 animate-spin" /> : null}
+            {percent === null ? `~${used}` : null}
+            {percent === null || compacting ? null : <RoomsChatContextRing percent={percent} />}
           </span>
         </PromptInputButton>
       </PopoverTrigger>
@@ -87,6 +97,7 @@ export function RoomsChatContextItem({ bot, chat }: RoomsChatContextItemProps) {
     botId: bot.id,
     conversationId: chat.conversationId,
     revision: chat.isRunning ? undefined : chat.lastMessage?.entryId,
+    onCompacted: (message) => toast.success(message),
   });
 
   const context = usage.context;
@@ -174,6 +185,7 @@ function RoomsChatContextPanel({ bot, usage, isCompacting, onClose, align, side 
   }
 
   const { percent, shown, tokens, tone } = usage.context;
+  const compacting = isCompacting || usage.isCompacting;
 
   return (
     <PopoverContent align={align} side={side}>
@@ -199,18 +211,17 @@ function RoomsChatContextPanel({ bot, usage, isCompacting, onClose, align, side 
         </p>
         <p className="text-xs text-muted-foreground">{m.rooms_context_estimate({ bot: bot.name })}</p>
         <div className="flex gap-2">
-          <Button
-            disabled={isCompacting || usage.isCompacting}
-            size="xs"
-            variant={tone === 'destructive' ? 'primary' : 'outline'}
-            onClick={() => {
-              onClose();
-              usage.compact();
-            }}
-          >
-            <IconFoldVertical aria-hidden />
-            {m.rooms_context_compact()}
-          </Button>
+          {usage.isCompactable || compacting ? (
+            <ButtonLoading
+              loading={compacting}
+              size="xs"
+              variant={tone === 'destructive' ? 'primary' : 'outline'}
+              onClick={usage.compact}
+            >
+              {compacting ? null : <IconFoldVertical aria-hidden />}
+              {compacting ? m.avatars_activity_compacting() : m.rooms_context_compact()}
+            </ButtonLoading>
+          ) : null}
           <Button
             size="xs"
             variant="outline"

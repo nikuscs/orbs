@@ -26,6 +26,7 @@ export type PromptInputEditorSegment = { kind: 'text', text: string } | { kind: 
 export interface PromptInputEditorHandle {
   insert: (items: PromptInputEditorItem[]) => void
   restore: (segments: PromptInputEditorSegment[]) => void
+  focus: () => void
 }
 
 export interface PromptInputEditorTrigger {
@@ -326,6 +327,9 @@ export function PromptInputEditor({
       if (editor?.isEmpty) {
         editor.chain().setContent(promptInputEditorDocument(segments)).focus('end').run();
       }
+    },
+    focus: () => {
+      editor?.commands.focus('end');
     },
   }), [editor]);
 

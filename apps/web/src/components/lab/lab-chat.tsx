@@ -25,6 +25,11 @@ function LabChatView({ fixture }: LabChatViewProps) {
   const panes = usePaneHost();
   const latestEntryId = messages.at(-1)?.metadata?.entryId ?? 0;
 
+  function reply(message: ChatMessage) {
+    setReplyTo(message);
+    composer.current?.focus();
+  }
+
   const measureComposer = (node: HTMLDivElement | null) => {
     if (!node) {
       return;
@@ -64,7 +69,7 @@ function LabChatView({ fixture }: LabChatViewProps) {
         messages={[...messages, draft]}
         older={{ isEnabled: false, isLoading: false, onLoad: () => undefined }}
         reactions={fixture.reactions}
-        onReply={setReplyTo}
+        onReply={reply}
       />
       <div className={cn('pointer-events-none absolute inset-x-0 bottom-0 *:pointer-events-auto', panes.isOpen ? 'z-30' : 'z-10')} ref={measureComposer}>
         <RoomsChatComposer
@@ -73,7 +78,6 @@ function LabChatView({ fixture }: LabChatViewProps) {
           bots={bots}
           conversationId={1}
           editor={composer}
-          isCompacting={false}
           latestEntryId={latestEntryId}
           messages={messages}
           queued={fixture.queued}

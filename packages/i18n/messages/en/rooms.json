@@ -111,6 +111,8 @@
   "rooms_context_compact": "Compact",
   "rooms_context_reset": "Reset…",
   "rooms_context_compact_failed": "The conversation could not be compacted. Try again.",
+  "rooms_context_compacted": "Context compacted: earlier messages were summarized.",
+  "rooms_context_compact_nothing": "Nothing to compact yet.",
   "mobile_context_compact": "Compact now",
   "mobile_context_reset": "Reset context",
   "rooms_send_mode": "New messages while a bot works",

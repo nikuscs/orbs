@@ -42,7 +42,7 @@ export async function serverNetworkQueryAddresses({ host, port }: ServerNetworkD
     .filter((entry) => entry?.family === 'IPv4' && !entry.internal)
     .map((entry) => entry?.address ?? '');
 
-  const tailscaleHosts = [...await serverNetworkTailscaleName(), ...ips.filter(serverNetworkIsTailscale)];
+  const tailscaleHosts = [...ips.filter(serverNetworkIsTailscale), ...await serverNetworkTailscaleName()];
 
   return [
     { url: serverNetworkUrl(SERVER.loopbackHost), kind: 'loopback' },

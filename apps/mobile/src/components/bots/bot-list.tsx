@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Bot, LayoutDashboard, Plus, Star, UserRound } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { SectionList, View } from 'react-native';
+import { Pressable, SectionList, View } from 'react-native';
 import { match, P } from 'ts-pattern';
 import { ChatSearchResults } from '@/components/chat/chat-search-results';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -123,7 +123,12 @@ function BotListContent({ session }: BotListContentProps) {
     .with(P.nonNullable, (chat) => (
       <View className="items-center py-8">
         <BotActionsMenu botId={chat.botId} mode="longPress">
-          <View className="items-center gap-2">
+          <Pressable
+            accessibilityLabel={chat.name}
+            accessibilityRole="button"
+            className="items-center gap-2"
+            onPress={() => router.push({ pathname: '/chat/[botId]', params: { botId: chat.botId } })}
+          >
             <View>
               <Avatar
                 avatar={chat.avatar}
@@ -143,7 +148,7 @@ function BotListContent({ session }: BotListContentProps) {
               </Badge>
             </View>
             <Text tone="muted" variant="featured-name">{chat.name}</Text>
-          </View>
+          </Pressable>
         </BotActionsMenu>
       </View>
     ))

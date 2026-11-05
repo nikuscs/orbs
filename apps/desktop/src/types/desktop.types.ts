@@ -89,6 +89,7 @@ export interface DesktopOrigins {
 export interface DesktopServer extends DesktopOrigins {
   url: string;
   daemonEntry: string[];
+  canAutoPair: boolean;
   port: number;
   portFallback: boolean;
   exited: Promise<number>;

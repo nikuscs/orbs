@@ -6,6 +6,7 @@ import type { UIMessage } from 'ai';
 export type ChatApprovalDecision = 'approve' | 'always' | 'deny';
 
 export type ChatActivity = 'idle' | 'queued' | 'thinking' | 'working' | 'writing' | 'compacting' | 'failed';
+export type ChatCompaction = 'blocking' | 'background';
 
 export interface ChatUsage {
   input: number;
@@ -65,6 +66,7 @@ export interface ChatQueued {
   submissionId: number;
   mode: 'steer' | 'followUp';
   text: string;
+  skills: string[];
 }
 
 export interface ChatOutgoing {
@@ -82,7 +84,7 @@ export interface ChatOutgoingParams {
   queued: ChatQueued[];
 }
 
-type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
+export type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
 
 export type ChatInputContent = ChatQueuedInput['content'] | Extract<ChatPiMessage, { role: 'user' | 'toolResult' }>['content'];
 
@@ -105,6 +107,7 @@ export interface ChatContextUsageParams {
   botId: string;
   conversationId: number;
   revision?: number;
+  onCompacted?: (message: string) => void;
 }
 
 export interface ChatContextView {

@@ -86,7 +86,7 @@ export function RoomsStart() {
       onKeyDown={closeOnEscape}
       onValueChange={setSelected}
     >
-      <div className="relative z-20 flex h-12 shrink-0 cursor-default items-center gap-2 border-b pr-2 pl-12 electrobun-webkit-app-region-drag md:pl-4">
+      <div className="relative z-20 flex h-12 shrink-0 cursor-default items-center gap-2 border-b pr-2 pl-14 electrobun-webkit-app-region-drag md:pl-4">
         <label className="text-sm text-muted-foreground" htmlFor={inputId}>{m.rooms_start_to()}</label>
         <input
           autoComplete="off"

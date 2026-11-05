@@ -1,6 +1,6 @@
 {
   "name": "@repo/mobile",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "main": "expo-router/entry",
   "expo": {
@@ -18,7 +18,7 @@
     "eas:dev": "eas build --profile development",
     "eas:preview": "eas build --profile preview",
     "eas:prod": "eas build --profile production",
-    "eas:testflight": "eas build --platform ios --profile production --local --output /tmp/orbs-ios.ipa && eas submit --platform ios --profile production --path /tmp/orbs-ios.ipa",
+    "eas:testflight": "PATH=/usr/bin:$PATH eas build --platform ios --profile production --local --output /tmp/orbs-ios.ipa && APP_VARIANT=production eas submit --platform ios --profile production --path /tmp/orbs-ios.ipa",
     "eas:testflight:cloud": "eas build --platform ios --profile production --auto-submit",
     "codegen": "uniwind generate-artifacts --css ./src/application/styles.css --dts ./src/uniwind-types.d.ts",
     "check": "bun run codegen && tsrs --noEmit",

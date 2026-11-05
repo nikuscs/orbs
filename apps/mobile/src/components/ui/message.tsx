@@ -1,3 +1,4 @@
+import { roomsImageFrame } from '@repo/client/client';
 import { cva } from 'cva';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FileText } from 'lucide-react-native';
@@ -142,11 +143,13 @@ interface MessageImageProps {
   name: string;
 }
 
-/** A sent photo; a muted block holds its place while it loads. */
+/** A sent photo framed in its own shape within limits; a muted block holds its place while it loads. */
 export function MessageImage({ source, name }: MessageImageProps) {
+  const [size, setSize] = useState<{ width: number; height: number }>();
+
   return (
-    <View accessibilityLabel={name} accessibilityRole="image" className={cn('size-48 overflow-hidden rounded-3xl bg-muted', messageOutline)} style={{ borderCurve: 'continuous' }}>
-      <Image className="size-full" resizeMode="cover" source={source} />
+    <View accessibilityLabel={name} accessibilityRole="image" className={cn('max-w-full overflow-hidden rounded-3xl bg-muted', messageOutline)} style={[{ borderCurve: 'continuous' }, roomsImageFrame(size)]}>
+      <Image className="size-full" resizeMode="cover" source={source} onLoad={(event) => setSize(event.nativeEvent.source)} />
     </View>
   );
 }
