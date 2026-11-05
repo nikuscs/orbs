@@ -250,6 +250,7 @@
   "rooms_event_routine_create": "Created routine",
   "rooms_event_routine_update": "Updated routine",
   "rooms_event_routine_run": "Ran routine",
+  "rooms_event_bot_start": "Bot started",
   "rooms_event_routine_remove": "Removed routine",
   "rooms_event_todo_create": "Added todo",
   "rooms_event_todo_update": "Updated todo",

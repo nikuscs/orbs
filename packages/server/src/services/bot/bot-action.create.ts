@@ -1,6 +1,7 @@
 import { Errors } from '@repo/errors/universal';
 import { match, P } from 'ts-pattern';
 import { botActionConfigure } from './bot-action.configure';
+import { botActionStart } from './bot-action.start';
 import { botValues } from './bot.utils';
 import type { BotServiceDeps } from '../../types/bot.types';
 import type { BotCreateInput } from '@repo/contracts/universal';
@@ -34,5 +35,11 @@ export async function botActionCreate(deps: BotServiceDeps, params: BotCreateInp
     listener();
   }
 
-  return botActionConfigure(deps, { botId });
+  const bot = await botActionConfigure(deps, { botId });
+
+  if (bot.instructions.trim()) {
+    await botActionStart(deps, { botId });
+  }
+
+  return bot;
 }

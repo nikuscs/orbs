@@ -38,6 +38,7 @@ interface ChatDataPartPayloads {
   subagent: UniversalTypes.EntrySubagentReport;
   ownerNote: UniversalTypes.EntryOwnerNote & { peerName: string | null };
   routineRun: UniversalTypes.EntryRoutineRun;
+  botStart: Record<string, never>;
   compaction: { status: 'done' };
   reset: Record<string, never>;
   failure: { text: string };
