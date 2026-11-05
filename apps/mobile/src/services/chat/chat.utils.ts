@@ -106,13 +106,9 @@ export function chatFileSource(session: RpcSession, botId: string, file: RoomsFi
 }
 
 export function chatPosterSource(session: RpcSession, botId: string, file: RoomsFilePart): ImageURISource | undefined {
-  if (!file.url.startsWith(CHAT.attachmentScheme)) {
-    return undefined;
-  }
+  const source = chatFileSource(session, botId, file);
 
-  const source = connectionFileSource(session, { botId, attachmentId: file.url.slice(CHAT.attachmentScheme.length) });
-
-  return { ...source, uri: `${source.uri ?? ''}/${CHAT.posterPath}` };
+  return file.url.startsWith(CHAT.attachmentScheme) ? { ...source, uri: `${source.uri ?? ''}/${CHAT.posterPath}` } : undefined;
 }
 
 export function chatPlaybackStart(player: ChatTypes.ChatPlayback) {
