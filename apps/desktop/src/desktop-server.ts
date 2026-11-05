@@ -112,6 +112,7 @@ async function desktopServerAdopt(): Promise<DesktopServer | null> {
     tailscale: origins.tailscale,
     urls: [url, ...origins.urls],
     daemonEntry: desktopDaemonEntry(),
+    canAutoPair: false,
     exited: Promise.withResolvers<number>().promise,
     stop: async () => undefined,
   };
@@ -210,6 +211,7 @@ export async function desktopServerStart(settings: DesktopSettings): Promise<Des
       tailscale: origins.tailscale,
       urls: [url, ...remote],
       daemonEntry: desktopDaemonEntry(),
+      canAutoPair: true,
       exited,
       stop: async () => {
         for (const child of children) {
@@ -240,6 +242,10 @@ export async function desktopServerStart(settings: DesktopSettings): Promise<Des
 
 /** A one-time pairing link for this Mac's own daemon, through its owner-only CLI socket. */
 export async function desktopServerPairLink(server: DesktopServer): Promise<string | null> {
+  if (!server.canAutoPair) {
+    return null;
+  }
+
   const child = Bun.spawn([...server.daemonEntry, 'pair', '--url', server.url], {
     stdout: 'pipe',
     stderr: 'ignore',

@@ -7,5 +7,5 @@ export async function secretBrokerQueryRedact({ source, proxy }: SecretBrokerSer
 
   return values.reduce((result, { name, value }) => (
     value && value.length >= SECRET_BROKER.redactMinLength ? result.replaceAll(value, proxy.queries.placeholder({ name })) : result
-  ), text);
+  ), proxy.queries.redact(text));
 }

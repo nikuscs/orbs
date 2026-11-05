@@ -132,7 +132,7 @@ function desktopMainOpen(url: string): void {
   const window = new BrowserWindow({
     title: appName,
     url,
-    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${clipboardBridge} ${titleBarBridge} ${server && url.startsWith(server.url) ? pairBridge : ''} ${nativeMenuBlock}`,
+    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${clipboardBridge} ${titleBarBridge} ${server?.canAutoPair && new URL(url).origin === new URL(server.url).origin ? pairBridge : ''} ${nativeMenuBlock}`,
     frame: saved && desktopFrameVisible(saved) ? saved : desktopFrameDefault(),
     titleBarStyle: 'hiddenInset',
     trafficLightOffset: DESKTOP.mainWindow.trafficLights,
@@ -170,7 +170,7 @@ function desktopMainOpen(url: string): void {
       desktopConnectOpen('choose');
     }
 
-    if (server && desktopPairMessage.safeParse(event).success) {
+    if (server?.canAutoPair && new URL(url).origin === new URL(server.url).origin && desktopPairMessage.safeParse(event).success) {
       void desktopServerPairLink(server).then((link) => link && window.webview.loadURL(link));
     }
   });

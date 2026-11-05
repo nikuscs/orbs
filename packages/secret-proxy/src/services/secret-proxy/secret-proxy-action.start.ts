@@ -1,4 +1,5 @@
 import { generateCACertificate, getLocal } from 'mockttp';
+import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { rootCertificates } from 'node:tls';
@@ -7,11 +8,17 @@ import { secretProxyActionSwap } from './secret-proxy-action.swap';
 import { SECRET_PROXY } from './secret-proxy.constants';
 import { secretProxyCarries, secretProxyIsLocal } from './secret-proxy.utils';
 import type { SecretProxyServiceDeps } from '../../types/secret-proxy.types';
+import type { CompletedRequest } from 'mockttp';
 
-const refused = { response: { statusCode: 403, body: 'Only this machine may use the secret proxy.\n' } };
+const refused = { response: { statusCode: 403, body: 'Proxy authorization required.\n' } };
 
 export function secretProxyActionStart(deps: SecretProxyServiceDeps) {
   async function secretProxyStart() {
+    deps.state.token = randomBytes(32).toString('hex');
+
+    const secretProxyAuthorized = (request: CompletedRequest) => secretProxyIsLocal(request.remoteIpAddress)
+      && request.tags.includes(`socket-metadata:${deps.state.token}`);
+
     const ca = await generateCACertificate();
     const server = getLocal({ https: ca });
 
@@ -19,12 +26,12 @@ export function secretProxyActionStart(deps: SecretProxyServiceDeps) {
     await writeFile(join(deps.folder, SECRET_PROXY.bundleFile), [ca.cert, ...rootCertificates].join('\n'), { mode: 0o644 });
 
     await server.forAnyRequest().always().matching(secretProxyCarries).thenPassThrough({
-      beforeRequest: (request) => (secretProxyIsLocal(request.remoteIpAddress) ? secretProxyActionSwap(deps, { request }) : refused),
+      beforeRequest: (request) => (secretProxyAuthorized(request) ? secretProxyActionSwap(deps, { request }) : refused),
       beforeResponse: (response, request) => secretProxyActionScrub(deps, { response, request }),
     });
 
     await server.forAnyRequest().always().thenPassThrough({
-      beforeRequest: (request) => (secretProxyIsLocal(request.remoteIpAddress) ? undefined : refused),
+      beforeRequest: (request) => (secretProxyAuthorized(request) ? undefined : refused),
     });
 
     await server.start();
