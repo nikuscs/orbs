@@ -1,5 +1,5 @@
 import { ATTACHMENT, attachmentMessage, attachmentSent, ENTRY, entryOwnerNote, entryPeerMessage, entryRoutineRun, entrySubagentReport, REACTION, REPLY, replyMessage, replySilent, toolCallJson } from '@repo/contracts/universal';
-import { getLocale, m } from '@repo/i18n/client';
+import { m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
 import { mentionHref, mentionSubmission } from '../mention/mention.utils';
 import { CHAT, CHAT_FILE_TYPES } from './chat.constants';
@@ -440,29 +440,4 @@ export function chatFileType({ name, mediaType }: ChatTypes.ChatFileTypeParams):
   const extension = name.split('.').at(-1)?.toLowerCase();
 
   return mediaType ?? Object.entries(CHAT_FILE_TYPES).find(([type]) => type === extension)?.[1] ?? '';
-}
-
-export function chatContextView({ contextWindow, estimatedTokens }: UniversalTypes.ConversationContextUsage): ChatTypes.ChatContextView {
-  const number = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 });
-
-  const chatTokens = (value: number) => match(value)
-    .with(P.number.gte(1_000_000), (count) => `${number.format(count / 1_000_000)}M`)
-    .with(P.number.gte(1000), (count) => `${number.format(count / 1000)}K`)
-    .otherwise((count) => number.format(count));
-
-  const used = chatTokens(estimatedTokens);
-  const percent = contextWindow ? Math.min(100, Math.round((estimatedTokens / contextWindow) * 100)) : null;
-  const shown = percent === null ? null : new Intl.NumberFormat(getLocale(), { style: 'percent' }).format(percent / 100);
-
-  return {
-    percent,
-    shown,
-    used,
-    label: shown ? m.rooms_context_full({ percent: shown }) : m.rooms_context_tokens_only({ used }),
-    tokens: contextWindow ? m.rooms_context_tokens({ used, total: chatTokens(contextWindow) }) : m.rooms_context_tokens_only({ used }),
-    tone: match(percent)
-      .with(P.number.gte(CHAT.contextCriticalPercent), () => 'destructive' as const)
-      .with(P.number.gte(CHAT.contextWarningPercent), () => 'warning' as const)
-      .otherwise(() => 'muted' as const),
-  };
 }
