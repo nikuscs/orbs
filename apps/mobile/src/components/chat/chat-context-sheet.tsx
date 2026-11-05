@@ -9,6 +9,7 @@ import { ActionSheet, ActionSheetGroup, ActionSheetItem } from '@/components/ui/
 import { Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { useConnection } from '@/hooks/use-connection';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/cn';
 import type { RpcSession } from '@/types/rpc.types';
 
@@ -39,7 +40,13 @@ function ChatContextSheetContent({ session, botId, conversationId }: ChatContext
   const router = useRouter();
   const bots = useQuery(session.rpc.bots.list.queryOptions());
   const name = bots.data?.find((item) => item.id === botId)?.name ?? '';
-  const usage = useChatContextUsage({ botId, conversationId });
+  const toast = useToast();
+
+  const usage = useChatContextUsage({
+    botId,
+    conversationId,
+    onCompacted: (message) => toast.show({ message, variant: 'default' }),
+  });
 
   if (!usage.context) {
     return null;
@@ -73,16 +80,18 @@ function ChatContextSheetContent({ session, botId, conversationId }: ChatContext
         <Text variant="muted">{tokens}</Text>
       </View>
       <ActionSheetGroup>
-        <ActionSheetItem
-          disabled={usage.isCompacting}
-          icon={FoldVertical}
-          onPress={() => {
-            usage.compact();
-            router.back();
-          }}
-        >
-          {m.mobile_context_compact()}
-        </ActionSheetItem>
+        {usage.isCompactable ? (
+          <ActionSheetItem
+            disabled={usage.isCompacting}
+            icon={FoldVertical}
+            onPress={() => {
+              usage.compact();
+              router.back();
+            }}
+          >
+            {m.mobile_context_compact()}
+          </ActionSheetItem>
+        ) : null}
         <ActionSheetItem icon={RotateCcw} onPress={() => router.replace({ pathname: '/chat/[botId]/reset', params: { botId } })}>
           {m.mobile_context_reset()}
         </ActionSheetItem>

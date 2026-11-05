@@ -1,4 +1,5 @@
 import { calculateContextTokens, estimateMessageTokens } from '@earendil-works/pi-ai/utils/estimate';
+import { DEFAULT_COMPACTION_POLICY } from '@earendil-works/pi-durable';
 import { match, P } from 'ts-pattern';
 import { runtimeQueryConversation } from './runtime-query.conversation';
 import type { RuntimeContextInput, RuntimeConversationParams, RuntimeServiceDeps } from '../../types/runtime.types';
@@ -43,10 +44,16 @@ export async function runtimeQueryContextUsage(
     .with(P.nonNullable, ({ provider, modelId }) => deps.models.getModel(provider, modelId))
     .otherwise(() => undefined);
 
+  const recentTokens = view.contributions.slice(view.head === undefined ? 1 : 2).flat().reduce(
+    (tokens, message) => tokens + estimateMessageTokens(message),
+    0,
+  );
+
   return {
     contextWindow: match(model?.contextWindow)
       .with(P.number.positive(), (value) => value)
       .otherwise(() => null),
     estimatedTokens: runtimeContextUsageTokens(view),
+    compactable: recentTokens >= DEFAULT_COMPACTION_POLICY.keepRecentTokens,
   };
 }

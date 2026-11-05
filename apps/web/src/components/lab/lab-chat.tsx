@@ -78,7 +78,6 @@ function LabChatView({ fixture }: LabChatViewProps) {
           bots={bots}
           conversationId={1}
           editor={composer}
-          isCompacting={false}
           latestEntryId={latestEntryId}
           messages={messages}
           queued={fixture.queued}

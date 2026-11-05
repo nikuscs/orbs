@@ -32,7 +32,7 @@ interface RoomsChatComposerProps {
   messages: ClientTypes.ChatMessage[]
   queued: ClientTypes.ChatQueued[]
   isBusy: boolean
-  isCompacting: boolean
+  compaction?: ClientTypes.ChatCompaction
   latestEntryId: number
   editor: ReactTypes.RefObject<PromptInputEditorHandle | null>
   replyTo: ClientTypes.ChatMessage | null
@@ -49,7 +49,7 @@ export function RoomsChatComposer({
   messages,
   queued,
   isBusy,
-  isCompacting,
+  compaction,
   latestEntryId,
   editor,
   replyTo,
@@ -58,6 +58,7 @@ export function RoomsChatComposer({
   onSend,
   status,
 }: RoomsChatComposerProps) {
+  const isCompacting = compaction === 'blocking';
   const queryClient = useQueryClient();
   const scroller = useMessageScroller();
   const isMobile = useIsMobile();
@@ -305,7 +306,7 @@ export function RoomsChatComposer({
               bot={bot}
               conversationId={conversationId}
               isBusy={isBusy}
-              isCompacting={isCompacting}
+              isCompacting={compaction !== undefined}
               latestEntryId={latestEntryId}
             />
           )}

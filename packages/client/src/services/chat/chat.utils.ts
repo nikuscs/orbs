@@ -143,13 +143,21 @@ export function chatActivity(state: UniversalTypes.ConversationState | undefined
 
   return match({ live, state })
     .returnType<ChatTypes.ChatActivity>()
-    .with({ live: { compactions: P.array({ blocking: true }).select() } }, (compactions) => (compactions.length > 0 ? 'compacting' : 'thinking'))
+    .when(() => chatCompaction(state) === 'blocking', () => 'compacting')
     .when(() => (live?.tools ?? []).some((slot) => slot.status !== 'done'), () => 'working')
     .when(() => content.some((part) => part.type === 'text'), () => 'writing')
     .when(() => live?.run !== undefined, () => 'thinking')
+    .when(() => chatCompaction(state) === 'background', () => 'compacting')
     .when(() => (state?.inbox.items.length ?? 0) > 0, () => 'queued')
     .with({ state: { lastRun: { outcome: { status: 'failed' } } } }, () => 'failed')
     .otherwise(() => 'idle');
+}
+
+export function chatCompaction(state: UniversalTypes.ConversationState | undefined): ChatTypes.ChatCompaction | undefined {
+  return match(state?.live.compactions ?? [])
+    .returnType<ChatTypes.ChatCompaction | undefined>()
+    .with([], () => undefined)
+    .otherwise((items) => (items.some((item) => item.blocking) ? 'blocking' : 'background'));
 }
 
 export function chatQueued(state: UniversalTypes.ConversationState | undefined): ChatTypes.ChatQueued[] {

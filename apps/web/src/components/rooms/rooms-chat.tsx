@@ -163,10 +163,10 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
         <RoomsChatComposer
           bot={bot}
           bots={bots}
+          compaction={room.compaction}
           conversationId={conversationId}
           editor={composer}
           isBusy={isBusy}
-          isCompacting={activity === 'compacting'}
           latestEntryId={view.latestEntryId}
           messages={messages}
           queued={queued}

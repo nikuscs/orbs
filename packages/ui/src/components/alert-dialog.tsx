@@ -1,6 +1,7 @@
 import { m } from '@repo/i18n/client';
 import { AlertDialog as AlertDialogPrimitive } from 'radix-ui';
 import { useState } from 'react';
+import IconSpinner from '~icons/svg-spinners/90-ring-with-bg';
 import { cn } from '../lib/cn';
 import { Button } from './button';
 import { Input } from './input';
@@ -200,6 +201,7 @@ function ConfirmationDialog(props: ConfirmationDialogProps) {
               onConfirm();
             }}
           >
+            {pending ? <IconSpinner aria-hidden className="animate-spin" /> : null}
             {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
