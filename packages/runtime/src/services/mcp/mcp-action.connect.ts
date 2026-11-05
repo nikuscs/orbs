@@ -92,7 +92,7 @@ export async function mcpActionConnect(deps: McpClientServiceDeps, { botId, entr
     try {
       connection.hasToolChanges = false;
       const tools = await connection.client.listTools();
-      const registrations = mcpTools(connection, server, tools);
+      const registrations = mcpTools(connection, server, tools, { root: deps.root, botId });
       connection.tools = registrations;
 
       connection.catalog = tools.map((tool, index) => ({
