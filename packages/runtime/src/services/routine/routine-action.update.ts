@@ -1,11 +1,11 @@
 import { match } from 'ts-pattern';
 import { routineScheduleNextRunAt } from './routine-schedule.utils';
 import { routineDocument } from './routine.constants';
-import { routineCopy, routineGet } from './routine.utils';
+import { routineAbortStale, routineCopy, routineGet, routineReplaceTask } from './routine.utils';
 import type { RoutineContextParams, RoutineServiceDeps, RoutineUpdateParams } from '../../types/routine.types';
 
 export async function routineActionUpdate({ harness }: RoutineServiceDeps, { context, ...params }: RoutineUpdateParams & RoutineContextParams) {
-  return harness.commit(async (tx) => {
+  const { routine, staleTaskId: replacedTaskId } = await harness.commit(async (tx) => {
     const doc = await tx.doc(routineDocument, params.conversationId);
     const record = routineGet(doc, params.routineId);
     const schedule = params.schedule ?? record.schedule;
@@ -25,6 +25,12 @@ export async function routineActionUpdate({ harness }: RoutineServiceDeps, { con
     record.scheduleRevision += Number(shouldReschedule);
     record.updatedAt = now;
 
-    return routineCopy(record);
+    const staleTaskId = await routineReplaceTask(tx, record, params.conversationId);
+
+    return { routine: routineCopy(record), staleTaskId };
   }, context);
+
+  await routineAbortStale(harness, replacedTaskId, context);
+
+  return routine;
 }

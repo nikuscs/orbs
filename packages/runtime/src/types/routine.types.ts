@@ -35,8 +35,5 @@ export interface RoutineTaskInput {
 
 export type RoutineTaskState =
   | { phase: 'check' }
-  | { phase: 'wait'; revision: number; until: number | null }
+  | { phase: 'wait'; until: number }
   | { phase: 'deliver'; scheduleRevision: number; occurrence: number; prompt: string; isManual: boolean };
-
-export type RoutineTaskRuntime = PiTypes.TaskRuntime<RoutineTaskInput, RoutineTaskState, null, object>;
-export type RoutineWaitState = Extract<RoutineTaskState, { phase: 'wait' }>;
