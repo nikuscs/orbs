@@ -1,4 +1,4 @@
-import { botBubble, CHAT, chatPairMessages, roomsTimeLabel } from '@repo/client/client';
+import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, chatPairMessages, roomsTimeLabel } from '@repo/client/client';
 import { chatQueries, useChatPendingSync, useChatRoom } from '@repo/client/react';
 import { getLocale, m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
@@ -103,9 +103,10 @@ function ChatPairView({ session, asker, peer, bots, view }: ChatPairViewProps) {
             activity={room.activity}
             approvals={room.approvals}
             bot={peer}
-            draft={messages.find((message) => message.id === CHAT.liveMessageId)}
+            draft={chatActivityMessage(messages)}
             failure={room.failure}
             questions={room.questions}
+            startedAt={chatActivityStartedAt(messages)}
           />
         )}
         keyExtractor={(message) => message.id}

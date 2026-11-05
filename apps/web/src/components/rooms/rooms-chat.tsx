@@ -1,4 +1,4 @@
-import { CHAT, mentionQuote } from '@repo/client/client';
+import { CHAT, chatActivityMessage, chatActivityStartedAt, mentionQuote } from '@repo/client/client';
 import { chatQueries, useChatRoom } from '@repo/client/react';
 import { useChatQuote, useChatRead } from '@repo/client/web';
 import { cn } from '@repo/ui/cn';
@@ -140,9 +140,10 @@ function RoomsChatView({ bot, bots, chat, view }: RoomsChatViewProps) {
               approvals={room.approvals}
               bot={bot}
               bots={bots}
-              draft={draft}
+              draft={chatActivityMessage(messages)}
               failure={room.failure}
               questions={room.questions}
+              startedAt={chatActivityStartedAt(messages)}
             />
           )}
           messages={[...messages, ...room.sending]}

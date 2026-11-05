@@ -40,6 +40,7 @@ export * from './hooks/use-settings-providers';
 export * from './hooks/use-settings-sources';
 export * from './hooks/use-settings-secrets';
 export * from './hooks/use-settings-tools';
+export * from './hooks/use-chat-elapsed';
 export * from './hooks/use-sidebar-sections';
 export * from './services/chat/chat.client';
 export * from './services/query/query.client';

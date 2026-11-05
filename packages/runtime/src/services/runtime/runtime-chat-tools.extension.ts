@@ -1,6 +1,7 @@
 import { defineExtension, defineTool, section } from '@earendil-works/pi-durable';
-import { REACTION } from '@repo/contracts/universal';
+import { GIF, gifToolCall, REACTION } from '@repo/contracts/universal';
 import * as m from '@repo/i18n/messages';
+import { runtimeGifToolParameters } from '../../types/runtime-gif.types';
 import {
   runtimeHistoryToolPage,
   runtimeHistoryToolPageParameters,
@@ -11,8 +12,9 @@ import { runtimeReactionTool, runtimeReactionToolParameters } from '../../types/
 import { runtimeHistoryEntries, runtimeHistoryOutput, runtimeHistoryPage } from './runtime-history.utils';
 import { runtimeReactionSetBot } from './runtime-reaction.utils';
 import { runtimeToolOutput } from './runtime-tool.utils';
+import type { RuntimeChatToolsParams } from '../../types/runtime.types';
 
-export function runtimeChatToolsExtension() {
+export function runtimeChatToolsExtension({ gifs }: RuntimeChatToolsParams) {
   const history = defineTool({
     name: 'bot_history',
     description: m.ui_tool_bot_history_description(),
@@ -45,12 +47,33 @@ export function runtimeChatToolsExtension() {
     },
   });
 
+  const gif = defineTool({
+    name: GIF.toolName,
+    description: m.ui_tool_bot_gif_description(),
+    parameters: runtimeGifToolParameters,
+    replay: 'safe',
+    execute: async (params) => {
+      const { reaction } = gifToolCall.parse(params);
+      const details = await gifs.actions.pick({ reaction });
+
+      if (!details) {
+        return { isError: true, output: [{ type: 'text' as const, text: m.ui_tool_bot_gif_off() }] };
+      }
+
+      return { output: [{ type: 'text' as const, text: m.ui_tool_bot_gif_sent({ reaction }) }], details };
+    },
+  });
+
   return {
     extension: defineExtension({
       name: 'bots.chat-tools',
-      tools: [history, search, react],
-      sections: [section('reactions', () => m.ui_tool_bot_react_prompt())],
+      tools: [history, search, react, gif],
+      sections: [
+        section('reactions', () => m.ui_tool_bot_react_prompt()),
+        section('status', () => m.ui_tool_bot_status_prompt()),
+        section('gifs', async () => ((await gifs.queries.provider()) === 'off' ? undefined : m.ui_tool_bot_gif_prompt())),
+      ],
     }),
-    readOnlyTools: [history, search, react],
+    readOnlyTools: [history, search, react, gif],
   };
 }

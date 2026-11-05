@@ -33,6 +33,8 @@ export interface ChatMetadata {
   authorName: string;
   replyTo: ChatReplyTo | null;
   usage: ChatUsage | null;
+  startedAt?: number;
+  endedAt?: number;
 }
 
 interface ChatDataPartPayloads {
@@ -49,6 +51,20 @@ export type ChatDataParts = Pick<ChatDataPartPayloads, keyof ChatDataPartPayload
 export type ChatMessage = UIMessage<ChatMetadata, ChatDataParts>;
 
 export type ChatPart = ChatMessage['parts'][number];
+
+export interface ChatActivitySteps {
+  steps: number;
+  seconds: number | null;
+}
+
+export type ChatActivityWait = 'approval' | 'question';
+
+export type ChatActivityBot = Pick<UniversalTypes.Bot, 'id' | 'name'>;
+
+export interface ChatActivityDetailParams {
+  draft?: ChatMessage;
+  bots: ChatActivityBot[];
+}
 
 export interface ChatMessagesParams {
   entries: readonly ChatEntry[];

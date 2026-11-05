@@ -3,6 +3,7 @@ import { type } from '@orpc/contract';
 import { z } from 'zod';
 import { attachmentIds } from './attachment.types';
 import { botAvatar } from './bot.types';
+import { gifProvider } from './gif.types';
 import { questionAnswerInput, questionChoices, questionText } from './question.types';
 import { REACTION, reactionEmoji } from './reaction.types';
 import { secretRule } from './secret.types';
@@ -214,6 +215,7 @@ export const conversationSetWhenBusy = z.object({
 export const conversationSettings = z.object({
   whenBusy: conversationWhenBusy,
   hideVerbose: z.boolean(),
+  gifProvider,
 });
 
 export const conversationConfigure = conversationSettings.partial();

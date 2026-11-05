@@ -7,6 +7,7 @@ import { makeAvatarService } from '../services/avatar/avatar.service';
 import { makeBotService } from '../services/bot/bot.service';
 import { makeCollaborationService } from '../services/collaboration/collaboration.service';
 import { makeConversationService } from '../services/conversation/conversation.service';
+import { makeGifService } from '../services/gif/gif.service';
 import { makeInstructionService } from '../services/instruction/instruction.service';
 import { makeLimitService } from '../services/limit/limit.service';
 import { makeLinkService } from '../services/link/link.service';
@@ -48,11 +49,13 @@ export async function makeServices({
   });
 
   const collaboration = makeCollaborationService({ database });
+  const gifs = makeGifService({ settings });
 
   const runtime = makeRuntimeService({
     ...runtimeOptions,
     permissions: tools,
     collaboration,
+    gifs,
   });
 
   try {
@@ -129,6 +132,7 @@ export async function makeServices({
       bots,
       runtime,
       tools,
+      gif: gifs,
       skills: skill,
       instructions: instruction,
       plugins: plugin,
@@ -145,6 +149,7 @@ export async function makeServices({
         skill,
         attachments,
         tools,
+        gifs,
       }),
     };
   } catch (error) {

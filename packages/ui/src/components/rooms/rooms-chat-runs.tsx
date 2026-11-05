@@ -1,3 +1,4 @@
+import { chatActivityWaitingOn } from '@repo/client/client';
 import { m } from '@repo/i18n/client';
 import { Fragment } from 'react';
 import { EventLabel, EventLine, EventList } from '../ai/event';
@@ -16,11 +17,12 @@ interface RoomsChatRunsProps {
   activity: ChatActivity
   failure: string | null
   draft?: ChatMessage
+  startedAt?: number
   approvals: ToolApproval[]
   questions: ConversationQuestion[]
 }
 
-export function RoomsChatRuns({ bot, bots = [], activity, failure, draft, approvals, questions }: RoomsChatRunsProps) {
+export function RoomsChatRuns({ bot, bots = [], activity, failure, draft, startedAt, approvals, questions }: RoomsChatRunsProps) {
   const source = (privateWith: string | null) => {
     const peer = bots.find((item) => item.id === privateWith);
 
@@ -57,12 +59,15 @@ export function RoomsChatRuns({ bot, bots = [], activity, failure, draft, approv
           <RoomsChatFailure bot={bot} detail={failure} />
         </EventList>
       ) : null}
-      <div className="flex h-8 items-center">
+      <div className="flex min-h-8 items-center">
         {activity === 'idle' || activity === 'failed' ? null : (
           <RoomsChatActivity
             activity={activity}
             botName={bot.name}
+            bots={bots}
             draft={draft}
+            startedAt={startedAt}
+            waitingOn={chatActivityWaitingOn(approvals.length, questions.length)}
             waiting={activity === 'queued'}
           />
         )}

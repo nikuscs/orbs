@@ -29,7 +29,7 @@ export interface CoreServicesParams {
   linkResolver: LinkResolverService;
   appScheme: string;
   providers: ServerTypes.ProviderService;
-  runtime: Omit<ServerTypes.RuntimeServiceParams, 'permissions' | 'collaboration'>;
+  runtime: Omit<ServerTypes.RuntimeServiceParams, 'permissions' | 'collaboration' | 'gifs'>;
 }
 
 export interface CoreHandlerDeps {

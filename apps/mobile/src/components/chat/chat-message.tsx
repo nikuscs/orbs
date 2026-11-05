@@ -1,9 +1,11 @@
-import { mentionMarkdown, mentionTarget } from '@repo/client/client';
+import { chatActivitySteps, chatActivityStepsLabel, mentionMarkdown, mentionTarget } from '@repo/client/client';
 import { useChatHideVerbose } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
 import { useRouter } from 'expo-router';
-import { Linking } from 'react-native';
+import { useState } from 'react';
+import { Linking, Pressable } from 'react-native';
 import { match } from 'ts-pattern';
+import { EventLabel, EventLine, EventList } from '@/components/ui/event';
 import { Markdown } from '@/components/ui/markdown';
 import { Message, MessageBubble, MessageQuote } from '@/components/ui/message';
 import { Text } from '@/components/ui/text';
@@ -12,6 +14,7 @@ import { ChatArtifact } from './chat-artifact';
 import { ChatEvents } from './chat-events';
 import { ChatFailure } from './chat-failure';
 import { ChatFiles } from './chat-files';
+import { ChatGif } from './chat-gif';
 import { ChatHtml } from './chat-html';
 import { ChatNotice } from './chat-notice';
 import { ChatReactions } from './chat-reactions';
@@ -62,7 +65,9 @@ export function ChatMessage({
   const name = message.metadata?.authorName ?? bot.name;
   const router = useRouter();
   const { hideVerbose } = useChatHideVerbose();
-  const segments = chatMessageSegments(message, hideVerbose);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const steps = hideVerbose && !isLive ? chatActivitySteps(message) : null;
+  const segments = chatMessageSegments(message, hideVerbose && !isExpanded);
   const reply = message.metadata?.replyTo;
   const firstText = segments.flatMap((segment) => (segment.kind === 'bubbles' ? segment.parts : [])).find((part) => part.kind === 'markdown');
 
@@ -126,6 +131,7 @@ export function ChatMessage({
           session={session}
         />
       ))
+      .with({ kind: 'gif' }, (gif) => <ChatGif gif={gif.gif} key={gif.key} />)
       .with({ kind: 'files' }, (files) => (
         <ChatFiles
           botId={bot.id}
@@ -141,6 +147,19 @@ export function ChatMessage({
   return (
     <>
       {timeLabel}
+      {steps ? (
+        <EventList>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: isExpanded }}
+            onPress={() => setIsExpanded(!isExpanded)}
+          >
+            <EventLine>
+              <EventLabel>{isExpanded ? m.rooms_activity_steps_hide() : chatActivityStepsLabel(steps)}</EventLabel>
+            </EventLine>
+          </Pressable>
+        </EventList>
+      ) : null}
       {segments.map((segment) => match(segment)
         .with({ kind: 'tools' }, (tools) => <ChatTools key={tools.key} parts={tools.parts} />)
         .with({ kind: 'events' }, (events) => (

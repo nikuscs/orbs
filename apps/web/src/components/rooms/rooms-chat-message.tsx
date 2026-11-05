@@ -1,8 +1,8 @@
-import { CHAT, toolBlocks } from '@repo/client/client';
+import { CHAT, chatActivitySteps, chatActivityStepsLabel, toolBlocks } from '@repo/client/client';
 import { useChatHideVerbose } from '@repo/client/react';
 import { useLongPress } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
-import { EventList } from '@repo/ui/ai/event';
+import { EventLine, EventList } from '@repo/ui/ai/event';
 import { Message, MessageClamp, MessageContent, MessageStack } from '@repo/ui/ai/message';
 import { Response } from '@repo/ui/ai/response';
 import { htmlReplyPage } from '@repo/ui/html.utils';
@@ -19,6 +19,7 @@ import { Fragment, useState } from 'react';
 import { match } from 'ts-pattern';
 import { RoomsChatArtifact } from '@/components/rooms/rooms-chat-artifact';
 import { RoomsChatEvents } from '@/components/rooms/rooms-chat-events';
+import { RoomsChatGif } from '@/components/rooms/rooms-chat-gif';
 import { RoomsChatMention } from '@/components/rooms/rooms-chat-mention';
 import { RoomsChatSubagent } from '@/components/rooms/rooms-chat-subagent';
 import type { ChatMessage, ToolBot } from '@repo/client/client';
@@ -62,7 +63,9 @@ export function RoomsChatMessage({
   const entryId = message.metadata?.entryIds[0];
 
   const { hideVerbose } = useChatHideVerbose();
-  const blocks = toolBlocks({ parts: message.parts, hideVerbose });
+  const [isExpanded, setIsExpanded] = useState(false);
+  const steps = hideVerbose && !live ? chatActivitySteps(message) : null;
+  const blocks = toolBlocks({ parts: message.parts, hideVerbose: hideVerbose && !isExpanded });
   const files = message.parts.filter(isFileUIPart);
   const standalone = (block: typeof blocks[number] | undefined) => block?.kind === 'tools' || block?.kind === 'events' || block?.kind === 'reasoning' || block?.kind === 'failure';
   const bubbleBlocks = blocks.filter((block) => !standalone(block));
@@ -126,7 +129,21 @@ export function RoomsChatMessage({
 
   const filesContent = filesView && !actionsBlock && (actions || reactions) ? withActions(filesView) : filesView;
 
-  return segments.map((segment) => {
+  const stepsRow = steps ? (
+    <EventList key={`${message.id}-steps`}>
+      <EventLine>
+        <button
+          aria-expanded={isExpanded}
+          type="button"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          {isExpanded ? m.rooms_activity_steps_hide() : chatActivityStepsLabel(steps)}
+        </button>
+      </EventLine>
+    </EventList>
+  ) : null;
+
+  const rendered = segments.map((segment) => {
     const first = segment.at(0);
 
     const event = match(first)
@@ -165,6 +182,7 @@ export function RoomsChatMessage({
             const content = match(block)
               .with({ kind: 'tools' }, { kind: 'events' }, { kind: 'reasoning' }, { kind: 'failure' }, () => null)
               .with({ kind: 'artifact' }, (artifact) => <RoomsChatArtifact artifact={artifact.artifact} />)
+              .with({ kind: 'gif' }, (gif) => <RoomsChatGif gif={gif.gif} />)
               .with({ kind: 'subagent' }, (subagent) => (
                 <RoomsChatSubagent
                   bot={bot ?? { name }}
@@ -224,4 +242,11 @@ export function RoomsChatMessage({
       </Message>
     );
   });
+
+  return (
+    <>
+      {stepsRow}
+      {rendered}
+    </>
+  );
 }

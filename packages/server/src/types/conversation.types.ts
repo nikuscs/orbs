@@ -1,6 +1,7 @@
 import type { AttachmentService } from '../services/attachment/attachment.service';
 import type { AuthService } from '../services/auth/auth.service';
 import type { BotService } from '../services/bot/bot.service';
+import type { GifService } from '../services/gif/gif.service';
 import type { NotificationService } from '../services/notification/notification.service';
 import type { SecretService } from '../services/secret/secret.service';
 import type { SettingsService } from '../services/settings/settings.service';
@@ -22,6 +23,7 @@ export interface ConversationServiceDeps {
   secrets: SecretService;
   sidebarSections: SidebarSectionService;
   settings: SettingsService;
+  gifs: GifService;
   skill: SkillService;
   tools: ToolService;
 }

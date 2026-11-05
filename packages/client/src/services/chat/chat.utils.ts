@@ -2,6 +2,7 @@ import { ATTACHMENT, attachmentMessage, attachmentSent, ENTRY, entryOwnerNote, e
 import { m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
 import { mentionHref, mentionSubmission } from '../mention/mention.utils';
+import { chatActivityPreamble } from './chat-activity.utils';
 import { CHAT, CHAT_FILE_TYPES } from './chat.constants';
 import type * as ChatTypes from '../../types/chat.types';
 import type * as UniversalTypes from '@repo/contracts/universal';
@@ -281,12 +282,18 @@ function chatAssistantEntry(messages: ChatTypes.ChatMessage[], entry: ChatTypes.
             entryId: hasText ? entry.id : current.metadata.entryId,
             entryIds: [...current.metadata.entryIds, entry.id],
             usage: chatUsageAdd(current.metadata.usage, answer.usage),
+            endedAt: createdAt,
           };
         })
         .otherwise(() => messages.push({
           id: chatMessageId(entry),
           role: 'assistant',
-          metadata: { ...chatMetadata(entry.id, createdAt, bot.id, bot.name), usage: chatUsageAdd(null, answer.usage) },
+          metadata: {
+            ...chatMetadata(entry.id, createdAt, bot.id, bot.name),
+            usage: chatUsageAdd(null, answer.usage),
+            startedAt: last && last.role !== 'assistant' ? last.metadata?.createdAt ?? createdAt : createdAt,
+            endedAt: createdAt,
+          },
           parts,
         }));
     })
@@ -294,8 +301,10 @@ function chatAssistantEntry(messages: ChatTypes.ChatMessage[], entry: ChatTypes.
 }
 
 function chatAssistantParts(content: readonly ChatTypes.ChatContentPart[], state: 'streaming' | 'done'): ChatTypes.ChatPart[] {
-  return content.flatMap((part): ChatTypes.ChatPart[] => match(part)
-    .with({ type: 'text' }, ({ text }) => (text.trim() === '' || replySilent.safeParse(text).success ? [] : [{ type: 'text' as const, text, state }]))
+  return content.flatMap((part, index): ChatTypes.ChatPart[] => match(part)
+    .with({ type: 'text' }, ({ text }) => text.trim() === '' || replySilent.safeParse(text).success ? [] : [chatActivityPreamble(content, index)
+      ? { type: 'reasoning' as const, text: text.trim(), state, providerMetadata: CHAT.preambleMetadata }
+      : { type: 'text' as const, text, state }])
     .with({ type: 'thinking', redacted: P.optional(P.not(true)) }, ({ thinking }) => (thinking.trim() === '' ? [] : [{ type: 'reasoning' as const, text: thinking, state }]))
     .with({ type: 'toolCall', name: REACTION.toolName }, () => [])
     .with({ type: 'toolCall' }, (call) => [{

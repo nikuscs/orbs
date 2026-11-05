@@ -13,6 +13,10 @@ export interface CollaborationBot {
   handle: string;
 }
 
+export interface CollaborationListedBot extends CollaborationBot {
+  summary: string;
+}
+
 export interface CollaborationBotParams {
   botId: string;
 }
@@ -24,7 +28,7 @@ export interface CollaborationRecipientParams extends CollaborationBotParams {
 
 export interface CollaborationPolicy {
   queries: {
-    bots(params: CollaborationBotParams): Promise<CollaborationBot[]>;
+    bots(params: CollaborationBotParams): Promise<CollaborationListedBot[]>;
     recipient(params: CollaborationRecipientParams): Promise<{
       sender: CollaborationBot;
       recipient: CollaborationBot;
