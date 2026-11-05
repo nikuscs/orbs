@@ -7,6 +7,8 @@ import { SettingsGroup } from '@repo/ui/settings/settings-group';
 import { toasty } from '@repo/ui/sonner';
 import { StatusDot } from '@repo/ui/status-dot';
 import { useQuery } from '@tanstack/react-query';
+import { match } from 'ts-pattern';
+import { useDesktopUpdate } from '@/hooks/use-desktop-update';
 import { rpc } from '@/services/rpc/rpc.client';
 import IconCopy from '~icons/lucide/copy';
 
@@ -14,6 +16,7 @@ export function SettingsDesktop() {
   const desktop = window.__electrobunSendToHost;
   const server = useQuery({ ...rpc.server.info.queryOptions(), enabled: Boolean(desktop) });
   const clipboard = useClipboardCopy();
+  const update = useDesktopUpdate();
   let status = m.desktop_connection_checking();
   let variant: 'default' | 'success' | 'destructive' = 'default';
 
@@ -45,6 +48,26 @@ export function SettingsDesktop() {
           {m.desktop_change()}
         </Button>
       </PanelRow>
+      {update ? (
+        <PanelRow>
+          <PanelContent>
+            <span className="text-sm font-medium">{m.desktop_update_version({ version: update.version })}</span>
+            <PanelDescription>{update.status === 'ready' ? m.desktop_update_ready({ name: env.VITE_APP_NAME, version: update.available ?? '' }) : null}</PanelDescription>
+          </PanelContent>
+          <Button
+            disabled={update.status === 'checking' || update.status === 'downloading'}
+            size="sm"
+            type="button"
+            variant="outline"
+            onClick={() => desktop({ update: update.status === 'ready' ? 'apply' : 'check' })}
+          >
+            {match(update.status)
+              .with('ready', () => m.desktop_update_restart_action())
+              .with('downloading', () => m.desktop_update_downloading())
+              .otherwise(() => m.desktop_update_check_action())}
+          </Button>
+        </PanelRow>
+      ) : null}
       {addresses.length > 0 ? (
         <PanelRow className="items-start">
           <div className="flex min-w-0 flex-1 flex-col gap-2">

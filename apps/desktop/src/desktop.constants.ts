@@ -30,6 +30,17 @@ export const DESKTOP = {
   tray: { image: 'views://server/web/dist/client/img/brand/tray.svg', width: 19, height: 16 },
   login: { env: 'DESKTOP_LOGIN', agents: 'Library/LaunchAgents' },
   headless: { env: 'DESKTOP_HEADLESS' },
+  update: {
+    channel: 'stable',
+    firstCheckMs: 30_000,
+    intervalMs: 6 * 60 * 60 * 1000,
+    preparedFile: 'self-extraction/.electrobun-prepared-update.json',
+    event: 'bots-desktop-update',
+    codesign: '/usr/bin/codesign',
+    spctl: '/usr/sbin/spctl',
+    tar: '/usr/bin/tar',
+    teamIdPrefix: 'TeamIdentifier=',
+  },
   notify: {
     frameworks: {
       notifications: '/System/Library/Frameworks/UserNotifications.framework/UserNotifications',

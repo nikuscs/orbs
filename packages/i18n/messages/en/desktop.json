@@ -56,5 +56,16 @@
   "desktop_connection_connected": "Connected",
   "desktop_connection_offline": "Offline",
   "desktop_connection_tailscale": "Tailscale",
-  "desktop_connection_unknown": "Not identified"
+  "desktop_connection_unknown": "Not identified",
+  "desktop_update_check": "Check for Updates…",
+  "desktop_update_checking": "Checking for Updates…",
+  "desktop_update_downloading": "Downloading Update…",
+  "desktop_update_restart": "Restart to Update to {version}",
+  "desktop_update_current": "{name} {version} is the latest version.",
+  "desktop_update_failed": "The update could not be installed. Try again later.",
+  "desktop_update_ready": "{name} {version} is ready.",
+  "desktop_update_restart_action": "Restart to Update",
+  "desktop_update_version": "Version {version}",
+  "desktop_update_check_action": "Check for Updates",
+  "desktop_update_check_failed": "{name} could not check for updates. Try again later."
 }
