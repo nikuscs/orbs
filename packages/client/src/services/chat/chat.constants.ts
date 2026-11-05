@@ -4,6 +4,7 @@ export const CHAT = {
   attachmentScheme: 'attachment:',
   filesPath: '/files',
   posterPath: 'poster',
+  videoFirstFrame: '#t=0.001',
   attachmentUrlKey: 'objectUrl',
   entryPrefix: 'entry-',
   liveMessageId: 'live',

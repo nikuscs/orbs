@@ -75,7 +75,7 @@ export function RoomsChatVideo({ botId, file, fallback }: RoomsChatVideoProps) {
           controls
           playsInline
           preload="metadata"
-          src={src}
+          src={`${src}${CHAT.videoFirstFrame}`}
           onError={() => setIsFailed(true)}
           onPlay={roomsChatMediaSolo}
         >
