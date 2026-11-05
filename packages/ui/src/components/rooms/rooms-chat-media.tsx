@@ -1,4 +1,4 @@
-import { CHAT, chatAttachmentPath, roomsMediaTime } from '@repo/client/client';
+import { CHAT, roomsAttachmentPath, roomsMediaTime } from '@repo/client/client';
 import { useChatAttachmentUrl } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { useRef, useState } from 'react';
@@ -42,7 +42,7 @@ export function RoomsChatVideo({ botId, file, fallback }: RoomsChatVideoProps) {
   const [isFailed, setIsFailed] = useState(false);
   const [hasPoster, setHasPoster] = useState(file.url.startsWith(CHAT.attachmentScheme));
   const name = file.filename ?? '';
-  const src = chatAttachmentPath(botId, file.url);
+  const src = roomsAttachmentPath(botId, file.url);
 
   if (isFailed && !hasPoster) {
     return fallback;
@@ -60,7 +60,7 @@ export function RoomsChatVideo({ botId, file, fallback }: RoomsChatVideoProps) {
           <img
             alt=""
             className="absolute inset-0 size-full object-cover"
-            src={chatAttachmentPath(botId, file.url, true)}
+            src={roomsAttachmentPath(botId, file.url, true)}
             onError={() => setHasPoster(false)}
           />
           <span className="relative flex-center size-11 rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover/play:scale-105 group-focus-visible/play:ring-2 group-focus-visible/play:ring-ring motion-reduce:transition-none">
