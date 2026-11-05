@@ -1,4 +1,4 @@
-import { connectionAddressesMerge, connectionAddressPick, connectionRpcUrl, makeHttpClient } from '@repo/client/client';
+import { CHAT, connectionAddressesMerge, connectionAddressPick, connectionRpcUrl, makeHttpClient } from '@repo/client/client';
 import { connectionStored, SERVER_PROTOCOL } from '@repo/contracts/universal';
 import { Errors } from '@repo/errors/universal';
 import * as SecureStore from 'expo-secure-store';
@@ -61,7 +61,7 @@ export function connectionAddressesLearn({ connection, addresses }: ConnectionTy
 
 export function connectionFileSource(session: Pick<RpcSession, 'connection' | 'address'>, { botId, attachmentId }: ConnectionTypes.ConnectionFileParams): ImageURISource {
   return {
-    uri: new URL(`/files/${encodeURIComponent(botId)}/${encodeURIComponent(attachmentId)}`, session.address().url).toString(),
+    uri: new URL(`${CHAT.filesPath}/${encodeURIComponent(botId)}/${encodeURIComponent(attachmentId)}`, session.address().url).toString(),
     headers: {
       authorization: `Bearer ${session.connection.token}`,
       [SERVER_PROTOCOL.versionHeader]: String(SERVER_PROTOCOL.version),

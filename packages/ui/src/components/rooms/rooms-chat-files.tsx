@@ -132,7 +132,7 @@ export function RoomsChatFiles({ botId, files, onOpen }: RoomsChatFilesProps) {
     <div className="flex flex-col items-end gap-1 group-data-[role=assistant]:items-start">
       {roomsFileRows(files).map((row) => match(row)
         .with({ kind: 'images' }, (images) => <RoomsChatGallery botId={botId} files={images.files} hidden={images.hidden} key={row.key} onOpen={onOpen} />)
-        .with({ kind: 'video' }, ({ file }) => <RoomsChatVideo botId={botId} file={file} key={row.key} />)
+        .with({ kind: 'video' }, ({ file }) => <RoomsChatVideo botId={botId} fallback={<RoomsChatFile botId={botId} file={file} />} file={file} key={row.key} />)
         .with({ kind: 'audio' }, ({ file }) => <RoomsChatAudio botId={botId} file={file} key={row.key} />)
         .with({ kind: 'file' }, ({ file }) => <RoomsChatFile botId={botId} file={file} key={row.key} />)
         .exhaustive())}

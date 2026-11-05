@@ -23,8 +23,6 @@ export default {
       notarize: false,
       createDmg: false,
       icons: 'icon.icon',
-      bundleCEF: true,
-      defaultRenderer: 'cef',
     },
   },
   scripts: { postBuild: '../../scripts/desktop.ts' },

@@ -22,6 +22,10 @@ export async function attachmentStore({ runtime, storage }: AttachmentServiceDep
     file,
   });
 
+  if (attachment.mediaType.startsWith('video/')) {
+    await storage.actions.poster({ ...target, attachment });
+  }
+
   try {
     await runtime.actions.addAttachment({ ...target, attachment });
     return attachment;

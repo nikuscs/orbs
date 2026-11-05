@@ -27,7 +27,7 @@ const headless = process.env[DESKTOP.headless.env] === '1';
 const atLogin = process.env[DESKTOP.login.env] === '1';
 // Electrobun always enables the WebKit inspector, so release builds hide the native menu that offers "Inspect Element".
 const nativeMenuBlock = process.env.DESKTOP_WEB_DEV ? '' : "window.addEventListener('contextmenu', (event) => event.preventDefault());";
-// CEF never settles navigator.clipboard.writeText, so copies always go through the host.
+// The webview has no navigator.clipboard on plain-http remote origins, so copies always go through the host.
 const clipboardBridge = "{ const copy = (text) => { window.__electrobunSendToHost({ copy: String(text) }); return Promise.resolve(); }; if (navigator.clipboard) navigator.clipboard.writeText = copy; else Object.defineProperty(navigator, 'clipboard', { value: { writeText: copy } }); }";
 // Electrobun drags the window from JS, so macOS never sees a title bar double-click; forward it to the host.
 // This Mac's own daemon pairs the app without a code: the connect page asks the host for a one-time link.

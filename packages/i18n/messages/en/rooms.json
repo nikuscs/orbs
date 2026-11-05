@@ -175,6 +175,8 @@
   "rooms_media_pause": "Pause {name}",
   "rooms_media_seek": "Position in {name}",
   "rooms_media_unavailable": "{name} could not be loaded.",
+  "rooms_media_unplayable": "{name} can't play here.",
+  "rooms_media_download": "Download {name}",
   "rooms_media_viewer_count": "{index} of {total}",
   "rooms_media_viewer_from": "From {name} · {time}",
   "rooms_media_viewer_previous": "Previous image",

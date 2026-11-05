@@ -6,7 +6,7 @@ import { match } from 'ts-pattern';
 import { MessageFile, MessageImage, messageOutline } from '@/components/ui/message';
 import { Text } from '@/components/ui/text';
 import { cn } from '@/lib/cn';
-import { chatFileSource } from '@/services/chat/chat.utils';
+import { chatFileSource, chatPosterSource } from '@/services/chat/chat.utils';
 import { ChatAudio } from './chat-audio';
 import { ChatVideo } from './chat-video';
 import type { ChatMediaRouteParams } from '@/types/chat.types';
@@ -132,6 +132,7 @@ export function ChatFiles({ session, botId, files, entryId }: ChatFilesProps) {
         <ChatVideo
           key={row.key}
           name={file.filename ?? ''}
+          poster={chatPosterSource(session, botId, file)}
           source={chatFileSource(session, botId, file)}
         />
       ))

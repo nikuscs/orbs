@@ -1,5 +1,6 @@
 import { m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
+import { CHAT } from '../chat/chat.constants';
 import { toolInputText } from '../tool/tool.utils';
 import { ROOMS } from './rooms.constants';
 import type { ChatMessage } from '../../types/chat.types';
@@ -187,4 +188,14 @@ export function roomsMediaTime(seconds: number): string {
   const whole = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
 
   return `${String(Math.floor(whole / 60))}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+export function roomsAttachmentPath(botId: string, url: string, isPoster = false): string {
+  if (!url.startsWith(CHAT.attachmentScheme)) {
+    return url;
+  }
+
+  const path = `${CHAT.filesPath}/${encodeURIComponent(botId)}/${encodeURIComponent(url.slice(CHAT.attachmentScheme.length))}`;
+
+  return isPoster ? `${path}/${CHAT.posterPath}` : path;
 }
