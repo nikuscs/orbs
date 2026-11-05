@@ -249,7 +249,7 @@ function coreNativeRpc(services: CoreTypes.CoreServices, isLocal: boolean) {
       interceptors,
       errorStatusMap,
     }),
-    files: new OpenAPIHandler({ download: router.attachments.download }, {
+    files: new OpenAPIHandler({ download: router.attachments.download, poster: router.attachments.poster }, {
       plugins: [...plugins, cors],
       interceptors,
       errorStatusMap,

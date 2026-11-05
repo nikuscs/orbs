@@ -1,6 +1,8 @@
 import { attachmentStorageActionClear } from './attachment-storage-action.clear';
+import { attachmentStorageActionPoster } from './attachment-storage-action.poster';
 import { attachmentStorageActionRemove } from './attachment-storage-action.remove';
 import { attachmentStorageActionWrite } from './attachment-storage-action.write';
+import { attachmentStorageQueryPoster } from './attachment-storage-query.poster';
 import { attachmentStorageQueryRead } from './attachment-storage-query.read';
 import { attachmentStorageQuerySource } from './attachment-storage-query.source';
 import { attachmentStorageQueryStale } from './attachment-storage-query.stale';
@@ -12,12 +14,14 @@ export function makeAttachmentStorageService(deps: AttachmentStorageTypes.Attach
   return {
     actions: {
       write: (params: AttachmentStorageTypes.AttachmentStorageWriteParams) => attachmentStorageActionWrite(deps, params),
+      poster: (params: AttachmentStorageTypes.AttachmentStorageParams) => attachmentStorageActionPoster(deps, params),
       remove: (params: AttachmentStorageTypes.AttachmentStorageParams) => attachmentStorageActionRemove(deps, params),
       clear: (params: BotGetInput) => attachmentStorageActionClear(deps, params),
     },
     queries: {
       stale: (params: AttachmentStorageTypes.AttachmentStorageTarget) => attachmentStorageQueryStale(deps, params),
       read: (params: AttachmentStorageTypes.AttachmentStorageReadParams) => attachmentStorageQueryRead(deps, params),
+      poster: (params: AttachmentStorageTypes.AttachmentStorageParams) => attachmentStorageQueryPoster(deps, params),
       source: (params: AttachmentSendParams) => attachmentStorageQuerySource(deps, params),
     },
   };

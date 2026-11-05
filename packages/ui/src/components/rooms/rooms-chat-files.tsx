@@ -9,7 +9,7 @@ import { cn } from '../../lib/cn';
 import { messageSurface } from '../ai/message';
 import { RoomsChatAudio, RoomsChatVideo } from './rooms-chat-media';
 import type { RoomsFilePart } from '@repo/client/client';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 const ROOMS_CHAT_FILES = { viewMargin: '200px' } as const;
 
@@ -106,18 +106,18 @@ function RoomsChatFile({ botId, file }: { botId: string, file: RoomsFilePart }) 
   );
 }
 
-interface RoomsChatFilesProps extends Pick<ComponentProps<typeof RoomsChatVideo>, 'onPlayElsewhere'> {
+interface RoomsChatFilesProps {
   botId: string
   files: RoomsFilePart[]
   onOpen?: (file: RoomsFilePart) => void
 }
 
-export function RoomsChatFiles({ botId, files, onOpen, onPlayElsewhere }: RoomsChatFilesProps) {
+export function RoomsChatFiles({ botId, files, onOpen }: RoomsChatFilesProps) {
   return (
     <div className="flex flex-col items-end gap-1 group-data-[role=assistant]:items-start">
       {roomsFileRows(files).map((row) => match(row)
         .with({ kind: 'images' }, (images) => <RoomsChatGallery botId={botId} files={images.files} hidden={images.hidden} key={row.key} onOpen={onOpen} />)
-        .with({ kind: 'video' }, ({ file }) => <RoomsChatVideo botId={botId} file={file} key={row.key} onPlayElsewhere={onPlayElsewhere} />)
+        .with({ kind: 'video' }, ({ file }) => <RoomsChatVideo botId={botId} fallback={<RoomsChatFile botId={botId} file={file} />} file={file} key={row.key} />)
         .with({ kind: 'audio' }, ({ file }) => <RoomsChatAudio botId={botId} file={file} key={row.key} />)
         .with({ kind: 'file' }, ({ file }) => <RoomsChatFile botId={botId} file={file} key={row.key} />)
         .exhaustive())}

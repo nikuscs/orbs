@@ -105,6 +105,16 @@ export function chatFileSource(session: RpcSession, botId: string, file: RoomsFi
     : { uri: file.url };
 }
 
+export function chatPosterSource(session: RpcSession, botId: string, file: RoomsFilePart): ImageURISource | undefined {
+  if (!file.url.startsWith(CHAT.attachmentScheme)) {
+    return undefined;
+  }
+
+  const source = connectionFileSource(session, { botId, attachmentId: file.url.slice(CHAT.attachmentScheme.length) });
+
+  return { ...source, uri: `${source.uri ?? ''}/${CHAT.posterPath}` };
+}
+
 export function chatPlaybackStart(player: ChatTypes.ChatPlayback) {
   DeviceEventEmitter.emit(CHAT_MEDIA.playbackEvent, player);
 }

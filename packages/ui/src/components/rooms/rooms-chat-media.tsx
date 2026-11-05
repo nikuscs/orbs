@@ -1,26 +1,21 @@
-import { CHAT, roomsMediaTime } from '@repo/client/client';
+import { CHAT, chatAttachmentPath, roomsMediaTime } from '@repo/client/client';
 import { useChatAttachmentUrl } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { useRef, useState } from 'react';
 import { match } from 'ts-pattern';
+import IconLucideDownload from '~icons/lucide/download';
 import IconLucideLoaderCircle from '~icons/lucide/loader-circle';
 import IconLucidePause from '~icons/lucide/pause';
 import IconLucidePlay from '~icons/lucide/play';
 import { cn } from '../../lib/cn';
-import { ROOMS_CHAT_MEDIA } from '../../services/rooms/rooms.constants';
 import { messageSurface } from '../ai/message';
 import { Button } from '../button';
-import type { RoomsMediaSource } from '../../types/rooms.types';
 import type { RoomsFilePart } from '@repo/client/client';
-import type { SyntheticEvent } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 
 interface RoomsChatMediaProps {
   botId: string
   file: RoomsFilePart
-}
-
-interface RoomsChatVideoProps extends RoomsChatMediaProps {
-  onPlayElsewhere?: (media: RoomsMediaSource) => Promise<void>
 }
 
 function roomsChatMediaSolo(event: SyntheticEvent<HTMLMediaElement>) {
@@ -39,69 +34,53 @@ function RoomsChatMediaProblem({ name }: { name: string }) {
   );
 }
 
-export function RoomsChatVideo({ botId, file, onPlayElsewhere }: RoomsChatVideoProps) {
-  const [isRequested, setIsRequested] = useState(false);
+interface RoomsChatVideoProps extends RoomsChatMediaProps {
+  fallback: ReactNode
+}
+
+export function RoomsChatVideo({ botId, file, fallback }: RoomsChatVideoProps) {
   const [isFailed, setIsFailed] = useState(false);
-  const [isOpening, setIsOpening] = useState(false);
-  const loaded = useChatAttachmentUrl(botId, file.url, isRequested);
-  const url = isRequested ? loaded : undefined;
+  const [hasPoster, setHasPoster] = useState(file.url.startsWith(CHAT.attachmentScheme));
   const name = file.filename ?? '';
-  const attachmentId = file.url.startsWith(CHAT.attachmentScheme) ? file.url.slice(CHAT.attachmentScheme.length) : undefined;
+  const src = chatAttachmentPath(botId, file.url);
 
-  if (onPlayElsewhere && attachmentId && !isFailed && !ROOMS_CHAT_MEDIA.inlineVideoTypes.includes(file.mediaType)) {
-    return (
-      <button
-        className={cn(messageSurface, 'flex h-8 max-w-full cursor-pointer items-center gap-1.5 rounded-full px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-progress')}
-        disabled={isOpening}
-        type="button"
-        onClick={() => {
-          setIsOpening(true);
-          onPlayElsewhere({
-            botId,
-            attachmentId,
-            name,
-          }).catch(() => setIsFailed(true)).finally(() => setIsOpening(false));
-        }}
-      >
-        {isOpening ? <IconLucideLoaderCircle className="size-4 shrink-0 animate-spin text-muted-foreground motion-reduce:animate-none" /> : <IconLucidePlay className="size-4 shrink-0 fill-current text-muted-foreground" />}
-        <span className="max-w-56 truncate">{name}</span>
-        <span className="shrink-0 text-muted-foreground">{m.rooms_media_open_player()}</span>
-      </button>
-    );
-  }
-
-  if (isFailed) {
-    return <RoomsChatMediaProblem name={name} />;
+  if (isFailed && !hasPoster) {
+    return fallback;
   }
 
   return (
     <div className="relative aspect-video w-72 max-w-full overflow-hidden rounded-3xl border border-input bg-black">
-      {url ? (
+      {isFailed ? (
+        <a
+          aria-label={m.rooms_media_download({ name })}
+          className="group/play absolute inset-0 flex-center outline-none"
+          download={name}
+          href={src}
+        >
+          <img
+            alt=""
+            className="absolute inset-0 size-full object-cover"
+            src={chatAttachmentPath(botId, file.url, true)}
+            onError={() => setHasPoster(false)}
+          />
+          <span className="relative flex-center size-11 rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover/play:scale-105 group-focus-visible/play:ring-2 group-focus-visible/play:ring-ring motion-reduce:transition-none">
+            <IconLucideDownload className="size-5" />
+          </span>
+          <span className="absolute inset-x-4 bottom-3 truncate text-left text-xs text-white/80">{m.rooms_media_unplayable({ name })}</span>
+        </a>
+      ) : (
         <video
           aria-label={name}
-          autoPlay
           className="size-full object-contain"
           controls
           playsInline
-          src={url}
+          preload="metadata"
+          src={src}
           onError={() => setIsFailed(true)}
           onPlay={roomsChatMediaSolo}
         >
           <track kind="captions" />
         </video>
-      ) : (
-        <button
-          aria-label={m.rooms_media_play({ name })}
-          className="group/play absolute inset-0 flex-center cursor-pointer outline-none disabled:cursor-progress"
-          disabled={isRequested}
-          type="button"
-          onClick={() => setIsRequested(true)}
-        >
-          <span className="flex-center size-11 rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover/play:scale-105 group-focus-visible/play:ring-2 group-focus-visible/play:ring-ring motion-reduce:transition-none">
-            {isRequested ? <IconLucideLoaderCircle className="size-5 animate-spin motion-reduce:animate-none" /> : <IconLucidePlay className="ml-0.5 size-5 fill-current" />}
-          </span>
-          <span className="absolute inset-x-4 bottom-3 truncate text-left text-xs text-white/80">{name}</span>
-        </button>
       )}
     </div>
   );

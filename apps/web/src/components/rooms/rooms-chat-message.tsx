@@ -13,7 +13,7 @@ import { RoomsChatFailure } from '@repo/ui/rooms/rooms-chat-failure';
 import { RoomsChatFiles } from '@repo/ui/rooms/rooms-chat-files';
 import { RoomsChatReasoning } from '@repo/ui/rooms/rooms-chat-reasoning';
 import { RoomsChatTools } from '@repo/ui/rooms/rooms-chat-tools';
-import { useHydrated, useNavigate, useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { isFileUIPart } from 'ai';
 import { Fragment, useState } from 'react';
 import { match } from 'ts-pattern';
@@ -21,7 +21,6 @@ import { RoomsChatArtifact } from '@/components/rooms/rooms-chat-artifact';
 import { RoomsChatEvents } from '@/components/rooms/rooms-chat-events';
 import { RoomsChatMention } from '@/components/rooms/rooms-chat-mention';
 import { RoomsChatSubagent } from '@/components/rooms/rooms-chat-subagent';
-import { roomsMediaPlayElsewhere } from '@/services/rooms/rooms.client';
 import type { ChatMessage, ToolBot } from '@repo/client/client';
 import type * as ReactTypes from 'react';
 
@@ -58,7 +57,6 @@ export function RoomsChatMessage({
   const reply = message.metadata?.replyTo;
   const [sheet, setSheet] = useState(false);
   const press = useLongPress(() => setSheet(true));
-  const hydrated = useHydrated();
   const navigate = useNavigate();
   const { handle } = useParams({ from: '/_chat/rooms/direct/$handle', shouldThrow: false }) ?? {};
   const entryId = message.metadata?.entryIds[0];
@@ -123,7 +121,6 @@ export function RoomsChatMessage({
           });
         }
       } : undefined}
-      onPlayElsewhere={hydrated ? roomsMediaPlayElsewhere() : undefined}
     />
   ) : null;
 

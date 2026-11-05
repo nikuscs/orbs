@@ -451,3 +451,13 @@ export function chatContextView({ contextWindow, estimatedTokens }: UniversalTyp
       .otherwise(() => 'muted' as const),
   };
 }
+
+export function chatAttachmentPath(botId: string, url: string, isPoster = false): string {
+  if (!url.startsWith(CHAT.attachmentScheme)) {
+    return url;
+  }
+
+  const path = `${CHAT.filesPath}/${encodeURIComponent(botId)}/${encodeURIComponent(url.slice(CHAT.attachmentScheme.length))}`;
+
+  return isPoster ? `${path}/${CHAT.posterPath}` : path;
+}

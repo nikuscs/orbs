@@ -2,6 +2,8 @@ export const CHAT = {
   contextWarningPercent: 60,
   contextCriticalPercent: 80,
   attachmentScheme: 'attachment:',
+  filesPath: '/files',
+  posterPath: 'poster',
   attachmentUrlKey: 'objectUrl',
   entryPrefix: 'entry-',
   liveMessageId: 'live',
