@@ -60,6 +60,7 @@
   "mobile_chat_empty": "Say hello to {name} 👋",
   "mobile_chat_attach_photos": "Photo",
   "mobile_chat_attach_camera": "Take Photo",
+  "mobile_chat_attach_camera_denied": "Camera access is off. Turn it on in Settings to take a photo.",
   "mobile_chat_attach_files": "Choose File",
   "mobile_chat_attach_failed": "Couldn’t upload {name}. Tap it to try again.",
   "mobile_toast_close": "Close",

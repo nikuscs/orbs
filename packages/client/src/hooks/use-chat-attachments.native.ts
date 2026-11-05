@@ -39,7 +39,16 @@ export function useChatAttachmentsNative({ botId, onProblem }: ChatAttachmentsPl
     preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
   }));
 
-  const takePhoto = async () => addPhotos(await ImagePicker.launchCameraAsync({ mediaTypes: ['images'] }));
+  const takePhoto = async () => {
+    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!granted) {
+      onProblem(m.mobile_chat_attach_camera_denied());
+      return;
+    }
+
+    addPhotos(await ImagePicker.launchCameraAsync({ mediaTypes: ['images'] }));
+  };
 
   const pickFiles = async () => {
     const result = await DocumentPicker.getDocumentAsync({ type: [...ATTACHMENT.mediaTypes], multiple: true });
