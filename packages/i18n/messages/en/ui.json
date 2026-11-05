@@ -31,6 +31,8 @@
   "ui_tool_bot_todo_remove_description": "Remove one of your todos by ID. Prefer marking a finished todo done; remove only when it is no longer needed.",
   "ui_todo_prompt": "Open todos you keep with the owner, by ID. Mark one done with bot_todo_update as soon as it is finished. Bring them up only when relevant, when asked, or when a routine asks for a review; do not list them in every reply.",
   "ui_todo_prompt_more": "…and {count} more; use bot_todo_list to see them.",
+  "ui_note_prompt": "Your notes. They are shared by all your conversations, including private chats with other bots and routine runs. Trust them over older messages in this conversation that contradict them.",
+  "ui_tool_bot_note_description": "Save, replace or remove one of your shared notes. Notes appear in every one of your conversations, including private chats with other bots and routine runs. Save lasting facts you will need elsewhere: how to reach a system or service, the owner's standing permissions and preferences, and where things are kept. Use a short key; saving an existing key replaces it. Do not save task progress, secrets or personal data you do not need. Keep each note under 500 characters; at most 30 notes.",
   "ui_tool_bot_get_description": "Get a bot configuration by its bot ID.",
   "ui_tool_bot_create_description": "Create a bot using an available model. This changes saved configuration; list bots before retrying an interrupted call.",
   "ui_tool_bot_update_description": "Update a bot configuration. Omitted fields stay unchanged. Get the bot before retrying an interrupted call.",
