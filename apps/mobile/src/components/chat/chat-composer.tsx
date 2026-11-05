@@ -5,7 +5,7 @@ import { m } from '@repo/i18n/client';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowUp, Plus, Square } from 'lucide-react-native';
 import { useRef, useState } from 'react';
-import { View } from 'react-native';
+import { Alert, Linking, View } from 'react-native';
 import { match } from 'ts-pattern';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -67,7 +67,16 @@ export function ChatComposer({
   const quoteKey = quote ? `${quote.href} ${quote.label}` : undefined;
   const [quotedKey, setQuotedKey] = useState<string>();
   const [prefilled, setPrefilled] = useState<string>();
-  const files = useChatAttachmentsNative({ botId: bot.id, onProblem: (message) => toast.show({ message }) });
+
+  const files = useChatAttachmentsNative({
+    botId: bot.id,
+    onProblem: (message) => toast.show({ message }),
+    onCameraBlocked: () => Alert.alert(m.mobile_chat_attach_camera_blocked_title(), m.mobile_chat_attach_camera_blocked_description(), [
+      { text: m.ui_cancel(), style: 'cancel' },
+      { text: m.mobile_scan_permission_settings(), onPress: () => void Linking.openSettings() },
+    ]),
+  });
+
   const field = useRef<TextInputInstance>(null);
   const replyToEntryId = replyTo?.metadata?.entryId;
 
