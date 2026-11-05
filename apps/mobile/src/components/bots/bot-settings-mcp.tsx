@@ -104,6 +104,46 @@ export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
           </Item>
         ))}
       </ItemGroup>
+      <View className="gap-1.5">
+        <Text
+          className="px-3"
+          tone="muted"
+          variant="small"
+        >
+          {m.bots_mcp_available()}
+        </Text>
+        <ItemGroup>
+          {mcp.presets.map((preset) => (
+            <Item key={preset.name}>
+              <ItemMedia className="mt-1 self-start">
+                <Icon icon={Server} tone="muted" />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle numberOfLines={1}>{preset.title}</ItemTitle>
+                <ItemDescription numberOfLines={0}>{preset.description}</ItemDescription>
+                <Button
+                  accessibilityRole="link"
+                  className="self-start"
+                  size="inline"
+                  variant="link-muted"
+                  onPress={() => void Linking.openURL(preset.documentation)}
+                >
+                  {m.bots_mcp_docs()}
+                </Button>
+              </ItemContent>
+              <Button
+                disabled={preset.isAdded || mcp.adding !== null}
+                loading={mcp.adding === preset.name}
+                size="sm"
+                variant={preset.isAdded ? 'secondary' : 'outline'}
+                onPress={() => mcp.add(preset)}
+              >
+                {preset.isAdded ? m.bots_mcp_added() : m.bots_mcp_add()}
+              </Button>
+            </Item>
+          ))}
+        </ItemGroup>
+      </View>
       {mcp.pending ? (
         <View className="gap-2">
           <Text variant="label">{m.bots_mcp_paste_label()}</Text>

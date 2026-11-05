@@ -3,6 +3,7 @@ export const TOOL = {
   approvalRulesSetting: 'tools.approvalRules',
   approvalTimeoutSetting: 'tools.approvalTimeoutMinutes',
   alwaysAllowSettingPrefix: 'tools.alwaysAllow.',
+  askFirstTools: ['bot_mcp_add'],
   judgeTimeoutMs: 5000,
   minuteMs: 60_000,
   judgeThreshold: 0.9,

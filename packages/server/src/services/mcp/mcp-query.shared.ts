@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { mcpQueryConfig } from './mcp-query.config';
 import { mcpQuerySettings } from './mcp-query.settings';
 import type { McpBotParams, McpServiceDeps } from '../../types/mcp.types';
@@ -14,6 +15,6 @@ export async function mcpQueryShared(deps: McpServiceDeps, { bot }: McpBotParams
   });
 
   return config.servers
-    .filter((entry) => !entry.isBotLocal)
+    .filter((entry) => !entry.isBotLocal && !entry.source.endsWith(join('mcp', `${bot.id}.json`)))
     .map((entry) => ({ name: entry.name, source: entry.source }));
 }

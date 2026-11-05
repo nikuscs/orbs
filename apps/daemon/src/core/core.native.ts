@@ -194,6 +194,7 @@ async function coreNativeServices(resources: AsyncDisposableStack): Promise<Core
       settings,
       clients: mcpClients,
       credentials,
+      secrets,
     }),
     mcpAuth,
     network: makeServerNetworkService({ host: env.DAEMON_HOST, port: env.DAEMON_PORT }),

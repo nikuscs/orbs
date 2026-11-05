@@ -61,6 +61,8 @@ export function expandValidationError(key: string, params: Record<string, string
     .with('validation_file_size', () => m.validation_file_size())
     .with('validation_file_type', () => m.validation_file_type())
     .with('validation_artifact_spec', () => m.validation_artifact_spec())
+    .with('validation_mcp_secret_missing', () => m.validation_mcp_secret_missing())
+    .with('validation_mcp_secret_host', () => m.validation_mcp_secret_host())
     .with('validation_routine_schedule', () => m.validation_routine_schedule())
     .otherwise(() => key);
 }
