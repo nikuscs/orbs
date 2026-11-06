@@ -96,6 +96,11 @@ export function desktopUpdateCheck(): Promise<DesktopUpdateState> {
 
 /** Only packaged stable builds update; dev and canary builds keep their own version. */
 export async function desktopUpdateStart(onChange: (next: DesktopUpdateState) => void): Promise<boolean> {
+  // Releases ship only signed macOS builds, and verification needs codesign and Gatekeeper.
+  if (DESKTOP.platform !== 'macos') {
+    return false;
+  }
+
   const { channel, version } = await Updater.getLocalInfo();
 
   if (channel !== DESKTOP.update.channel) {

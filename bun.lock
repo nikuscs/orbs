@@ -58,6 +58,7 @@
       "dependencies": {
         "@repo/env": "workspace:*",
         "@repo/i18n": "workspace:*",
+        "ts-pattern": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {

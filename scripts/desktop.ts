@@ -6,6 +6,7 @@ const root = path.resolve(import.meta.dir, '..');
 const desktop = path.join(root, 'apps/desktop');
 const name = process.env.APP_NAME ?? 'Orbs';
 const entitlements = ['allow-jit', 'allow-unsigned-executable-memory', 'disable-library-validation'];
+const isDarwin = process.platform === 'darwin';
 
 function fail(message: string): never {
   console.error(message);
@@ -80,6 +81,10 @@ async function bundle() {
 }
 
 function plist() {
+  if (!isDarwin) {
+    return;
+  }
+
   const { ELECTROBUN_BUILD_DIR: buildDir, ELECTROBUN_APP_NAME: appName } = process.env;
 
   if (!buildDir || !appName) {
@@ -116,7 +121,7 @@ function release() {
   }
 
   console.log(`Building ${name} ${version}`);
-  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:macos'], { ...process.env, DESKTOP_VERSION: version });
+  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:app'], { ...process.env, DESKTOP_VERSION: version });
 
   const temp = mkdtempSync(path.join(tmpdir(), 'desktop-release-'));
   const resources = path.join(app, 'Contents/Resources');

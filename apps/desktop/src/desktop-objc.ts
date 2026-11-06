@@ -1,24 +1,34 @@
 import { dlopen, FFIType, JSCallback, ptr } from 'bun:ffi';
+import { DESKTOP } from './desktop.constants';
 import type { Pointer } from 'bun:ffi';
 
+const isMacos = DESKTOP.platform === 'macos';
 const objcPath = '/usr/lib/libobjc.A.dylib';
 
 function desktopObjcSend(args: FFIType[]): (...values: unknown[]) => Pointer | null {
+  if (!isMacos) {
+    return () => null;
+  }
+
   const send = dlopen(objcPath, { objc_msgSend: { args: [FFIType.ptr, FFIType.ptr, ...args], returns: FFIType.ptr } }).symbols.objc_msgSend;
 
   // SAFETY: a `ptr` return is an object pointer or null; Bun types it with `bigint` only for the generic FFI signature.
   return (...values) => send(...values) as Pointer | null;
 }
 
-const objc = dlopen(objcPath, {
-  objc_getClass: { args: [FFIType.ptr], returns: FFIType.ptr },
-  sel_registerName: { args: [FFIType.ptr], returns: FFIType.ptr },
-});
+const objc = isMacos
+  ? dlopen(objcPath, {
+    objc_getClass: { args: [FFIType.ptr], returns: FFIType.ptr },
+    sel_registerName: { args: [FFIType.ptr], returns: FFIType.ptr },
+  })
+  : null;
 
-const system = dlopen('/usr/lib/libSystem.B.dylib', {
-  dlopen: { args: [FFIType.ptr, FFIType.i32], returns: FFIType.ptr },
-  dlsym: { args: [FFIType.ptr, FFIType.ptr], returns: FFIType.ptr },
-});
+const system = isMacos
+  ? dlopen('/usr/lib/libSystem.B.dylib', {
+    dlopen: { args: [FFIType.ptr, FFIType.i32], returns: FFIType.ptr },
+    dlsym: { args: [FFIType.ptr, FFIType.ptr], returns: FFIType.ptr },
+  })
+  : null;
 
 export const desktopSend = {
   none: desktopObjcSend([]),
@@ -36,7 +46,11 @@ export const desktopSend = {
 };
 
 const BLOCK_IS_GLOBAL = 1 << 28;
-const blockIsa = system.symbols.dlsym(system.symbols.dlopen(null, 0), desktopCString('_NSConcreteGlobalBlock'));
+
+const blockIsa = system
+  ? system.symbols.dlsym(system.symbols.dlopen(null, 0), desktopCString('_NSConcreteGlobalBlock'))
+  : null;
+
 const blockDescriptor = Buffer.alloc(16);
 const blocksAlive = new Map<Buffer, JSCallback>();
 
@@ -47,11 +61,11 @@ function desktopCString(text: string): Buffer {
 }
 
 export function desktopSelector(name: string) {
-  return objc.symbols.sel_registerName(desktopCString(name));
+  return objc ? objc.symbols.sel_registerName(desktopCString(name)) : null;
 }
 
 export function desktopClass(name: string) {
-  return objc.symbols.objc_getClass(desktopCString(name));
+  return objc ? objc.symbols.objc_getClass(desktopCString(name)) : null;
 }
 
 export function desktopString(text: string) {
@@ -63,7 +77,9 @@ export function desktopNew(name: string) {
 }
 
 export function desktopFramework(path: string): void {
-  system.symbols.dlopen(desktopCString(path), 1);
+  if (system) {
+    system.symbols.dlopen(desktopCString(path), 1);
+  }
 }
 
 /** An Objective-C block that calls back into JS once, for completion handlers: `args` follow the block's own pointer. */
