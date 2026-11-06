@@ -237,3 +237,7 @@ export interface ChatAttachmentsPlatformParams {
   botId: string;
   onProblem: (message: string) => void;
 }
+
+export interface ChatAttachmentsNativeParams extends ChatAttachmentsPlatformParams {
+  onCameraBlocked: () => void;
+}

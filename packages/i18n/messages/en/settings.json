@@ -7,6 +7,7 @@
   "settings_desktop": "Desktop app",
   "settings_general": "General",
   "settings_general_verbose": "Hide tool calls and thinking",
+  "settings_general_permissions": "Permissions",
   "settings_gifs": "GIFs",
   "settings_gifs_emoji": "Animated emoji",
   "settings_gifs_anime": "Anime reactions",
