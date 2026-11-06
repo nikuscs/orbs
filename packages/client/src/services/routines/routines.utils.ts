@@ -2,7 +2,7 @@ import { m } from '@repo/i18n/client';
 import { match } from 'ts-pattern';
 import { ROUTINES } from './routines.constants';
 import type { RoutinesScheduleTextParams } from '../../types/routines.types';
-import type { RoutineSchedule } from '@repo/contracts/universal';
+import type { Routine, RoutineSchedule } from '@repo/contracts/universal';
 
 export function routinesScheduleText({ schedule, locale }: RoutinesScheduleTextParams): string {
   function routinesCronText(expression: string): string {
@@ -49,6 +49,26 @@ export function routinesScheduleText({ schedule, locale }: RoutinesScheduleTextP
     })
     .with({ kind: 'cron' }, ({ expression }) => routinesCronText(expression))
     .exhaustive();
+}
+
+export function routinesSections(routines: Routine[]) {
+  const routinesIsPast = ({ nextRunAt, lastRun }: Routine) => nextRunAt === null && lastRun !== null;
+  const routinesIsFailed = ({ lastRun }: Routine) => lastRun?.status === 'unanswered';
+
+  return [
+    {
+      title: m.rooms_routines_upcoming(),
+      routines: routines
+        .filter((routine) => !routinesIsPast(routine))
+        .sort((a, b) => (a.nextRunAt ?? Number.MAX_SAFE_INTEGER) - (b.nextRunAt ?? Number.MAX_SAFE_INTEGER)),
+    },
+    {
+      title: m.rooms_routines_past(),
+      routines: routines
+        .filter(routinesIsPast)
+        .sort((a, b) => Number(routinesIsFailed(b)) - Number(routinesIsFailed(a)) || (b.lastRun?.startedAt ?? 0) - (a.lastRun?.startedAt ?? 0)),
+    },
+  ].filter((section) => section.routines.length > 0);
 }
 
 export function routinesScheduleDefault(kind: string): RoutineSchedule {

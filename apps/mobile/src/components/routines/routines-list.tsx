@@ -1,9 +1,10 @@
-import { routinesScheduleText } from '@repo/client/client';
+import { ROOMS, routinesScheduleText, routinesSections } from '@repo/client/client';
 import { getLocale, m } from '@repo/i18n/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { CalendarClock, Ellipsis } from 'lucide-react-native';
 import { Switch, View } from 'react-native';
+import { BotDetailsSection } from '@/components/bots/bot-details-section';
 import { Card } from '@/components/ui/card';
 import { Empty, EmptyLink } from '@/components/ui/empty';
 import { Icon } from '@/components/ui/icon';
@@ -22,7 +23,7 @@ export function RoutinesList({ session, bot, onPrefill }: RoutinesListProps) {
   const queryClient = useQueryClient();
   const toast = useToast();
   const router = useRouter();
-  const list = useQuery(session.rpc.routines.list.queryOptions({ input: { botId: bot.id } }));
+  const list = useQuery(session.rpc.routines.list.queryOptions({ input: { botId: bot.id }, refetchInterval: ROOMS.routinesRefreshMs }));
 
   const update = useMutation(session.rpc.routines.update.mutationOptions({
     onError: () => toast.show({ message: m.rooms_routines_action_failed() }),
@@ -36,6 +37,7 @@ export function RoutinesList({ session, bot, onPrefill }: RoutinesListProps) {
 
   const routines = list.data ?? [];
   const isBusy = update.isPending || run.isPending;
+  const sections = routinesSections(routines);
 
   return (
     <View className="gap-2">
@@ -60,61 +62,63 @@ export function RoutinesList({ session, bot, onPrefill }: RoutinesListProps) {
           title={m.rooms_routines_empty_title()}
         />
       ) : null}
-      {routines.length > 0 ? (
-        <Card className="overflow-hidden">
-          {routines.map((routine) => (
-            <Item key={routine.id} size="sm">
-              <ItemContent>
-                <ItemTitle numberOfLines={1}>{routine.name}</ItemTitle>
-                <ItemDescription numberOfLines={1}>{routinesScheduleText({ schedule: routine.schedule, locale: getLocale() })}</ItemDescription>
-                {routine.lastRun?.status === 'unanswered' ? <Text tone="destructive" variant="small">{m.rooms_routines_failed()}</Text> : null}
-              </ItemContent>
-              <Switch
-                accessibilityLabel={m.rooms_routines_toggle({ name: routine.name })}
-                disabled={isBusy}
-                value={routine.isEnabled}
-                onValueChange={(isEnabled) => update.mutate({
-                  botId: bot.id,
-                  routineId: routine.id,
-                  isEnabled,
-                })}
-              />
-              <Menu
-                isDisabled={isBusy}
-                items={[
-                  {
-                    label: m.rooms_routines_run(),
-                    systemImage: 'arrow.clockwise',
-                    onSelect: () => run.mutate({ botId: bot.id, routineId: routine.id }, {
-                      onSuccess: () => toast.show({ message: m.rooms_routines_started({ name: routine.name }) }),
-                    }),
-                  },
-                  {
-                    label: m.rooms_routines_edit(),
-                    systemImage: 'pencil',
-                    onSelect: () => router.push({ pathname: '/bots/[botId]/routines/[routineId]/edit', params: { botId: bot.id, routineId: routine.id } }),
-                  },
-                  {
-                    label: m.rooms_routines_delete(),
-                    systemImage: 'trash',
-                    isDestructive: true,
-                    hasDividerBefore: true,
-                    onSelect: () => router.push({ pathname: '/bots/[botId]/routines/[routineId]/delete', params: { botId: bot.id, routineId: routine.id } }),
-                  },
-                ]}
-              >
-                <View
-                  accessibilityLabel={m.rooms_routines_actions()}
-                  accessibilityRole="button"
-                  className="size-8 items-center justify-center"
+      {sections.map((section) => (
+        <BotDetailsSection key={section.title} title={section.title}>
+          <Card className="overflow-hidden">
+            {section.routines.map((routine) => (
+              <Item key={routine.id} size="sm">
+                <ItemContent>
+                  <ItemTitle numberOfLines={2}>{routine.name}</ItemTitle>
+                  <ItemDescription numberOfLines={1}>{routinesScheduleText({ schedule: routine.schedule, locale: getLocale() })}</ItemDescription>
+                  {routine.lastRun?.status === 'unanswered' ? <Text tone="destructive" variant="small">{m.rooms_routines_failed()}</Text> : null}
+                </ItemContent>
+                <Switch
+                  accessibilityLabel={m.rooms_routines_toggle({ name: routine.name })}
+                  disabled={isBusy}
+                  value={routine.isEnabled}
+                  onValueChange={(isEnabled) => update.mutate({
+                    botId: bot.id,
+                    routineId: routine.id,
+                    isEnabled,
+                  })}
+                />
+                <Menu
+                  isDisabled={isBusy}
+                  items={[
+                    {
+                      label: m.rooms_routines_run(),
+                      systemImage: 'arrow.clockwise',
+                      onSelect: () => run.mutate({ botId: bot.id, routineId: routine.id }, {
+                        onSuccess: () => toast.show({ message: m.rooms_routines_started({ name: routine.name }) }),
+                      }),
+                    },
+                    {
+                      label: m.rooms_routines_edit(),
+                      systemImage: 'pencil',
+                      onSelect: () => router.push({ pathname: '/bots/[botId]/routines/[routineId]/edit', params: { botId: bot.id, routineId: routine.id } }),
+                    },
+                    {
+                      label: m.rooms_routines_delete(),
+                      systemImage: 'trash',
+                      isDestructive: true,
+                      hasDividerBefore: true,
+                      onSelect: () => router.push({ pathname: '/bots/[botId]/routines/[routineId]/delete', params: { botId: bot.id, routineId: routine.id } }),
+                    },
+                  ]}
                 >
-                  <Icon icon={Ellipsis} tone="muted" />
-                </View>
-              </Menu>
-            </Item>
-          ))}
-        </Card>
-      ) : null}
+                  <View
+                    accessibilityLabel={m.rooms_routines_actions()}
+                    accessibilityRole="button"
+                    className="size-8 items-center justify-center"
+                  >
+                    <Icon icon={Ellipsis} tone="muted" />
+                  </View>
+                </Menu>
+              </Item>
+            ))}
+          </Card>
+        </BotDetailsSection>
+      ))}
       {routines.length > 0 ? (
         <Text tone="muted" variant="small">
           <EmptyLink onPress={() => onPrefill(m.rooms_routines_prefill())}>{m.rooms_prefill_create()}</EmptyLink>

@@ -1,8 +1,8 @@
 import { m } from '@repo/i18n/client';
 import { useEvent, useEventListener } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { Play } from 'lucide-react-native';
-import { useState } from 'react';
+import { Maximize, Play } from 'lucide-react-native';
+import { useRef, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { Icon } from '@/components/ui/icon';
 import { messageOutline } from '@/components/ui/message';
@@ -21,6 +21,7 @@ interface ChatVideoProps {
 export function ChatVideo({ source, poster, name }: ChatVideoProps) {
   const player = useVideoPlayer({ uri: source.uri, headers: source.headers });
   const { status } = useEvent(player, 'statusChange', { status: player.status });
+  const video = useRef<VideoView>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [hasPoster, setHasPoster] = useState(Boolean(poster));
 
@@ -74,9 +75,21 @@ export function ChatVideo({ source, poster, name }: ChatVideoProps) {
         fullscreenOptions={{ enable: true }}
         nativeControls={isStarted}
         player={player}
+        ref={video}
         style={{ flex: 1 }}
       />
-      {isStarted ? null : (
+      {isStarted ? (
+        <Pressable
+          accessibilityLabel={m.rooms_media_fullscreen({ name })}
+          accessibilityRole="button"
+          className="absolute top-0 left-0 size-11 items-center justify-center"
+          onPress={() => void video.current?.enterFullscreen()}
+        >
+          <View className="size-8 items-center justify-center rounded-full bg-background/90">
+            <Icon icon={Maximize} />
+          </View>
+        </Pressable>
+      ) : (
         <Pressable
           accessibilityLabel={m.rooms_media_play({ name })}
           accessibilityRole="button"

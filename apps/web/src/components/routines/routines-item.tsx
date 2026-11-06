@@ -12,8 +12,10 @@ import {
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@repo/ui/item';
 import { toasty } from '@repo/ui/sonner';
 import { Switch } from '@repo/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/tooltip';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useHydrated, useMatch } from '@tanstack/react-router';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { rpc } from '@/services/rpc/rpc.client';
 import IconEllipsisVertical from '~icons/lucide/ellipsis-vertical';
 import IconPencil from '~icons/lucide/pencil';
@@ -29,6 +31,21 @@ interface RoutinesItemProps {
 export function RoutinesItem({ bot, routine }: RoutinesItemProps) {
   const hydrated = useHydrated();
   const queryClient = useQueryClient();
+  const title = useRef<HTMLSpanElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+
+  useLayoutEffect(() => {
+    const node = title.current;
+
+    if (!node) {
+      return undefined;
+    }
+
+    const observer = new ResizeObserver(() => setIsTruncated(node.scrollWidth > node.clientWidth));
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, []);
 
   const params = { botId: bot.id, routineId: routine.id };
   const isInBotDialog = Boolean(useMatch({ from: '/_chat/bots', shouldThrow: false }));
@@ -52,7 +69,12 @@ export function RoutinesItem({ bot, routine }: RoutinesItemProps) {
     <Item size="sm">
       <ItemContent className="min-w-0">
         <ItemTitle className="w-full">
-          <span className="truncate">{routine.name}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="truncate" ref={title}>{routine.name}</span>
+            </TooltipTrigger>
+            {isTruncated ? <TooltipContent className="max-w-64 wrap-break-word">{routine.name}</TooltipContent> : null}
+          </Tooltip>
         </ItemTitle>
         <ItemDescription className="truncate">{when}</ItemDescription>
         {routine.lastRun?.status === 'unanswered' ? (
