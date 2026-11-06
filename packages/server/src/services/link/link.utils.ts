@@ -1,8 +1,6 @@
 import { linkUrl } from '@repo/contracts/universal';
 import { LINK } from './link.constants';
 
-const LINK_ENTITIES = new Map([['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'], ['apos', "'"], ['nbsp', ' ']]);
-
 function linkDecode(text: string) {
   return text.replaceAll(/&(?:#x([\da-f]+)|#(\d+)|([a-z]+));/gi, (entity, hex: string | undefined, decimal: string | undefined, name: string | undefined) => {
     const point = hex ? Number.parseInt(hex, 16) : Number(decimal);
@@ -11,7 +9,7 @@ function linkDecode(text: string) {
       return String.fromCodePoint(point);
     }
 
-    return LINK_ENTITIES.get(name?.toLowerCase() ?? '') ?? entity;
+    return LINK.entities.get(name?.toLowerCase() ?? '') ?? entity;
   });
 }
 

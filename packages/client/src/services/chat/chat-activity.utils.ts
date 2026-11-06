@@ -1,4 +1,3 @@
-import { GIF, REACTION } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { match } from 'ts-pattern';
 import { toolBlocks } from '../tool/tool.client';
@@ -6,8 +5,6 @@ import { TOOL_ACTIVITY_LABELS, TOOL_PEER_NAMES, TOOL_SUBAGENT } from '../tool/to
 import { toolInputText, toolPresentation, toolPreview, toolRunning } from '../tool/tool.utils';
 import { CHAT } from './chat.constants';
 import type * as ChatTypes from '../../types/chat.types';
-
-const CHAT_ACTIVITY_REPLY_TOOLS = new Set<string>([REACTION.toolName, GIF.toolName]);
 
 export function chatActivityMessage(messages: readonly ChatTypes.ChatMessage[]): ChatTypes.ChatMessage | undefined {
   const last = messages.at(-1);
@@ -25,7 +22,7 @@ export function chatActivityPreamble(content: readonly ChatTypes.ChatContentPart
 
   const text = part.text.trim();
   const isShort = text.length <= CHAT.preambleMaxLength && !text.includes('\n\n');
-  const hasWorkAfter = calls.some((call) => !CHAT_ACTIVITY_REPLY_TOOLS.has(call.name));
+  const hasWorkAfter = calls.some((call) => !CHAT.activityReplyTools.has(call.name));
 
   return (part.textSignature?.includes(CHAT.commentaryPhase) ?? false) || (isShort && (hasWorkAfter || /(?:…|\.\.\.)$/u.test(text)));
 }

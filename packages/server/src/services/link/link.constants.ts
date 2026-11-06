@@ -5,6 +5,7 @@ export const LINK = {
   maxTitleLength: 200,
   maxDescriptionLength: 300,
   maxCodePoint: 0x10FFFF,
+  entities: new Map([['amp', '&'], ['lt', '<'], ['gt', '>'], ['quot', '"'], ['apos', "'"], ['nbsp', ' ']]),
   userAgent: 'Mozilla/5.0 (compatible; OrbsLinkPreview/1.0)',
   privateSubnets: [
     ['0.0.0.0', 8, 'ipv4'],

@@ -2,14 +2,12 @@ import { AssistantEntry, UserEntry } from '@earendil-works/pi-durable';
 import { ATTACHMENT, REACTION, REPLY } from '@repo/contracts/universal';
 import { Errors } from '@repo/errors/universal';
 import { match, P } from 'ts-pattern';
-import { runtimeReactions } from './runtime-reaction.constants';
+import { RUNTIME_REACTION_OWNER_KINDS, runtimeReactions } from './runtime-reaction.constants';
 import { runtimeBot } from './runtime.constants';
 import type { RuntimeReaction, RuntimeReactionToolInput } from '../../types/runtime-reaction.types';
 import type { Context } from '@earendil-works/chord/context';
 import type * as PiDurableTypes from '@earendil-works/pi-durable';
 import type { ConversationReaction } from '@repo/contracts/universal';
-
-const runtimeReactionOwnerKinds = new Set<string>([UserEntry.kind, ATTACHMENT.entryKind, REPLY.entryKind]);
 
 export function runtimeReactionTarget(entry: PiDurableTypes.EntryRecord | undefined, conversationId: PiDurableTypes.ConversationId) {
   return match(entry)
@@ -94,7 +92,7 @@ export async function runtimeReactionSetBot(
 
   return api.commit(async (tx) => {
     const entryId = params.entryId ?? (await tx.scanEntries({ conversationId: api.conversationId, order: 'descending' }, 50)).items
-      .find((entry) => runtimeReactionOwnerKinds.has(entry.kind))?.id;
+      .find((entry) => RUNTIME_REACTION_OWNER_KINDS.has(entry.kind))?.id;
 
     // SAFETY: an entry ID is only a lookup key; runtimeReactionTarget rejects entries outside this conversation.
     return match(runtimeReactionTarget(entryId === undefined ? undefined : await tx.entry(entryId as PiDurableTypes.EntryId), api.conversationId))
