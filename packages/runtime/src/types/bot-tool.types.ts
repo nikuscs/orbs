@@ -7,7 +7,7 @@ export const botToolUpdate = botUpdate.omit({ permission: true }).strict();
 export const botToolGet = botGet.strict();
 export const botToolSwapModels = botSwapModels.strict();
 
-export const botToolMcpAdd = z.object(mcpServerAdd.shape).omit({ botId: true }).strict();
+export const botToolMcpAdd = z.object(mcpServerAdd.shape).omit({ botId: true, env: true }).strict();
 export const botToolMcpRemove = mcpServerRemove.omit({ botId: true }).strict();
 
 export const botToolCreateParameters = Type.Unsafe<z.infer<typeof botToolCreate>>(

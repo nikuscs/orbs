@@ -72,12 +72,18 @@ export async function mcpQueryConfig(
           });
         })
         .with({ result: { success: true } }, ({ result: { data } }) => {
-          servers.set(name, {
+          const entry: McpConfig['servers'][number] = {
             name,
             source,
             config: data,
             isBotLocal,
-          });
+          };
+
+          if (isOwned) {
+            entry.isOwned = true;
+          }
+
+          servers.set(name, entry);
         })
         .with({ result: { success: false } }, () => {
           diagnostics.push({

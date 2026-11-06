@@ -1,5 +1,6 @@
 import { artifactSpec, commandArguments, commandIdArguments, routineCreate, todo } from '@repo/contracts/universal';
 import { z } from 'zod';
+import { note } from './note.types';
 import type { ActivityService } from '../services/activity/activity.service';
 import type { ArtifactService } from '../services/artifact/artifact.service';
 import type { NotificationService } from '../services/notification/notification.service';
@@ -317,6 +318,7 @@ export const runtimeCarry = z.object({
     title: true,
     isDone: true,
   })),
+  notes: z.array(note).default([]),
 });
 
 export type RuntimeCarry = z.infer<typeof runtimeCarry>;

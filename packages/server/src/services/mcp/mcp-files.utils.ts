@@ -43,7 +43,7 @@ export async function mcpFiles(path: string, visited = new Set<string>()): Promi
 }
 
 export function mcpFilesOwnedPath({ root }: Pick<McpServiceDeps, 'root'>, botId: string) {
-  return join(root, 'mcp', `${botId}.json`);
+  return join(root, 'data', 'bots', botId, MCP.ownedFile);
 }
 
 export async function mcpFilesRead(deps: Pick<McpServiceDeps, 'root'>, botId: string) {

@@ -4,11 +4,9 @@ import { log } from '@repo/logger/server';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { match, P } from 'ts-pattern';
+import { MCP } from './mcp.constants';
 import type { McpContentFile, McpContentTarget, McpContentWriteTarget } from '../../types/mcp.types';
 import type * as PiMcpTypes from '@earendil-works/pi-mcp';
-
-const maxNameLength = 120;
-const maxCollisions = 100;
 
 export async function mcpContent(target: McpContentTarget, result: PiMcpTypes.CallToolResult): Promise<PiMcpTypes.LlmContent[]> {
   if (result.content.length === 0) {
@@ -26,6 +24,7 @@ export async function mcpContent(target: McpContentTarget, result: PiMcpTypes.Ca
 
 function mcpContentFile(block: PiMcpTypes.ContentBlock): McpContentFile | undefined {
   return match(block)
+    .with({ type: 'resource', resource: { blob: P.string, mimeType: P.string.startsWith('image/') } }, () => undefined)
     .with({ type: 'resource', resource: { blob: P.string } }, (resource) => ({
       uri: resource.resource.uri,
       mimeType: resource.resource.mimeType,
@@ -45,7 +44,7 @@ function mcpContentName(uri: string | undefined): string {
     decoded = segment;
   }
 
-  const name = decoded.replace(/[^A-Za-z0-9._ -]/g, '_').trim().replace(/^\.+/, '').slice(0, maxNameLength).trim();
+  const name = decoded.replace(/[^A-Za-z0-9._ -]/g, '_').trim().replace(/^\.+/, '').slice(0, MCP.maxFileNameLength).trim();
 
   return name === '' ? 'attachment' : name;
 }
@@ -97,7 +96,7 @@ async function mcpContentSave({ root, botId }: McpContentTarget, file: McpConten
 }
 
 async function mcpContentWrite(target: McpContentWriteTarget, attempt: number): Promise<string | undefined> {
-  if (attempt > maxCollisions) {
+  if (attempt > MCP.maxFileCollisions) {
     return undefined;
   }
 

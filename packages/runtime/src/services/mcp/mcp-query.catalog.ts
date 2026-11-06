@@ -38,6 +38,7 @@ export async function mcpQueryCatalog(deps: McpClientServiceDeps, { botId, confi
         .with({ needsLogin: true }, () => 'required' as const)
         .with({ authProvider: P.nonNullable }, () => 'authorized' as const)
         .otherwise(() => 'none' as const),
+      isOwned: entry.isOwned === true,
       tools: status === 'connected' ? connection?.catalog ?? [] : [],
     };
   });

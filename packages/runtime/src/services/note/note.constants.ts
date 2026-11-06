@@ -5,8 +5,6 @@ export const NOTE = {
   extension: 'bots.notes',
   tool: 'bot_note',
   maxNotes: 30,
-  maxKey: 64,
-  maxText: 500,
 } as const;
 
 export const noteDocument = defineDoc<NoteDocument>({

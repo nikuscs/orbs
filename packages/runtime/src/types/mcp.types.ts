@@ -34,6 +34,7 @@ export interface McpEntry {
   source: string;
   config: z.infer<typeof mcpServer>;
   isBotLocal: boolean;
+  isOwned?: true;
   sourceFingerprint?: string;
 }
 

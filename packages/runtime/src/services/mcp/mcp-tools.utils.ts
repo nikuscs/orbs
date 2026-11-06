@@ -2,11 +2,11 @@ import { Type } from '@earendil-works/pi-ai';
 import { defineTool } from '@earendil-works/pi-durable';
 import { mcpContent } from './mcp-content.utils';
 import { mcpToolName } from './mcp.utils';
-import type { McpConnection } from '../../types/mcp.types';
+import type { McpConnection, McpContentTarget } from '../../types/mcp.types';
 import type { JsonObject } from '@earendil-works/pi-durable';
 import type { Tool } from '@earendil-works/pi-mcp';
 
-export function mcpTools(connection: McpConnection, server: string, tools: Tool[], target: { root: string; botId: string }) {
+export function mcpTools(connection: McpConnection, server: string, tools: Tool[], target: McpContentTarget) {
   return tools.map((tool) => defineTool({
     name: mcpToolName(server, tool.name, `${connection.fingerprint}:${JSON.stringify(tool)}`),
     description: tool.description ?? tool.name,

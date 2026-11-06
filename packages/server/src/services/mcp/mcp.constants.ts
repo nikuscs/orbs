@@ -6,4 +6,5 @@ export const MCP = {
   secretPrefix: 'secrets.',
   derivedPrefix: 'mcp.',
   maxHeaders: 8,
+  ownedFile: 'mcp.json',
 } as const;

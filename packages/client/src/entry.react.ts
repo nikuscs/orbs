@@ -5,6 +5,7 @@ export * from './hooks/use-bot-cheer';
 export * from './hooks/use-bot-create';
 export * from './hooks/use-bot-delete';
 export * from './hooks/use-bot-mcp';
+export * from './hooks/use-bot-mcp-remove';
 export * from './hooks/use-bot-update';
 export * from './hooks/use-chat-approval';
 export * from './hooks/use-chat-around';

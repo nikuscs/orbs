@@ -2,14 +2,15 @@ import { m } from '@repo/i18n/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { match } from 'ts-pattern';
-import { MCP_PRESETS } from '../services/mcp/mcp.constants';
+import { MCP } from '../services/mcp/mcp.constants';
 import { SETTINGS } from '../services/settings/settings.constants';
+import { useBotUpdate } from './use-bot-update';
 import { useRpc } from './use-rpc';
-import type { BotMcpParams } from '../types/bot.types';
+import type { BotMcpParams, BotMcpRow } from '../types/bot.types';
 import type { SettingsProviderStatus } from '../types/settings.types';
-import type { McpCatalog } from '@repo/contracts/universal';
 
-export function useBotMcp({ botId, login: target }: BotMcpParams) {
+export function useBotMcp({ bot, login: target }: BotMcpParams) {
+  const botId = bot.id;
   const { rpc } = useRpc();
   const queryClient = useQueryClient();
   const [started, setStarted] = useState<string | null>(null);
@@ -21,6 +22,36 @@ export function useBotMcp({ botId, login: target }: BotMcpParams) {
   });
 
   const discover = useQuery(rpc.mcp.discover.queryOptions({ input: { botId } }));
+  const shared = useQuery(rpc.mcp.shared.queryOptions({ input: { botId } }));
+  const update = useBotUpdate();
+
+  const sharedNames = [...new Set((shared.data ?? []).map((server) => server.name))].sort((left, right) => left.localeCompare(right));
+  const chosen = bot.sharedMcp?.length ? sharedNames.filter((name) => bot.sharedMcp?.includes(name)) : sharedNames;
+  const selected = new Set(bot.inherit.includes('mcp') ? chosen : []);
+  const servers = discover.data?.servers ?? [];
+
+  const rows: BotMcpRow[] = [
+    ...servers.map((server) => ({
+      name: server.name,
+      server,
+      isShared: !server.isOwned && sharedNames.includes(server.name),
+      isOn: true,
+    })),
+    ...sharedNames
+      .filter((name) => !servers.some((server) => server.name === name))
+      .map((name) => ({ name, server: null, isShared: true, isOn: false })),
+  ].sort((left, right) => left.name.localeCompare(right.name));
+
+  function toggle(name: string, isOn: boolean) {
+    const picked = sharedNames.filter((candidate) => (candidate === name ? isOn : selected.has(candidate)));
+    const without = bot.inherit.filter((item) => item !== 'mcp');
+
+    update.mutate({
+      botId,
+      inherit: picked.length === 0 ? without : [...without, 'mcp'],
+      sharedMcp: picked.length === sharedNames.length ? [] : picked,
+    });
+  }
 
   const add = useMutation(rpc.mcp.add.mutationOptions({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: rpc.mcp.discover.key() }),
@@ -77,7 +108,8 @@ export function useBotMcp({ botId, login: target }: BotMcpParams) {
       .exhaustive();
   }
 
-  const status = (server: McpCatalog['servers'][number]): SettingsProviderStatus => match({ server, isPending: pending === server.name })
+  const status = ({ name, server }: BotMcpRow): SettingsProviderStatus => match({ server, isPending: pending === name })
+    .with({ server: null }, () => ({ tone: 'default' as const, label: m.bots_mcp_disabled() }))
     .with({ isPending: true }, () => ({ tone: 'warning' as const, label: m.bots_mcp_waiting() }))
     .with({ server: { auth: 'required' } }, () => ({ tone: 'warning' as const, label: m.bots_mcp_login_required() }))
     .with({ server: { status: 'connected' } }, () => ({ tone: 'success' as const, label: m.bots_mcp_connected() }))
@@ -87,29 +119,21 @@ export function useBotMcp({ botId, login: target }: BotMcpParams) {
     .otherwise(() => ({ tone: 'default' as const, label: m.bots_mcp_not_connected() }));
 
   return {
-    servers: discover.data?.servers ?? [],
-    presets: MCP_PRESETS.map((preset) => ({
-      ...preset,
-      isAdded: discover.data?.servers.some((server) => server.name === preset.name) ?? false,
-      description: match(preset.name)
-        .with('cloudflare', () => m.bots_mcp_preset_cloudflare())
-        .with('linear', () => m.bots_mcp_preset_linear())
-        .with('notion', () => m.bots_mcp_preset_notion())
-        .with('sentry', () => m.bots_mcp_preset_sentry())
-        .exhaustive(),
-    })),
-    add: (preset: typeof MCP_PRESETS[number]) => add.mutate({
+    rows,
+    toggle,
+    presets: MCP.presets.filter((preset) => !discover.data?.servers.some((server) => server.name === preset.name)),
+    add: (preset: typeof MCP.presets[number]) => add.mutate({
       botId,
       name: preset.name,
       url: preset.url,
     }),
     adding: add.isPending ? add.variables.name : null,
-    isEmpty: discover.data?.servers.length === 0,
+    isEmpty: discover.isSuccess && shared.isSuccess && rows.length === 0,
     pending,
     status,
-    isBusy: start.isPending || complete.isPending || cancel.isPending || logout.isPending,
+    isBusy: start.isPending || complete.isPending || cancel.isPending || logout.isPending || update.isPending,
     problem: match({
-      isLoadFailed: discover.isError || prepare.isError,
+      isLoadFailed: discover.isError || prepare.isError || shared.isError,
       isLoginFailed: start.isError || complete.isError,
       isAddFailed: add.isError,
     })

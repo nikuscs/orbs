@@ -29,4 +29,5 @@ export type BotDialogView =
   | { kind: 'reset'; botId: string }
   | { kind: 'routine-edit'; botId: string; routineId: string }
   | { kind: 'routine-delete'; botId: string; routineId: string }
-  | { kind: 'todo-delete'; botId: string; todoId: string };
+  | { kind: 'todo-delete'; botId: string; todoId: string }
+  | { kind: 'mcp-remove'; botId: string; server: string };

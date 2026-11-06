@@ -1,16 +1,18 @@
 import { useBotMcp } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
 import * as Linking from 'expo-linking';
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { LogIn, LogOut, Plug, Server, X } from 'lucide-react-native';
+import { LogIn, LogOut, Plug, Plus, Server, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { Switch, View } from 'react-native';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { LabelDescription } from '@/components/ui/label';
+import { Menu } from '@/components/ui/menu';
 import { StatusDot } from '@/components/ui/status-dot';
 import { Text } from '@/components/ui/text';
 import type { RpcSession } from '@/types/rpc.types';
@@ -22,10 +24,11 @@ interface BotSettingsMcpProps {
 }
 
 export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
+  const router = useRouter();
   const [callbackUrl, setCallbackUrl] = useState('');
 
   const mcp = useBotMcp({
-    botId: bot.id,
+    bot,
     login: () => {
       const returnUrl = Linking.createURL('mcp/done');
 
@@ -52,22 +55,22 @@ export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
             </ItemContent>
           </Item>
         ) : null}
-        {mcp.servers.map((server) => (
-          <Item key={server.name}>
+        {mcp.rows.map((row) => ({ ...row, status: mcp.status(row) })).map(({ name, server, isShared, isOn, status }) => (
+          <Item key={name}>
             <ItemMedia className="mt-1 self-start">
               <Icon icon={Server} tone="muted" />
             </ItemMedia>
             <ItemContent>
-              <ItemTitle numberOfLines={1}>{server.name}</ItemTitle>
+              <ItemTitle numberOfLines={1}>{name}</ItemTitle>
               <View className="flex-row items-center gap-1.5">
-                <StatusDot label={mcp.status(server).label} variant={mcp.status(server).tone} />
+                <StatusDot label={status.label} variant={status.tone} />
                 <Text tone="muted" variant="chat-status">
-                  {mcp.status(server).label}
-                  {server.tools.length > 0 ? ` · ${m.bots_mcp_tools({ count: String(server.tools.length) })}` : null}
+                  {status.label}
+                  {server && server.tools.length > 0 ? ` · ${m.bots_mcp_tools({ count: String(server.tools.length) })}` : null}
                 </Text>
               </View>
             </ItemContent>
-            {mcp.pending === server.name ? (
+            {mcp.pending === name ? (
               <Button
                 accessibilityLabel={m.bots_mcp_cancel()}
                 disabled={mcp.isBusy}
@@ -78,72 +81,62 @@ export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
                 <Icon icon={X} size="sm" />
               </Button>
             ) : null}
-            {mcp.pending !== server.name && server.auth === 'required' ? (
+            {server && mcp.pending !== name && server.auth === 'required' ? (
               <Button
                 accessibilityLabel={m.bots_mcp_login()}
                 disabled={mcp.isBusy || mcp.pending !== null}
                 size="sm"
                 variant="outline"
-                onPress={() => mcp.connect(server.name)}
+                onPress={() => mcp.connect(name)}
               >
                 <Icon icon={LogIn} size="sm" />
                 {m.bots_mcp_login()}
               </Button>
             ) : null}
-            {server.auth === 'authorized' ? (
+            {server?.auth === 'authorized' ? (
               <Button
                 accessibilityLabel={m.bots_mcp_logout()}
                 disabled={mcp.isBusy}
                 size="icon-sm"
                 variant="ghost"
-                onPress={() => mcp.logout(server.name)}
+                onPress={() => mcp.logout(name)}
               >
                 <Icon icon={LogOut} size="sm" />
               </Button>
             ) : null}
+            {server?.isOwned ? (
+              <Button
+                accessibilityLabel={m.bots_mcp_remove()}
+                size="icon-sm"
+                variant="ghost"
+                onPress={() => router.push({ pathname: '/bots/[botId]/mcp/[server]/remove', params: { botId: bot.id, server: name } })}
+              >
+                <Icon icon={Trash2} size="sm" />
+              </Button>
+            ) : null}
+            {isShared ? (
+              <Switch
+                accessibilityLabel={m.bots_mcp_use({ server: name })}
+                disabled={mcp.isBusy}
+                value={isOn}
+                onValueChange={(value) => mcp.toggle(name, value)}
+              />
+            ) : null}
           </Item>
         ))}
       </ItemGroup>
-      <View className="gap-1.5">
-        <Text
-          className="px-3"
-          tone="muted"
-          variant="small"
+      {mcp.presets.length > 0 ? (
+        <Menu
+          isDisabled={mcp.adding !== null}
+          items={mcp.presets.map((preset) => ({ label: preset.title, onSelect: () => mcp.add(preset) }))}
+          title={m.bots_mcp_add()}
         >
-          {m.bots_mcp_available()}
-        </Text>
-        <ItemGroup>
-          {mcp.presets.map((preset) => (
-            <Item key={preset.name}>
-              <ItemMedia className="mt-1 self-start">
-                <Icon icon={Server} tone="muted" />
-              </ItemMedia>
-              <ItemContent>
-                <ItemTitle numberOfLines={1}>{preset.title}</ItemTitle>
-                <ItemDescription numberOfLines={0}>{preset.description}</ItemDescription>
-                <Button
-                  accessibilityRole="link"
-                  className="self-start"
-                  size="inline"
-                  variant="link-muted"
-                  onPress={() => void Linking.openURL(preset.documentation)}
-                >
-                  {m.bots_mcp_docs()}
-                </Button>
-              </ItemContent>
-              <Button
-                disabled={preset.isAdded || mcp.adding !== null}
-                loading={mcp.adding === preset.name}
-                size="sm"
-                variant={preset.isAdded ? 'secondary' : 'outline'}
-                onPress={() => mcp.add(preset)}
-              >
-                {preset.isAdded ? m.bots_mcp_added() : m.bots_mcp_add()}
-              </Button>
-            </Item>
-          ))}
-        </ItemGroup>
-      </View>
+          <Button size="sm" variant="outline">
+            <Icon icon={Plus} size="sm" />
+            {m.bots_mcp_add()}
+          </Button>
+        </Menu>
+      ) : null}
       {mcp.pending ? (
         <View className="gap-2">
           <Text variant="label">{m.bots_mcp_paste_label()}</Text>

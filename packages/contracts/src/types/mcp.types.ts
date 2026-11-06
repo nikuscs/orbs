@@ -24,6 +24,7 @@ export const mcpCatalogServer = z.object({
   isEnabled: z.boolean(),
   status: z.enum(['disabled', 'disconnected', 'connecting', 'connected', 'error']),
   auth: z.enum(['none', 'required', 'authorized']),
+  isOwned: z.boolean(),
   tools: z.array(mcpCatalogTool),
 });
 
