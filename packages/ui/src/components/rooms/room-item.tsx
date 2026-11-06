@@ -72,6 +72,7 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
           className="group/room-item"
           isActive={isActive}
           size="chat"
+          tooltip={chat.name}
         >
           <Link
             params={{ handle: chat.handle }}
