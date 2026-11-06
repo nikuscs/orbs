@@ -81,7 +81,6 @@ async function bundle() {
 }
 
 function plist() {
-  // Info.plist modification via PlistBuddy is strictly for macOS .app bundles.
   if (!isDarwin) {
     return;
   }
@@ -122,7 +121,7 @@ function release() {
   }
 
   console.log(`Building ${name} ${version}`);
-  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:macos'], { ...process.env, DESKTOP_VERSION: version });
+  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:app'], { ...process.env, DESKTOP_VERSION: version });
 
   const temp = mkdtempSync(path.join(tmpdir(), 'desktop-release-'));
   const resources = path.join(app, 'Contents/Resources');

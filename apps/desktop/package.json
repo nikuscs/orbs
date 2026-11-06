@@ -4,12 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && DATA_DIR=$HOME/.config/orbs-dev DESKTOP_WEB_DEV=$(cd ../web && pwd) bun --env-file=../../.env electrobun dev",
-    "dev:linux": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && DATA_DIR=$HOME/.config/orbs-dev DESKTOP_WEB_DEV=$(cd ../web && pwd) bun --env-file=../../.env electrobun dev",
-    "dev:macos": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && DATA_DIR=$HOME/.config/orbs-dev DESKTOP_WEB_DEV=$(cd ../web && pwd) bun --env-file=../../.env electrobun dev",
-    "build": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && bun --env-file=../../.env electrobun build --env=stable",
-    "build:linux": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && bun --env-file=../../.env electrobun build --env=stable",
-    "build:macos": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && bun --env-file=../../.env electrobun build --env=stable",
+    "dev:app": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && DATA_DIR=$HOME/.config/orbs-dev DESKTOP_WEB_DEV=$(cd ../web && pwd) bun --env-file=../../.env electrobun dev",
+    "build:app": "bun --env-file=../../.env ../../scripts/desktop.ts bundle && bun --env-file=../../.env electrobun build --env=stable",
     "check": "electrobun prepare && tsrs --noEmit",
     "lint": "electrobun prepare && oxlint src/ electrobun.config.ts -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config",
     "lint:fix": "electrobun prepare && oxlint src/ electrobun.config.ts -c ../../oxlint.config.ts --tsconfig tsconfig.json --disable-nested-config --fix"
@@ -17,6 +13,7 @@
   "dependencies": {
     "@repo/env": "workspace:*",
     "@repo/i18n": "workspace:*",
+    "ts-pattern": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

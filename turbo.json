@@ -25,14 +25,7 @@
         "@repo/daemon#dev"
       ]
     },
-    "dev:macos": {
-      "with": [
-        "@repo/daemon#dev"
-      ],
-      "persistent": true,
-      "cache": false
-    },
-    "dev:linux": {
+    "dev:app": {
       "with": [
         "@repo/daemon#dev"
       ],

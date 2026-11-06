@@ -14,8 +14,7 @@ function desktopWindowSet(window: Pointer, setter: string, value: ReturnType<typ
 }
 
 export function desktopWindowToolbar(window: Pointer): void {
-  // NSToolbar is only needed on macOS to allow dragging borderless windows; GTK handles window dragging natively via CSS regions.
-  if (!DESKTOP.isDarwin) {
+  if (DESKTOP.platform !== 'macos') {
     return;
   }
 
@@ -25,8 +24,7 @@ export function desktopWindowToolbar(window: Pointer): void {
 }
 
 export function desktopWindowAppearance(window: Pointer, theme: DesktopTheme): void {
-  // NSAppearance is macOS AppKit-specific; GTK and web views manage theme color schemes directly on Linux.
-  if (!DESKTOP.isDarwin) {
+  if (DESKTOP.platform !== 'macos') {
     return;
   }
 
@@ -36,8 +34,7 @@ export function desktopWindowAppearance(window: Pointer, theme: DesktopTheme): v
 }
 
 export function desktopWindowTitleBarDoubleClick(window: Pointer): void {
-  // AppleActionOnDoubleClick is a macOS NSUserDefaults setting; the Linux window manager handles double-clicks natively.
-  if (!DESKTOP.isDarwin) {
+  if (DESKTOP.platform !== 'macos') {
     return;
   }
 

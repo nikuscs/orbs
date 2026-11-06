@@ -1,6 +1,7 @@
 import { lookup } from 'node:dns/promises';
 import { existsSync } from 'node:fs';
 import { hostname, networkInterfaces } from 'node:os';
+import { match } from 'ts-pattern';
 import { DESKTOP_BUILD } from './desktop-build';
 import { DESKTOP } from './desktop.constants';
 import { desktopHealth, desktopTailscaleStatus } from './types/desktop.types';
@@ -24,8 +25,16 @@ export function desktopNetworkUrl(host: string, port: number): string {
   return `http://${host.includes(':') ? `[${host}]` : host}:${port}`;
 }
 
+/** The Tailscale CLI: macOS installs it at fixed paths, Linux packages put it on `PATH`. */
+function desktopTailscaleBinary(): string | null {
+  return match(DESKTOP.platform)
+    .with('macos', () => DESKTOP.tailscaleBinaries.find((path) => existsSync(path)) ?? null)
+    .with('linux', () => Bun.which('tailscale'))
+    .exhaustive();
+}
+
 export async function desktopNetworkOrigins(port: number): Promise<DesktopTypes.DesktopOrigins> {
-  const binary = DESKTOP.tailscaleBinaries.find((path) => existsSync(path));
+  const binary = desktopTailscaleBinary();
 
   if (!binary) {
     return { tailscale: 'missing', urls: [] };
@@ -44,7 +53,7 @@ export async function desktopNetworkOrigins(port: number): Promise<DesktopTypes.
 }
 
 export async function desktopNetworkTailscale(address: string): Promise<boolean> {
-  const binary = DESKTOP.tailscaleBinaries.find((candidate) => existsSync(candidate));
+  const binary = desktopTailscaleBinary();
 
   if (!binary) {
     return false;
@@ -119,7 +128,6 @@ export function desktopNetworkHost(): string {
 }
 
 export function desktopNetworkAdvertise(port: number): () => void {
-  // /usr/bin/dns-sd is built-in on macOS; on Linux, fall back silently if not installed.
   if (!existsSync(DESKTOP.find.dnsSd)) {
     return () => undefined;
   }
@@ -142,7 +150,6 @@ export async function desktopNetworkFind(server: DesktopTypes.DesktopServer | nu
   }
 
   async function desktopNetworkBonjour(): Promise<DesktopTypes.DesktopFound[]> {
-    // /usr/bin/dns-sd is built-in on macOS; if absent on Linux, skip Bonjour and fall back to candidate port probing.
     if (!existsSync(DESKTOP.find.dnsSd)) {
       return [];
     }
@@ -160,7 +167,7 @@ export async function desktopNetworkFind(server: DesktopTypes.DesktopServer | nu
   }
 
   async function desktopNetworkPeers(): Promise<DesktopTypes.DesktopFound[]> {
-    const binary = DESKTOP.tailscaleBinaries.find((candidate) => existsSync(candidate));
+    const binary = desktopTailscaleBinary();
     const status = binary ? desktopTailscaleStatus.safeParse(await desktopTailscaleJson(binary)) : null;
     const peers = status?.success ? Object.values(status.data.Peer ?? {}).filter((peer) => peer.Online !== false) : [];
 

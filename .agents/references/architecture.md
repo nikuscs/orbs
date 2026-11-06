@@ -77,7 +77,7 @@ flowchart TB
 | client `src/entry.{client,react,web,native}.ts` | clients | RPC client; React hooks; DOM-only and Expo-only hooks |
 | web `src/application/server.bun.ts` | Bun | production web server: SSR and the `/rpc` proxy |
 | mobile `src/app/_layout.tsx` | iOS | Expo Router root: providers, connection, push |
-| desktop `src/desktop.ts` | Electrobun | the macOS app: window, tray, local or remote server |
+| desktop `src/desktop.ts` | Electrobun | the macOS and Linux app: window, tray, local or remote server |
 
 ### Naming
 
@@ -196,7 +196,7 @@ apps/desktop/
 ├── icon.icon/                          the app icon
 └── src/
     ├── desktop.ts                      the main process: windows, tray, menus, local or remote server
-    ├── desktop-<concern>.ts            one concern: build, network, notify, objc, server, settings, window
+    ├── desktop-<concern>.ts            one concern: build, launch, network, notify, objc, server, settings, window
     ├── desktop.constants.ts            ports, labels and limits
     ├── types/desktop.types.ts          desktop types
     └── views/<name>/index.{html,ts}    a bundled webview page

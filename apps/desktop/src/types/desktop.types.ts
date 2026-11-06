@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { RPCSchema } from 'electrobun';
 
+export type DesktopPlatform = 'macos' | 'linux';
+
 export const desktopNetwork = z.enum(['all', 'local', 'custom']);
 
 const desktopTheme = z.enum(['light', 'dark']);

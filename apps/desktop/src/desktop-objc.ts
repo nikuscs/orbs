@@ -1,18 +1,12 @@
-/**
- * macOS Objective-C runtime bridge via Bun FFI.
- * Dynamically loads libobjc and libSystem on Darwin only; on non-macOS platforms,
- * all functions safely return null / no-op to allow unconditional imports without crashing.
- */
-
 import { dlopen, FFIType, JSCallback, ptr } from 'bun:ffi';
 import { DESKTOP } from './desktop.constants';
 import type { Pointer } from 'bun:ffi';
 
-const { isDarwin } = DESKTOP;
+const isMacos = DESKTOP.platform === 'macos';
 const objcPath = '/usr/lib/libobjc.A.dylib';
 
 function desktopObjcSend(args: FFIType[]): (...values: unknown[]) => Pointer | null {
-  if (!isDarwin) {
+  if (!isMacos) {
     return () => null;
   }
 
@@ -22,14 +16,14 @@ function desktopObjcSend(args: FFIType[]): (...values: unknown[]) => Pointer | n
   return (...values) => send(...values) as Pointer | null;
 }
 
-const objc = isDarwin
+const objc = isMacos
   ? dlopen(objcPath, {
     objc_getClass: { args: [FFIType.ptr], returns: FFIType.ptr },
     sel_registerName: { args: [FFIType.ptr], returns: FFIType.ptr },
   })
   : null;
 
-const system = isDarwin
+const system = isMacos
   ? dlopen('/usr/lib/libSystem.B.dylib', {
     dlopen: { args: [FFIType.ptr, FFIType.i32], returns: FFIType.ptr },
     dlsym: { args: [FFIType.ptr, FFIType.ptr], returns: FFIType.ptr },
@@ -53,7 +47,7 @@ export const desktopSend = {
 
 const BLOCK_IS_GLOBAL = 1 << 28;
 
-const blockIsa = isDarwin && system
+const blockIsa = system
   ? system.symbols.dlsym(system.symbols.dlopen(null, 0), desktopCString('_NSConcreteGlobalBlock'))
   : null;
 
@@ -66,32 +60,24 @@ function desktopCString(text: string): Buffer {
   return Buffer.from(`${text}\0`);
 }
 
-export function desktopSelector(name: string): Pointer | null {
-  return objc ? (objc.symbols.sel_registerName(desktopCString(name)) as Pointer | null) : null;
+export function desktopSelector(name: string) {
+  return objc ? objc.symbols.sel_registerName(desktopCString(name)) : null;
 }
 
-export function desktopClass(name: string): Pointer | null {
-  return objc ? (objc.symbols.objc_getClass(desktopCString(name)) as Pointer | null) : null;
+export function desktopClass(name: string) {
+  return objc ? objc.symbols.objc_getClass(desktopCString(name)) : null;
 }
 
 export function desktopString(text: string) {
-  if (!isDarwin) {
-    return null;
-  }
-
   return desktopSend.one(desktopClass('NSString'), desktopSelector('stringWithUTF8String:'), desktopCString(text));
 }
 
 export function desktopNew(name: string) {
-  if (!isDarwin) {
-    return null;
-  }
-
   return desktopSend.none(desktopSend.none(desktopClass(name), desktopSelector('alloc')), desktopSelector('init'));
 }
 
 export function desktopFramework(path: string): void {
-  if (isDarwin && system) {
+  if (system) {
     system.symbols.dlopen(desktopCString(path), 1);
   }
 }

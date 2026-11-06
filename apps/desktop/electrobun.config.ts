@@ -25,7 +25,6 @@ export default {
       icons: 'icon.icon',
     },
     linux: {
-      // Use native WebKitGTK renderer and provide standard application icon for .desktop generation.
       defaultRenderer: 'native',
       icon: 'icon.png',
     },

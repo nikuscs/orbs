@@ -27,11 +27,6 @@ function desktopUpdateTeam(app: string): string | null {
 
 /** Electrobun checks only the release identity and build hash, so the downloaded app must also be signed by the same team and accepted by Gatekeeper. */
 async function desktopUpdateVerify(): Promise<boolean> {
-  // Apple Gatekeeper (spctl), code signing (codesign), and .app bundles are macOS-specific.
-  if (!DESKTOP.isDarwin) {
-    return false;
-  }
-
   const prepared = desktopUpdatePrepared.safeParse(JSON.parse(readFileSync(join(await Updater.appDataFolder(), DESKTOP.update.preparedFile), 'utf8')));
   const team = desktopUpdateTeam(resolve(dirname(process.execPath), '..', '..'));
 
@@ -101,6 +96,11 @@ export function desktopUpdateCheck(): Promise<DesktopUpdateState> {
 
 /** Only packaged stable builds update; dev and canary builds keep their own version. */
 export async function desktopUpdateStart(onChange: (next: DesktopUpdateState) => void): Promise<boolean> {
+  // Releases ship only signed macOS builds, and verification needs codesign and Gatekeeper.
+  if (DESKTOP.platform !== 'macos') {
+    return false;
+  }
+
   const { channel, version } = await Updater.getLocalInfo();
 
   if (channel !== DESKTOP.update.channel) {
