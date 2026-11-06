@@ -97,6 +97,7 @@ function BotSettingsScreenForm({ session, bot, isDeletable }: BotSettingsScreenF
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
       sharedMcp: bot.sharedMcp,
+      disabledSkills: bot.disabledSkills,
     },
   });
 
@@ -134,7 +135,7 @@ function BotSettingsScreenForm({ session, bot, isDeletable }: BotSettingsScreenF
   const isBusy = save.isPending;
   const prefill = (text: string) => returnToChat({ botId: bot.id, prefill: text });
 
-  const submit = form.handleSubmit(({ sharedSkills: _skills, sharedMcp: _mcp, ...input }: BotForm) => save.mutate({
+  const submit = form.handleSubmit(({ sharedSkills: _skills, sharedMcp: _mcp, disabledSkills: _disabled, ...input }: BotForm) => save.mutate({
     ...input,
     inherit: [
       ...input.inherit.filter((resource) => !BOT_SHARED_RESOURCES.includes(resource)),

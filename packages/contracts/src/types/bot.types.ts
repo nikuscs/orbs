@@ -39,6 +39,7 @@ export const botFields = z.object({
   inherit: botInherit,
   sharedSkills: z.array(z.string().trim().min(1).max(128)).max(500).nullable(),
   sharedMcp: z.array(z.string().trim().min(1).max(128)).max(200).nullable(),
+  disabledSkills: z.array(z.string().trim().min(1).max(128)).max(500).nullable(),
 });
 
 export const bot = botFields.extend({
@@ -59,6 +60,7 @@ export const botCreate = botFields.extend({
   inherit: botInherit.default(['skills', 'mcp', 'plugins']),
   sharedSkills: botFields.shape.sharedSkills.default(null),
   sharedMcp: botFields.shape.sharedMcp.default(null),
+  disabledSkills: botFields.shape.disabledSkills.default(null),
 });
 
 export const botUpdate = botFields.partial().extend(botGet.shape);

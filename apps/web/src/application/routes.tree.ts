@@ -34,6 +34,7 @@ import { Route as roomsRoomsDotdirectDothandleRouteImport } from "./../routes/ro
 import { Route as settingsSettingsDotmodelsDotmodelRouteImport } from "./../routes/settings/settings.models.$model";
 import { Route as settingsSettingsDotthemesDotcreateRouteImport } from "./../routes/settings/settings.themes.create";
 import { Route as artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRouteImport } from "./../routes/artifacts/artifacts.$botId.$conversationId.$artifactId";
+import { Route as botsBotsDotbotIdDotskillsDotlocalRouteImport } from "./../routes/bots/bots.$botId.skills.local";
 import { Route as roomsRoomsDotdirectDothandleDotactivityRouteImport } from "./../routes/rooms/rooms.direct.$handle.activity";
 import { Route as roomsRoomsDotdirectDothandleDotmediaRouteImport } from "./../routes/rooms/rooms.direct.$handle.media";
 import { Route as roomsRoomsDotdirectDothandleDotresetRouteImport } from "./../routes/rooms/rooms.direct.$handle.reset";
@@ -184,6 +185,12 @@ const artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRoute =
     path: "/$botId/$conversationId/$artifactId",
     getParentRoute: () => artifactsArtifactsRoute,
   } as any);
+const botsBotsDotbotIdDotskillsDotlocalRoute =
+  botsBotsDotbotIdDotskillsDotlocalRouteImport.update({
+    id: "/skills/local",
+    path: "/skills/local",
+    getParentRoute: () => botsBotsDotbotIdRoute,
+  } as any);
 const roomsRoomsDotdirectDothandleDotactivityRoute =
   roomsRoomsDotdirectDothandleDotactivityRouteImport.update({
     id: "/activity",
@@ -294,6 +301,7 @@ export interface FileRoutesByFullPath {
   "/settings/themes/create": typeof settingsSettingsDotthemesDotcreateRoute;
   "/bots/$botId/": typeof botsBotsDotbotIdDotindexRoute;
   "/artifacts/$botId/$conversationId/$artifactId": typeof artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRoute;
+  "/bots/$botId/skills/local": typeof botsBotsDotbotIdDotskillsDotlocalRoute;
   "/rooms/direct/$handle/activity": typeof roomsRoomsDotdirectDothandleDotactivityRouteWithChildren;
   "/rooms/direct/$handle/media": typeof roomsRoomsDotdirectDothandleDotmediaRouteWithChildren;
   "/rooms/direct/$handle/reset": typeof roomsRoomsDotdirectDothandleDotresetRoute;
@@ -330,6 +338,7 @@ export interface FileRoutesByTo {
   "/settings/themes/create": typeof settingsSettingsDotthemesDotcreateRoute;
   "/bots/$botId": typeof botsBotsDotbotIdDotindexRoute;
   "/artifacts/$botId/$conversationId/$artifactId": typeof artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRoute;
+  "/bots/$botId/skills/local": typeof botsBotsDotbotIdDotskillsDotlocalRoute;
   "/rooms/direct/$handle/activity": typeof roomsRoomsDotdirectDothandleDotactivityRouteWithChildren;
   "/rooms/direct/$handle/media": typeof roomsRoomsDotdirectDothandleDotmediaRouteWithChildren;
   "/rooms/direct/$handle/reset": typeof roomsRoomsDotdirectDothandleDotresetRoute;
@@ -372,6 +381,7 @@ export interface FileRoutesById {
   "/_chat/settings/themes/create": typeof settingsSettingsDotthemesDotcreateRoute;
   "/_chat/bots/$botId/": typeof botsBotsDotbotIdDotindexRoute;
   "/_chat/artifacts/$botId/$conversationId/$artifactId": typeof artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRoute;
+  "/_chat/bots/$botId/skills/local": typeof botsBotsDotbotIdDotskillsDotlocalRoute;
   "/_chat/rooms/direct/$handle/activity": typeof roomsRoomsDotdirectDothandleDotactivityRouteWithChildren;
   "/_chat/rooms/direct/$handle/media": typeof roomsRoomsDotdirectDothandleDotmediaRouteWithChildren;
   "/_chat/rooms/direct/$handle/reset": typeof roomsRoomsDotdirectDothandleDotresetRoute;
@@ -414,6 +424,7 @@ export interface FileRouteTypes {
     | "/settings/themes/create"
     | "/bots/$botId/"
     | "/artifacts/$botId/$conversationId/$artifactId"
+    | "/bots/$botId/skills/local"
     | "/rooms/direct/$handle/activity"
     | "/rooms/direct/$handle/media"
     | "/rooms/direct/$handle/reset"
@@ -450,6 +461,7 @@ export interface FileRouteTypes {
     | "/settings/themes/create"
     | "/bots/$botId"
     | "/artifacts/$botId/$conversationId/$artifactId"
+    | "/bots/$botId/skills/local"
     | "/rooms/direct/$handle/activity"
     | "/rooms/direct/$handle/media"
     | "/rooms/direct/$handle/reset"
@@ -491,6 +503,7 @@ export interface FileRouteTypes {
     | "/_chat/settings/themes/create"
     | "/_chat/bots/$botId/"
     | "/_chat/artifacts/$botId/$conversationId/$artifactId"
+    | "/_chat/bots/$botId/skills/local"
     | "/_chat/rooms/direct/$handle/activity"
     | "/_chat/rooms/direct/$handle/media"
     | "/_chat/rooms/direct/$handle/reset"
@@ -693,6 +706,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof artifactsArtifactsDotbotIdDotconversationIdDotartifactIdRouteImport;
       parentRoute: typeof artifactsArtifactsRoute;
     };
+    "/_chat/bots/$botId/skills/local": {
+      id: "/_chat/bots/$botId/skills/local";
+      path: "/skills/local";
+      fullPath: "/bots/$botId/skills/local";
+      preLoaderRoute: typeof botsBotsDotbotIdDotskillsDotlocalRouteImport;
+      parentRoute: typeof botsBotsDotbotIdRoute;
+    };
     "/_chat/rooms/direct/$handle/activity": {
       id: "/_chat/rooms/direct/$handle/activity";
       path: "/activity";
@@ -813,6 +833,7 @@ interface botsBotsDotbotIdRouteChildren {
   botsBotsDotbotIdDotdeleteRoute: typeof botsBotsDotbotIdDotdeleteRoute;
   botsBotsDotbotIdDotresetRoute: typeof botsBotsDotbotIdDotresetRoute;
   botsBotsDotbotIdDotindexRoute: typeof botsBotsDotbotIdDotindexRoute;
+  botsBotsDotbotIdDotskillsDotlocalRoute: typeof botsBotsDotbotIdDotskillsDotlocalRoute;
   botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute: typeof botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute;
   botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute: typeof botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute;
   botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute: typeof botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute;
@@ -823,6 +844,8 @@ const botsBotsDotbotIdRouteChildren: botsBotsDotbotIdRouteChildren = {
   botsBotsDotbotIdDotdeleteRoute: botsBotsDotbotIdDotdeleteRoute,
   botsBotsDotbotIdDotresetRoute: botsBotsDotbotIdDotresetRoute,
   botsBotsDotbotIdDotindexRoute: botsBotsDotbotIdDotindexRoute,
+  botsBotsDotbotIdDotskillsDotlocalRoute:
+    botsBotsDotbotIdDotskillsDotlocalRoute,
   botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute:
     botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute,
   botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute:

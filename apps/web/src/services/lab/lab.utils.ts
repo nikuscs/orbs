@@ -2,26 +2,12 @@ import { CHAT, mentionHref, ROOMS } from '@repo/client/client';
 import { ENTRY } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { labArtifacts } from './lab-artifacts.utils';
+import { labBot } from './lab-bot.utils';
 import { labMediaLandscape, labMediaVoice } from './lab-media.utils';
 import { LAB_CHAT } from './lab.constants';
 import type { LabChatFixture, LabSubagentViewParams } from '@/types/lab.types';
 import type { ChatMessage, ChatPart } from '@repo/client/client';
 import type * as UniversalTypes from '@repo/contracts/universal';
-
-function labBot(bot: Pick<UniversalTypes.Bot, 'id' | 'name' | 'handle' | 'avatar' | 'modelProvider' | 'modelId'>, now: number): UniversalTypes.Bot {
-  return {
-    ...bot,
-    instructions: '',
-    thinkingLevel: 'medium',
-    fallbackModel: null,
-    permission: 'ask',
-    inherit: ['skills', 'mcp', 'plugins'],
-    sharedSkills: null,
-    sharedMcp: null,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
 
 function labMessage(entryId: number, createdAt: number, author: Pick<UniversalTypes.Bot, 'id' | 'name'> | null, role: ChatMessage['role'], parts: ChatPart[]): ChatMessage {
   return {

@@ -30,6 +30,7 @@ export interface SkillLoadParams {
   directories: string[];
   isInherited: boolean;
   sharedSkills: string[] | null;
+  disabledSkills: string[] | null;
 }
 
 export interface SkillLoadResult {
