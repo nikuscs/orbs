@@ -1,6 +1,6 @@
 # Plan: Cua computers for bots
 
-Status: approved by the owner, phase 1 next. Each phase gets its own detailed plan before code.
+Status: approved by the owner; phase 1 spike done, phase 2 next. Each phase gets its own detailed plan before code.
 
 ## Goal
 
@@ -42,6 +42,21 @@ Repos read at their main branch on the plan dates (2026-10-24, updated 2026-11-0
 
 - `@trycua/cua` 0.10.1 on npm: the cua SDK for Node and the browser on a Rust core (`@ubjs/core`, `@ubjs/node`). Its `SpacesdClient` has `callJson(method, json)` for unary `cua.env.v1` RPCs in proto3-JSON, plus `spawn`, `upload` and `download`. Whether Bun loads it is checked in phase 1.
 - `@trycua/pi-durable` 0.1.0 (MIT, not on npm, `libs/cua/typescript/integrations/pi-durable`): `SpacesExecutionEnv`, Pi's `ExecutionEnv` on a Space (needs the `process.exec_ledger` capability), and `durableSpaces()` with fenced commands and workspace or machine checkpoints that keep a Space consistent with the conversation log across crashes. It has no computer-use tools; it is the base for running a bot's file and shell tools inside its computer later.
+
+**Phase 1 spike results (2026-11-06, arm64, Docker Desktop)**
+
+- Run: `docker run -d --shm-size=1g --memory=1536m --cpus=1 --security-opt seccomp=<narrowed profile> -p 127.0.0.1::3211 -v <home volume>:/home/cua -v <token file>:/etc/cua/env-token:ro ghcr.io/trycua/linux:docker-build-slim-20261003-66e0b66-arm64`. The image copies the token file to `/run/cua/env-token`, so the token never shows in `docker inspect`. The host port changes on every start; read it with `docker port`.
+- Client: `@trycua/cua` 0.10.1 loads under Bun (native darwin-arm64 binding, about 1.9 s first import). `embedded().spacesd(url, token)` then `callJson('cua.env.v1.<Service>/<Method>', json)` covers Screenshot, Pointer, Keyboard, Windows, Accessibility, GetCapabilities and CreateViewerTicket; `spawn()` starts processes; `forwardTcp(port)` tunnels a container port to host loopback. spacesd only accepts gRPC-Web with protobuf bodies, so plain fetch JSON does not work. `/mcp` works through `@earendil-works/pi-mcp` but lists 59 tools and about 188 KB of schemas.
+- The image ships spacesd 0.2.2 (protocol rev 8). The 0.12.1 release binary (rev 13, adds `process.exec_ledger`, `process.services`, `run_as`) bind-mounted read-only over `/usr/local/bin/cua-spacesd` starts and serves screenshots and tickets. Pin SDK and binary together.
+- Capabilities: a11y, windows, desktop and window stream, `h264_sw`, clipboard, `tunnel.forward`, presence. Not `h264_hw`. Background input is limited (GTK and Chromium ignore XSendEvent), so use `DELIVERY_FOREGROUND` on the display; the whole screen is the bot's anyway.
+- Screenshots: spacesd scales and encodes itself (`format`, `quality`, `maxDimension`, `region`, `window`). A 320 px JPEG thumbnail is about 3.4 KB in 4 ms; a full JPEG about 36 KB. Pointer and keyboard calls take 1 to 4 ms; wait 300 to 500 ms after input before the next read. The accessibility tree takes 300 to 550 ms.
+- Chromium: launch `/opt/cua/bin/cua-chromium` through `spawn()` with `DISPLAY=:1`, `--remote-debugging-port=9222`, `--force-renderer-accessibility` (without it the tree is one node) and a profile in `/home/cua`. With the narrowed seccomp profile it runs fully sandboxed; with Docker's default profile the wrapper falls back to `--no-sandbox`. `forwardTcp(9222)` plus Playwright `connectOverCDP` works (41 ms connect). Killed Chromium processes stay defunct; avoid killing, restart the container instead. Processes do not restart after `docker start`, so Orbs relaunches Chromium.
+- cua-driver's browser tools (`browser_prepare`, `semantic_v2` refs) work but were fragile in the spike; Playwright over CDP is the browser path.
+- Viewer: tickets work for view-only and full input (principal `{ id, displayName }`), and the policy is enforced by spacesd. The viewer, its gRPC-Web calls and the `/media` WebSocket work through a Bun reverse proxy under `/computers/<id>/`. Viewer URL options include `view_only`, `codec=png`, `fps`, `scale`; there is no window option.
+- No input lease or take-over RPC in 0.2.2. Take over is Orbs policy: while a full-input ticket is live, the bot's acting tools wait or refuse.
+- Lifecycle: cold start 2.9 s, `docker start` 1.95 s, `stop` 2.5 s, `pause` and `unpause` under 70 ms. SDK, MCP, CDP and tunnel connections survive a pause. The Chromium profile (cookies, localStorage) survives stop and start.
+- Memory: 207 MiB idle without Chromium, 443 to 660 MiB with Chromium, the same while paused (pause frees CPU, not memory).
+- Gaps: no CJK fonts in the image; Chromium opens at 1050x753 instead of full screen; `docker pull` from Orbs should use the Docker API with empty registry auth, since the CLI may hit a locked keychain.
 
 **Orbs**
 
@@ -192,8 +207,7 @@ Auth: only a paired device can call `computer.viewer`. Tickets last 10 minutes, 
 
 ## Open questions
 
-- Does the image's Chromium sandbox work with the narrowed seccomp profile? Check in phase 1.
-- Can the viewer open a given window target from its URL, or does the window pick need a small change? Check in phase 1.
+- Opening one window in the viewer needs a viewer change (no window option); the container always shows the whole display, so this only matters for the host.
 - Should a computer be reachable from outside the LAN only through Tailscale, or also through Cua's relay? Default Tailscale only.
 - Later: run a bot's file and shell tools inside its computer (`SpacesExecutionEnv`, MIT, Linux only).
 
