@@ -1,5 +1,5 @@
 import type * as ClientTypes from '@repo/client/client';
-import type { ToolCallArtifact } from '@repo/contracts/universal';
+import type { GifToolDetails, ToolCallArtifact } from '@repo/contracts/universal';
 
 type ChatSearchParams = Record<string, string | string[] | undefined>;
 
@@ -61,6 +61,7 @@ export interface ChatTextRouteParams extends ChatSearchParams {
 export type ChatMessagePart =
   | { key: string; kind: 'markdown' | 'html'; text: string; isStreaming: boolean }
   | { key: string; kind: 'artifact'; artifact: ToolCallArtifact }
+  | { key: string; kind: 'gif'; gif: GifToolDetails }
   | { key: string; kind: 'files'; files: ClientTypes.RoomsFilePart[] };
 
 export type ChatMessageSegment =

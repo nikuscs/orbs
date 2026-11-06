@@ -89,6 +89,7 @@ export function makeRuntimeService({
   env,
   permissions,
   collaboration: policy,
+  gifs,
   images,
   secrets,
   toolExtensions = [],
@@ -98,7 +99,7 @@ export function makeRuntimeService({
   const directory = runtimeDirectory({ open: (botId) => runtimeBotOpen(shared, botId) });
   const collaboration = makeCollaborationExtensionService({ policy, directory });
   const questions = makeQuestionExtensionService();
-  const chatTools = runtimeChatToolsExtension();
+  const chatTools = runtimeChatToolsExtension({ gifs });
   const toolSearch = createToolSearchExtension();
   const subagents = makeSubagentExtensionService();
   const routines = makeRoutineExtensionService();

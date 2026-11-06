@@ -163,6 +163,14 @@ function release() {
   run(['ditto', '-c', '-k', '--keepParent', app, zip]);
   run(['spctl', '--assess', '--type', 'execute', app]);
   rmSync(temp, { recursive: true, force: true });
+
+  // The in-app updater downloads the manifest Electrobun wrote and a bundle of this signed, stapled app under the same name.
+  const manifest = JSON.parse(readFileSync(path.join(desktop, 'artifacts/stable-macos-arm64-update.json'), 'utf8'));
+  const updateTar = path.join(desktop, 'artifacts', `${manifest.artifact.file}.tar`);
+
+  run(['tar', '--no-mac-metadata', '-cf', updateTar, '-C', path.dirname(app), path.basename(app)], { ...process.env, COPYFILE_DISABLE: '1' });
+  writeFileSync(path.join(desktop, 'artifacts', manifest.artifact.file), Bun.zstdCompressSync(readFileSync(updateTar)));
+  rmSync(updateTar);
   console.log(`Notarized: ${zip}`);
 }
 

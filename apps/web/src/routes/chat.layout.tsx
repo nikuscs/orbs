@@ -9,6 +9,7 @@ import { match } from 'ts-pattern';
 import { LayoutShellDashboard } from '@/components/layout/layout-shell-dashboard';
 import { RoomsDetails } from '@/components/rooms/rooms-details';
 import { RoomsSearch } from '@/components/rooms/rooms-search';
+import { useDesktopUpdateToast } from '@/hooks/use-desktop-update-toast';
 import { useLayoutShortcuts } from '@/hooks/use-layout-shortcuts';
 import { useRoomsNotify } from '@/hooks/use-rooms-notify';
 import { layoutSidebarsOpen } from '@/services/layout/layout.client';
@@ -53,6 +54,7 @@ export const Route = createFileRoute('/_chat')({
 function RoomsLayout() {
   useChatListSync();
   useRoomsNotify();
+  useDesktopUpdateToast();
   useRoomsPresence();
   useLayoutShortcuts();
   const { sidebars, connection } = Route.useLoaderData();

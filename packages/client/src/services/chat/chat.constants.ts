@@ -1,4 +1,11 @@
 export const CHAT = {
+  activityDetailMaxLength: 160,
+  activityElapsedMinSeconds: 5,
+  preambleMaxLength: 200,
+  preambleKey: 'orbsPreamble',
+  preambleMetadata: { orbsPreamble: {} },
+  commentaryPhase: '"phase":"commentary"',
+  finalAnswerPhase: '"phase":"final_answer"',
   contextWarningPercent: 60,
   contextCriticalPercent: 80,
   attachmentScheme: 'attachment:',

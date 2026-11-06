@@ -1,14 +1,14 @@
 import type { ChatMessage } from './chat.types';
 import type { ToolEvent } from './tool-event.types';
-import type { Bot, ToolCallArtifact, ToolCallSubagent } from '@repo/contracts/universal';
+import type * as UniversalTypes from '@repo/contracts/universal';
 import type { DynamicToolUIPart } from 'ai';
 
-export interface ToolSubagent extends ToolCallSubagent {
+export interface ToolSubagent extends UniversalTypes.ToolCallSubagent {
   conversationId?: number;
 }
 
 export interface ToolPeer {
-  peer: Bot;
+  peer: UniversalTypes.Bot;
   conversationId: number | undefined;
 }
 
@@ -26,7 +26,8 @@ export type ToolBlock =
   | { kind: 'tools'; index: number; parts: DynamicToolUIPart[] }
   | { kind: 'events'; index: number; events: ToolEvent[] }
   | { kind: 'failure'; index: number; text: string }
-  | { kind: 'artifact'; index: number; artifact: ToolCallArtifact }
+  | { kind: 'artifact'; index: number; artifact: UniversalTypes.ToolCallArtifact }
+  | { kind: 'gif'; index: number; gif: UniversalTypes.GifToolDetails }
   | { kind: 'subagent'; index: number; part: DynamicToolUIPart; subagent: ToolSubagent };
 
 export interface ToolInputTextParams {
@@ -39,7 +40,7 @@ export interface ToolInputText {
   value: string;
 }
 
-export type ToolBot = Pick<Bot, 'name'> & Partial<Pick<Bot, 'avatar'>>;
+export type ToolBot = Pick<UniversalTypes.Bot, 'name'> & Partial<Pick<UniversalTypes.Bot, 'avatar'>>;
 
 export type ToolIconKind = 'terminal' | 'file' | 'edit' | 'search' | 'bot' | 'model' | 'question' | 'secret' | 'routine' | 'todo' | 'artifact' | 'mcp' | 'tool';
 
@@ -72,4 +73,9 @@ export interface ToolCollapsedParams {
 
 export interface ToolGroupStateParams {
   parts: DynamicToolUIPart[];
+}
+
+export interface ToolActivityLabel {
+  plain: () => string;
+  detail?: (detail: string) => string;
 }

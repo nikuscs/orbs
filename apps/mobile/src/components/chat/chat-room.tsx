@@ -1,5 +1,5 @@
 import { useKeyboardChatComposerInset } from '@legendapp/list/keyboard';
-import { botBubble, CHAT, roomsMessageText, roomsReactionGroups, roomsTimeLabel } from '@repo/client/client';
+import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, roomsMessageText, roomsReactionGroups, roomsTimeLabel } from '@repo/client/client';
 import { useChatUnread } from '@repo/client/native';
 import { chatQueries, useChatPendingSync, useChatReaction, useChatRoom } from '@repo/client/react';
 import { getLocale, m } from '@repo/i18n/client';
@@ -217,9 +217,10 @@ function ChatRoomView({ session, bot, bots, view, focusEntryId, replyToEntryId, 
               approvals={room.approvals}
               bot={bot}
               bots={bots}
-              draft={messages.find((message) => message.id === CHAT.liveMessageId)}
+              draft={chatActivityMessage(messages)}
               failure={room.failure}
               questions={room.questions}
+              startedAt={chatActivityStartedAt(messages)}
             />
           )}
           keyExtractor={(message) => message.id}

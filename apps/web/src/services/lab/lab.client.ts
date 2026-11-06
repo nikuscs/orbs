@@ -16,7 +16,11 @@ export function labChatQueryClient({ artifacts, bot, bots, subagentViews, subage
   });
 
   queryClient.setQueryData(rpc.bots.list.queryKey(), bots);
-  queryClient.setQueryData(rpc.conversation.settings.queryKey(), { whenBusy: 'followUp', hideVerbose: false });
+  queryClient.setQueryData(rpc.conversation.settings.queryKey(), {
+    whenBusy: 'followUp',
+    hideVerbose: false,
+    gifProvider: 'emoji',
+  });
   for (const artifact of artifacts) {
     const target = { botId: artifact.botId, conversationId: artifact.conversationId, artifactId: artifact.id };
 

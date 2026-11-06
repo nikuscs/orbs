@@ -75,6 +75,7 @@ export function chatMessageSegments(message: ChatMessage, hideVerbose: boolean):
         kind: 'artifact',
         artifact: artifact.artifact,
       }])
+      .with({ kind: 'gif' }, (gif) => [{ key: `${block.index}`, kind: 'gif', gif: gif.gif }])
       .otherwise(() => []);
 
     const last = segments.at(-1);
