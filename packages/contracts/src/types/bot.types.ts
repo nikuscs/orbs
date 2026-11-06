@@ -7,6 +7,10 @@ import { modelSelection, modelThinkingLevel } from './model.types';
 import { pluginCatalog } from './plugin.types';
 import { skill } from './skill.types';
 
+export const BOT_FIELDS = {
+  maxInstructions: 64_000,
+} as const;
+
 export const botAvatarImage = z.object({ kind: z.literal('image'), src: z.string().regex(/^\/avatars\/[\da-f-]{36}\.webp$/) });
 
 export const botAvatar = z.discriminatedUnion('kind', [
@@ -32,7 +36,7 @@ export const botFields = z.object({
   avatar: botAvatar.nullable(),
   name: z.string().trim().min(1).max(64),
   handle: z.string().trim().toLowerCase().min(1).max(48).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { error: 'validation_handle' }),
-  instructions: z.string().max(16000),
+  instructions: z.string().max(BOT_FIELDS.maxInstructions),
   ...modelSelection.shape,
   fallbackModel: modelSelection.nullable(),
   permission: z.enum(['read-only', 'ask', 'auto', 'full']),

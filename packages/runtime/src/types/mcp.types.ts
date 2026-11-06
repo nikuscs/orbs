@@ -11,11 +11,30 @@ export interface McpClientServiceDeps {
   connections: Map<string, McpConnection>;
 }
 
+export interface McpContentTarget {
+  root: string;
+  botId: string;
+}
+
+export interface McpContentFile {
+  uri?: string;
+  mimeType?: string;
+  data: string;
+}
+
+export interface McpContentWriteTarget {
+  directory: string;
+  base: string;
+  extension: string;
+  bytes: Buffer;
+}
+
 export interface McpEntry {
   name: string;
   source: string;
   config: z.infer<typeof mcpServer>;
   isBotLocal: boolean;
+  isOwned?: true;
   sourceFingerprint?: string;
 }
 

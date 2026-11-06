@@ -1,6 +1,6 @@
 {
   "name": "orbs",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -162,8 +162,10 @@
       "@pierrecapo/expo-notification-service-extension": "0.2.0"
     }
   },
+  "dependencies": {
+    "@expo/fingerprint": "catalog:mobile"
+  },
   "devDependencies": {
-    "@expo/fingerprint": "catalog:mobile",
     "@repo/contracts": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "oxlint": "catalog:",
@@ -190,7 +192,7 @@
     "dev:mobile:native": "turbo run dev:native --filter=@repo/mobile --log-prefix=none --env-mode=loose",
     "clean": "sh -c 'set -eu; rm -rf .local logs coverage playwright-report test-results .cache apps/mobile/ios apps/mobile/android \"${TMPDIR:-/tmp}\"/metro-* \"${TMPDIR:-/tmp}\"/haste-* \"$HOME\"/Library/Developer/Xcode/DerivedData/OrbsDev-*; watchman watch-del-all >/dev/null 2>&1 || true; for root in packages apps .; do [ -d \"$root\" ] || continue; for name in node_modules .turbo dist build .output .nitro .tanstack .vite .expo .content-collections .bundle-stats coverage playwright-report test-results .cache .fallow; do find \"$root\" -type d -name \"$name\" -prune -exec rm -rf {} +; done; done; find . \\( -name tsconfig.tsbuildinfo -o -name \"*.log\" \\) -delete'",
     "dev:pair": "bun run --cwd apps/daemon dev:pair",
-    "dev:desktop": "turbo run dev:macos --filter=@repo/desktop --log-prefix=none --env-mode=loose",
+    "dev:desktop": "turbo run dev:app --filter=@repo/desktop --log-prefix=none --env-mode=loose",
     "release:desktop": "bun --env-file=.env scripts/desktop.ts release",
     "release:ios": "bun run --cwd apps/mobile eas:testflight",
     "release:ios-expo": "bun run --cwd apps/mobile eas:testflight:cloud",

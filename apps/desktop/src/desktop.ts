@@ -1,14 +1,16 @@
 import { m } from '@repo/i18n/client';
 import Electrobun, { ApplicationMenu, BrowserView, BrowserWindow, PATHS, Screen, Tray, Utils } from 'electrobun/main';
+import { join } from 'node:path';
 import { DESKTOP_BUILD } from './desktop-build';
+import { desktopLaunchAtLogin, desktopLaunchAtLoginSet, desktopLaunchClaim, desktopLaunchPrepare, desktopLaunchRelease } from './desktop-launch';
 import { desktopNetworkFind, desktopNetworkHost, desktopNetworkProbe, desktopNetworkSelf, desktopNetworkTailscale } from './desktop-network';
 import { desktopNotify } from './desktop-notify';
-import { desktopProcessRuns, desktopServerLeftovers, desktopServerPairLink, desktopServerStart } from './desktop-server';
-import { desktopLoginEnabled, desktopLoginSet, desktopSettingsPrompt, desktopSettingsRead, desktopSettingsWrite, desktopStateRead, desktopStateWrite } from './desktop-settings';
+import { desktopServerLeftovers, desktopServerPairLink, desktopServerStart } from './desktop-server';
+import { desktopSettingsPrompt, desktopSettingsRead, desktopSettingsWrite, desktopStateRead, desktopStateWrite } from './desktop-settings';
 import { desktopUpdateApply, desktopUpdateCheck, desktopUpdateStart, desktopUpdateState } from './desktop-update';
 import { desktopWindowAppearance, desktopWindowTitleBarDoubleClick, desktopWindowToolbar } from './desktop-window';
 import { DESKTOP } from './desktop.constants';
-import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopPairMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage, desktopUpdateMessage } from './types/desktop.types';
+import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopPairMessage, desktopQuitMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage, desktopUpdateMessage } from './types/desktop.types';
 import type * as DesktopTypes from './types/desktop.types';
 import type { ElectrobunEvent } from 'electrobun/main';
 
@@ -25,8 +27,10 @@ let updates = false;
 
 const appName = DESKTOP_BUILD.name;
 
+desktopLaunchPrepare();
+
 const headless = process.env[DESKTOP.headless.env] === '1';
-const atLogin = process.env[DESKTOP.login.env] === '1';
+const atLogin = process.env[DESKTOP.launch.loginEnv] === '1';
 // Electrobun always enables the WebKit inspector, so release builds hide the native menu that offers "Inspect Element".
 const nativeMenuBlock = process.env.DESKTOP_WEB_DEV ? '' : "window.addEventListener('contextmenu', (event) => event.preventDefault());";
 // The webview has no navigator.clipboard on plain-http remote origins, so copies always go through the host.
@@ -35,9 +39,13 @@ const clipboardBridge = "{ const copy = (text) => { window.__electrobunSendToHos
 // This Mac's own daemon pairs the app without a code: the connect page asks the host for a one-time link.
 const pairBridge = "if (location.pathname === '/connect' && !location.hash.includes('code=')) window.__electrobunSendToHost({ pair: true });";
 const titleBarBridge = "window.addEventListener('dblclick', (event) => { const target = event.target instanceof Element ? event.target : null; if (target?.closest('.electrobun-webkit-app-region-drag') && !target.closest('.electrobun-webkit-app-region-no-drag')) window.__electrobunSendToHost({ titleBar: 'double-click' }); });";
+// Linux has no application menu, so Ctrl+Q in the webview quits through the host, which stops the local server first.
+const quitBridge = DESKTOP.platform === 'linux' ? "window.addEventListener('keydown', (event) => { if (event.ctrlKey && event.code === 'KeyQ') window.__electrobunSendToHost?.({ quit: true }); });" : '';
 
 function desktopDockSync(): void {
-  Utils.setDockIconVisible(Boolean(mainWindow ?? connectWindow));
+  if (DESKTOP.platform === 'macos') {
+    Utils.setDockIconVisible(Boolean(mainWindow ?? connectWindow));
+  }
 }
 
 function desktopRemote(): string | undefined {
@@ -94,7 +102,7 @@ function desktopTrayRender(): void {
       { type: 'separator' },
       { type: 'normal', label: m.desktop_update_restart({ version: update.available ?? '' }), action: 'update:apply', hidden: update.status !== 'ready', enabled: !busy },
       { type: 'normal', label: desktopUpdateLabel(), action: 'update:check', hidden: !updates || update.status === 'ready', enabled: !busy && update.status !== 'checking' && update.status !== 'downloading' },
-      { type: 'normal', label: m.desktop_tray_login(), action: 'login', checked: desktopLoginEnabled() },
+      { type: 'normal', label: m.desktop_tray_login(), action: 'login', checked: desktopLaunchAtLogin() },
       { type: 'separator' },
       { type: 'normal', label: m.desktop_tray_quit({ name: appName }), action: 'quit', enabled: !busy },
     ] as const,
@@ -204,7 +212,7 @@ function desktopMainOpen(url: string): void {
   const window = new BrowserWindow({
     title: appName,
     url,
-    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${desktopUpdateScript()} ${clipboardBridge} ${titleBarBridge} ${server?.canAutoPair && new URL(url).origin === new URL(server.url).origin ? pairBridge : ''} ${nativeMenuBlock}`,
+    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${desktopUpdateScript()} ${clipboardBridge} ${titleBarBridge} ${quitBridge} ${server?.canAutoPair && new URL(url).origin === new URL(server.url).origin ? pairBridge : ''} ${nativeMenuBlock}`,
     frame: saved && desktopFrameVisible(saved) ? saved : desktopFrameDefault(),
     titleBarStyle: 'hiddenInset',
     trafficLightOffset: DESKTOP.mainWindow.trafficLights,
@@ -236,6 +244,10 @@ function desktopMainOpen(url: string): void {
 
     if (pointer && desktopTitleBarMessage.safeParse(event).success) {
       desktopWindowTitleBarDoubleClick(pointer);
+    }
+
+    if (desktopQuitMessage.safeParse(event).success) {
+      Utils.quit(0);
     }
 
     if (desktopConnectionMessage.safeParse(event).success) {
@@ -285,13 +297,20 @@ async function desktopServerRun(settings: DesktopTypes.DesktopSettings, open = t
     server = started;
     desktopTrayRender();
 
-    if (headless || atLogin) {
-      void started.exited.then(() => {
-        if (server === started && !quitting) {
-          process.kill(process.pid, 'SIGKILL');
-        }
-      });
-    }
+    void started.exited.then(() => {
+      if (server !== started || quitting) {
+        return;
+      }
+
+      // Headless and macOS login launches exit with their server, and launchd's KeepAlive restarts the login launch; otherwise the tray switches to stopped and offers Retry.
+      if (headless || (atLogin && DESKTOP.platform === 'macos')) {
+        process.kill(process.pid, 'SIGKILL');
+        return;
+      }
+
+      server = null;
+      desktopTrayRender();
+    });
 
     if (open) {
       desktopMainOpen(server.url);
@@ -527,6 +546,8 @@ function desktopConnectOpen(screen: DesktopTypes.DesktopConnectScreen): void {
 async function desktopQuit(): Promise<void> {
   await operation;
 
+  desktopLaunchRelease();
+
   const running = server;
 
   server = null;
@@ -541,6 +562,7 @@ function desktopOpen(): void {
 
   if (window) {
     window.show();
+    window.activate();
   } else if (server) {
     desktopMainOpen(server.url);
   } else if (desktopRemote()) {
@@ -551,46 +573,49 @@ function desktopOpen(): void {
 }
 
 function desktopShellStart(): void {
-  ApplicationMenu.setApplicationMenu([
-    {
-      submenu: [
-        { role: 'about' },
-        { label: m.desktop_update_check(), action: 'update:check' },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideOthers' },
-        { role: 'showAll' },
-        { type: 'separator' },
-        { role: 'quit' },
-      ],
-    },
-    {
-      label: m.desktop_menu_edit(),
-      submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'pasteAndMatchStyle' },
-        { role: 'selectAll' },
-      ],
-    },
-    {
-      label: m.desktop_menu_window(),
-      submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        { role: 'toggleFullScreen' },
-        { type: 'separator' },
-        { role: 'close' },
-      ],
-    },
-  ]);
+  // Electrobun has no application menu on Linux.
+  if (DESKTOP.platform === 'macos') {
+    ApplicationMenu.setApplicationMenu([
+      {
+        submenu: [
+          { role: 'about' },
+          { label: m.desktop_update_check(), action: 'update:check' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'showAll' },
+          { type: 'separator' },
+          { role: 'quit' },
+        ],
+      },
+      {
+        label: m.desktop_menu_edit(),
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'pasteAndMatchStyle' },
+          { role: 'selectAll' },
+        ],
+      },
+      {
+        label: m.desktop_menu_window(),
+        submenu: [
+          { role: 'minimize' },
+          { role: 'zoom' },
+          { role: 'toggleFullScreen' },
+          { type: 'separator' },
+          { role: 'close' },
+        ],
+      },
+    ]);
+  }
 
   tray = new Tray({
-    image: DESKTOP.tray.image,
+    image: DESKTOP.platform === 'macos' ? DESKTOP.tray.image : join(PATHS.RESOURCES_FOLDER, DESKTOP.launch.icon),
     template: true,
     width: DESKTOP.tray.width,
     height: DESKTOP.tray.height,
@@ -619,7 +644,7 @@ function desktopShellStart(): void {
     } else if (action === 'update:apply') {
       void desktopUpdateInstall();
     } else if (action === 'login') {
-      desktopLoginSet(!desktopLoginEnabled());
+      desktopLaunchAtLoginSet(!desktopLaunchAtLogin());
       desktopTrayRender();
     } else if (action === 'quit') {
       Utils.quit(0);
@@ -627,8 +652,8 @@ function desktopShellStart(): void {
   });
   desktopTrayRender();
 
-  if (!headless && desktopLoginEnabled()) {
-    desktopLoginSet(true);
+  if (!headless && desktopLaunchAtLogin()) {
+    desktopLaunchAtLoginSet(true);
   }
 
   Electrobun.events.on('reopen', desktopOpen);
@@ -654,7 +679,7 @@ async function desktopHeadlessStart(): Promise<void> {
   }
 }
 
-if (desktopProcessRuns(desktopStateRead().appPid, PATHS.RESOURCES_FOLDER)) {
+if (!await desktopLaunchClaim(desktopOpen)) {
   Utils.quit(0);
 }
 

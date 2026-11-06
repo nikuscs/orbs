@@ -41,6 +41,7 @@ export function ChatNotice({ message, bots }: ChatNoticeProps) {
       name: <EventName icon={<Icon icon={AlarmClock} tone="subtle" />}>{data.name}</EventName>,
     }))
     .with({ type: 'data-routineRun' }, () => ({ label: m.rooms_notice_routine_run_unnamed() }))
+    .with({ type: 'data-botStart' }, () => ({ label: m.rooms_event_bot_start() }))
     .with({ type: 'data-compaction' }, () => ({ label: m.rooms_notice_compacted() }))
     .with({ type: 'data-reset' }, () => ({ label: m.rooms_notice_reset() }))
     .otherwise(() => ({ label: message.metadata?.authorName ?? '' }));

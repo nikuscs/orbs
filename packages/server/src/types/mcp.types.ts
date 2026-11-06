@@ -1,4 +1,5 @@
 import type { CredentialsService } from '../services/credentials/credentials.service';
+import type { SecretService } from '../services/secret/secret.service';
 import type { SettingsService } from '../services/settings/settings.service';
 import type { Bot, McpSettings } from '@repo/contracts/universal';
 import type { McpClientService } from '@repo/runtime/server';
@@ -8,6 +9,7 @@ export interface McpServiceDeps {
   settings: SettingsService;
   clients: McpClientService;
   credentials: CredentialsService;
+  secrets: Pick<SecretService, 'queries'>;
 }
 
 export interface McpBotParams {

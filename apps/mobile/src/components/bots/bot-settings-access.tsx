@@ -1,6 +1,6 @@
 import { BOT_PERMISSION_HINTS, BOT_PERMISSION_LABELS } from '@repo/client/client';
 import { m } from '@repo/i18n/client';
-import { Blocks, FileText, Plug, Shield, ShieldCheck, Sparkles } from 'lucide-react-native';
+import { Blocks, FileText, Shield, ShieldCheck, Sparkles } from 'lucide-react-native';
 import { useController, useFormContext } from 'react-hook-form';
 import { Switch } from 'react-native';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
@@ -69,14 +69,6 @@ export function BotSettingsAccess({ bot, session, isDisabled }: BotSettingsAcces
           resource="skills"
           session={session}
           title={m.bots_skills()}
-        />
-        <BotSettingsSharedRow
-          bot={bot}
-          icon={Plug}
-          isDisabled={isDisabled}
-          resource="mcp"
-          session={session}
-          title={m.bots_mcp()}
         />
       </ItemGroup>
     </BotDetailsSection>

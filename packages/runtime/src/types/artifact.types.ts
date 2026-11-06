@@ -64,3 +64,12 @@ export interface ArtifactVersionData extends PiTypes.JsonObject {
 export interface ArtifactContent extends PiTypes.JsonObject {
   spec: ContractTypes.ArtifactSpec | null;
 }
+
+export interface ArtifactPropSchema {
+  type?: string | string[];
+  enum?: string[];
+  items?: ArtifactPropSchema;
+  properties?: Record<string, ArtifactPropSchema>;
+  required?: string[];
+  additionalProperties?: ArtifactPropSchema;
+}

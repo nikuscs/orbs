@@ -21,5 +21,7 @@
   "validation_question_secret": "Answer a secret request with the secret or skip it.",
   "validation_muted_until": "Choose a mute end time in the future.",
   "validation_file_type": "This file type can't be sent.",
-  "validation_file_size": "This file is empty or too large to send."
+  "validation_file_size": "This file is empty or too large to send.",
+  "validation_mcp_secret_missing": "Ask the owner for this secret with bot_secret first.",
+  "validation_mcp_secret_host": "This secret is not allowed for the MCP server's host. Ask the owner to save it for that host."
 }

@@ -1,8 +1,6 @@
-import { m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { match } from 'ts-pattern';
 import { Icon } from '@/components/ui/icon';
 import { ItemButton, ItemContent, ItemMedia, ItemTitle, ItemValue } from '@/components/ui/item';
 import { useBotShared } from '@/hooks/use-bot-shared';
@@ -30,7 +28,7 @@ export function BotSettingsSharedRow({ bot, session, resource, icon, title, isDi
     resource,
   });
 
-  const localSkills = useQuery({ ...session.rpc.skills.local.queryOptions({ input: { botId: bot.id } }), enabled: resource === 'skills' });
+  const localSkills = useQuery(session.rpc.skills.local.queryOptions({ input: { botId: bot.id } }));
   const names = list.items?.map((item) => item.name);
 
   const selected = names
@@ -42,23 +40,20 @@ export function BotSettingsSharedRow({ bot, session, resource, icon, title, isDi
     })
     : null;
 
-  const summary = selected && names
-    ? match(resource)
-      .with('skills', () => localSkills.data && botSharedSkillsSummary({
-        sharedSelected: selected.size,
-        sharedTotal: names.length,
-        localNames: localSkills.data.map((skill) => skill.name),
-        disabled: bot.disabledSkills,
-      }))
-      .with('mcp', () => m.bots_pick_selected({ selected: String(selected.size), total: String(names.length) }))
-      .exhaustive()
+  const summary = selected && names && localSkills.data
+    ? botSharedSkillsSummary({
+      sharedSelected: selected.size,
+      sharedTotal: names.length,
+      localNames: localSkills.data.map((skill) => skill.name),
+      disabled: bot.disabledSkills,
+    })
     : null;
 
   return (
     <ItemButton
       accessibilityLabel={title}
       disabled={isDisabled}
-      onPress={() => router.push({ pathname: resource === 'skills' ? '/bots/[botId]/skills' : '/bots/[botId]/mcp', params: { botId: bot.id } })}
+      onPress={() => router.push({ pathname: '/bots/[botId]/skills', params: { botId: bot.id } })}
     >
       <ItemMedia>
         <Icon icon={icon} tone="muted" />

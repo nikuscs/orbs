@@ -1,3 +1,4 @@
+import { botActionAddMcp } from './bot-action.add-mcp';
 import { botActionArrange } from './bot-action.arrange';
 import { botActionClearHistory } from './bot-action.clear-history';
 import { botActionConfigure } from './bot-action.configure';
@@ -5,6 +6,7 @@ import { botActionConnectMcp } from './bot-action.connect-mcp';
 import { botActionCreate } from './bot-action.create';
 import { botActionDelete } from './bot-action.delete';
 import { botActionMarkRead } from './bot-action.mark-read';
+import { botActionRemoveMcp } from './bot-action.remove-mcp';
 import { botActionRestore } from './bot-action.restore';
 import { botActionSetPreferences } from './bot-action.set-preferences';
 import { botActionSwapModels } from './bot-action.swap-models';
@@ -46,6 +48,8 @@ export function makeBotService(deps: Omit<BotTypes.BotServiceDeps, 'queues' | 'c
     actions: {
       configure: (params: UniversalTypes.BotGetInput) => botActionConfigure(serviceDeps, params),
       connectMcp: (params: UniversalTypes.BotGetInput) => botActionConnectMcp(serviceDeps, params),
+      addMcp: (params: UniversalTypes.McpServerAddInput) => botActionAddMcp(serviceDeps, params),
+      removeMcp: (params: UniversalTypes.McpServerRemoveInput) => botActionRemoveMcp(serviceDeps, params),
       restore: () => botActionRestore(serviceDeps),
       create: (params: UniversalTypes.BotCreateInput) => botActionCreate(serviceDeps, params),
       swapModels: (params: UniversalTypes.BotSwapModelsInput) => botActionSwapModels(serviceDeps, params),

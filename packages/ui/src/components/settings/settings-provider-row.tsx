@@ -6,6 +6,7 @@ import IconLogIn from '~icons/lucide/log-in';
 import IconLogOut from '~icons/lucide/log-out';
 import IconRefreshCw from '~icons/lucide/refresh-cw';
 import { Button } from '../button';
+import { ButtonGroup } from '../button-group';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../dropdown-menu';
 import { PanelContent, PanelRow, PanelTitle } from '../panel';
 import { StatusDot } from '../status-dot';
@@ -64,7 +65,7 @@ export function SettingsProviderRow({ provider, status, isBusy, onLogin, onSignO
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <div className="flex flex-wrap justify-end gap-2">
+        <ButtonGroup aria-label={m.settings_providers_actions({ provider: provider.name })}>
           {provider.authTypes.map((authType) => (
             <Button
               disabled={isBusy}
@@ -76,7 +77,7 @@ export function SettingsProviderRow({ provider, status, isBusy, onLogin, onSignO
               <SettingsProviderRowLoginLabel authType={authType} provider={provider} />
             </Button>
           ))}
-        </div>
+        </ButtonGroup>
       )}
     </PanelRow>
   );

@@ -80,6 +80,8 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
       registry.install(extension);
     }
 
+    await routines.actions.recover(BACKGROUND_CONTEXT);
+
     const deps: RuntimeTypes.RuntimeServiceDeps = {
       appName: shared.appName,
       botId,

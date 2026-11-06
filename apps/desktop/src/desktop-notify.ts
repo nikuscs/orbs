@@ -117,6 +117,11 @@ function desktopNotifyLegacy({ title, body }: DesktopNotify, avatar: Buffer): vo
 
 /** A notification from the web app: with a bot, macOS shows the bot avatar; anything that fails falls back to Electrobun's plain notification. */
 export async function desktopNotify({ notify, serverUrl }: DesktopNotifyParams): Promise<void> {
+  if (DESKTOP.platform !== 'macos') {
+    Utils.showNotification(notify);
+    return;
+  }
+
   const avatar = notify.botId ? await desktopNotifyAvatar({ serverUrl, botId: notify.botId }) : null;
 
   if (!avatar) {

@@ -10,10 +10,6 @@ import { backupManifest } from '../../types/backup.types';
 import { BACKUP } from './backup.constants';
 import type { BackupManifest, BackupManifestFile, BackupWalkManifest } from '../../types/backup.types';
 
-const FILE_MODE = 0o600;
-const EXEC_MODE = 0o700;
-const DIRECTORY_MODE = 0o700;
-
 export async function backupCanonicalRoot(path: string) {
   try {
     return await realpath(resolve(path));
@@ -74,14 +70,14 @@ export async function backupAssertSource(root: string) {
 export async function backupStage(destination: string) {
   await backupAssertAbsent(destination);
   const staging = join(dirname(destination), `.bots-backup-${crypto.randomUUID()}`);
-  await mkdir(staging, { mode: DIRECTORY_MODE });
+  await mkdir(staging, { mode: BACKUP.modes.directory });
 
   return staging;
 }
 
 export async function backupPublish(staging: string, destination: string) {
   try {
-    await mkdir(destination, { recursive: false, mode: DIRECTORY_MODE });
+    await mkdir(destination, { recursive: false, mode: BACKUP.modes.directory });
   } catch (error) {
     throw match(error)
       .with({ code: 'EEXIST' }, () => new Errors.CONFLICT({ internal: 'Backup path already exists', cause: error }))
@@ -101,13 +97,13 @@ export async function backupRemoveStaging(staging: string) {
 }
 
 export async function backupPopulateCreate(root: string, staging: string) {
-  await mkdir(join(staging, BACKUP.directories.data), { mode: DIRECTORY_MODE });
-  await mkdir(join(staging, BACKUP.directories.agents), { mode: DIRECTORY_MODE });
-  await mkdir(join(staging, BACKUP.directories.bots), { mode: DIRECTORY_MODE });
+  await mkdir(join(staging, BACKUP.directories.data), { mode: BACKUP.modes.directory });
+  await mkdir(join(staging, BACKUP.directories.agents), { mode: BACKUP.modes.directory });
+  await mkdir(join(staging, BACKUP.directories.bots), { mode: BACKUP.modes.directory });
   const stores = await backupBotStores(root);
 
   await backupSerial([BACKUP.files.database, ...stores], async (path) => {
-    await mkdir(dirname(join(staging, path)), { recursive: true, mode: DIRECTORY_MODE });
+    await mkdir(dirname(join(staging, path)), { recursive: true, mode: BACKUP.modes.directory });
     const source = await backupContained(root, path);
     await match(path.endsWith('.json'))
       .with(true, () => backupCopyFile(source, join(staging, path)))
@@ -128,12 +124,12 @@ export async function backupPopulateCreate(root: string, staging: string) {
 
 export async function backupPopulateRestore(bundle: string, staging: string) {
   const manifest = await backupReadManifest(bundle);
-  await mkdir(join(staging, BACKUP.directories.data), { mode: DIRECTORY_MODE });
-  await mkdir(join(staging, BACKUP.directories.agents), { mode: DIRECTORY_MODE });
-  await mkdir(join(staging, BACKUP.directories.bots), { mode: DIRECTORY_MODE });
+  await mkdir(join(staging, BACKUP.directories.data), { mode: BACKUP.modes.directory });
+  await mkdir(join(staging, BACKUP.directories.agents), { mode: BACKUP.modes.directory });
+  await mkdir(join(staging, BACKUP.directories.bots), { mode: BACKUP.modes.directory });
 
   await backupSerial([...manifest.directories].sort((left, right) => left.localeCompare(right)), async (directory) => {
-    await mkdir(join(staging, backupAllowedPath(directory)), { recursive: true, mode: DIRECTORY_MODE });
+    await mkdir(join(staging, backupAllowedPath(directory)), { recursive: true, mode: BACKUP.modes.directory });
   });
 
   await backupSerial(manifest.files, async (file) => {
@@ -280,7 +276,7 @@ async function backupVacuum(source: string, destination: string) {
     database.close();
   }
 
-  await chmod(destination, FILE_MODE);
+  await chmod(destination, BACKUP.modes.file);
 }
 
 async function backupCopyFile(source: string, destination: string) {
@@ -294,11 +290,11 @@ async function backupCopyFile(source: string, destination: string) {
       throw new Errors.FORBIDDEN({ internal: 'Backup refuses unsupported file types' });
     });
 
-  await mkdir(dirname(destination), { recursive: true, mode: DIRECTORY_MODE });
+  await mkdir(dirname(destination), { recursive: true, mode: BACKUP.modes.directory });
   const from = await open(source, constants.O_RDONLY | constants.O_NOFOLLOW);
 
   try {
-    const to = await open(destination, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, FILE_MODE);
+    const to = await open(destination, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, BACKUP.modes.file);
 
     try {
       await pipeline(from.createReadStream(), to.createWriteStream());
@@ -309,7 +305,7 @@ async function backupCopyFile(source: string, destination: string) {
     await from.close();
   }
 
-  await chmod(destination, stats.mode & constants.S_IXUSR ? EXEC_MODE : FILE_MODE);
+  await chmod(destination, stats.mode & constants.S_IXUSR ? BACKUP.modes.exec : BACKUP.modes.file);
 }
 
 async function backupManifestEntry(relativePath: string, path: string): Promise<BackupManifestFile> {
@@ -343,7 +339,7 @@ async function backupWalk(
 
     await match({ isDirectory: entry.isDirectory(), isFile: entry.isFile() })
       .with({ isDirectory: true }, async () => {
-        await mkdir(to, { recursive: true, mode: DIRECTORY_MODE });
+        await mkdir(to, { recursive: true, mode: BACKUP.modes.directory });
         manifest.directories.push(next);
         await backupWalk(root, await backupContained(root, next), to, next, manifest);
       })
@@ -368,7 +364,7 @@ async function backupWriteManifest(directory: string, { files, directories, skip
   };
 
   await writeFile(join(directory, BACKUP.manifest), `${JSON.stringify(backupManifest.parse(manifest), null, 2)}\n`, {
-    mode: FILE_MODE,
+    mode: BACKUP.modes.file,
     flag: 'wx',
   });
 }

@@ -42,6 +42,7 @@ import { Route as roomsRoomsDotdirectDothandleDotroutinesRouteImport } from "./.
 import { Route as roomsRoomsDotdirectDothandleDottodosRouteImport } from "./../routes/rooms/rooms.direct.$handle.todos";
 import { Route as settingsSettingsDotdevicesDotdeviceIdDotrevokeRouteImport } from "./../routes/settings/settings.devices.$deviceId.revoke";
 import { Route as settingsSettingsDotprovidersDotproviderIdDotlogoutRouteImport } from "./../routes/settings/settings.providers.$providerId.logout";
+import { Route as botsBotsDotbotIdDotmcpDotserverDotremoveRouteImport } from "./../routes/bots/bots.$botId.mcp.$server.remove";
 import { Route as botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRouteImport } from "./../routes/bots/bots.$botId.routines.$routineId.delete";
 import { Route as botsBotsDotbotIdDotroutinesDotroutineIdDoteditRouteImport } from "./../routes/bots/bots.$botId.routines.$routineId.edit";
 import { Route as botsBotsDotbotIdDottodosDottodoIdDotdeleteRouteImport } from "./../routes/bots/bots.$botId.todos.$todoId.delete";
@@ -233,6 +234,12 @@ const settingsSettingsDotprovidersDotproviderIdDotlogoutRoute =
     path: "/providers/$providerId/logout",
     getParentRoute: () => settingsSettingsRoute,
   } as any);
+const botsBotsDotbotIdDotmcpDotserverDotremoveRoute =
+  botsBotsDotbotIdDotmcpDotserverDotremoveRouteImport.update({
+    id: "/mcp/$server/remove",
+    path: "/mcp/$server/remove",
+    getParentRoute: () => botsBotsDotbotIdRoute,
+  } as any);
 const botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute =
   botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRouteImport.update({
     id: "/routines/$routineId/delete",
@@ -309,6 +316,7 @@ export interface FileRoutesByFullPath {
   "/rooms/direct/$handle/todos": typeof roomsRoomsDotdirectDothandleDottodosRouteWithChildren;
   "/settings/devices/$deviceId/revoke": typeof settingsSettingsDotdevicesDotdeviceIdDotrevokeRoute;
   "/settings/providers/$providerId/logout": typeof settingsSettingsDotprovidersDotproviderIdDotlogoutRoute;
+  "/bots/$botId/mcp/$server/remove": typeof botsBotsDotbotIdDotmcpDotserverDotremoveRoute;
   "/bots/$botId/routines/$routineId/delete": typeof botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute;
   "/bots/$botId/routines/$routineId/edit": typeof botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute;
   "/bots/$botId/todos/$todoId/delete": typeof botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute;
@@ -346,6 +354,7 @@ export interface FileRoutesByTo {
   "/rooms/direct/$handle/todos": typeof roomsRoomsDotdirectDothandleDottodosRouteWithChildren;
   "/settings/devices/$deviceId/revoke": typeof settingsSettingsDotdevicesDotdeviceIdDotrevokeRoute;
   "/settings/providers/$providerId/logout": typeof settingsSettingsDotprovidersDotproviderIdDotlogoutRoute;
+  "/bots/$botId/mcp/$server/remove": typeof botsBotsDotbotIdDotmcpDotserverDotremoveRoute;
   "/bots/$botId/routines/$routineId/delete": typeof botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute;
   "/bots/$botId/routines/$routineId/edit": typeof botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute;
   "/bots/$botId/todos/$todoId/delete": typeof botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute;
@@ -389,6 +398,7 @@ export interface FileRoutesById {
   "/_chat/rooms/direct/$handle/todos": typeof roomsRoomsDotdirectDothandleDottodosRouteWithChildren;
   "/_chat/settings/devices/$deviceId/revoke": typeof settingsSettingsDotdevicesDotdeviceIdDotrevokeRoute;
   "/_chat/settings/providers/$providerId/logout": typeof settingsSettingsDotprovidersDotproviderIdDotlogoutRoute;
+  "/_chat/bots/$botId/mcp/$server/remove": typeof botsBotsDotbotIdDotmcpDotserverDotremoveRoute;
   "/_chat/bots/$botId/routines/$routineId/delete": typeof botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute;
   "/_chat/bots/$botId/routines/$routineId/edit": typeof botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute;
   "/_chat/bots/$botId/todos/$todoId/delete": typeof botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute;
@@ -432,6 +442,7 @@ export interface FileRouteTypes {
     | "/rooms/direct/$handle/todos"
     | "/settings/devices/$deviceId/revoke"
     | "/settings/providers/$providerId/logout"
+    | "/bots/$botId/mcp/$server/remove"
     | "/bots/$botId/routines/$routineId/delete"
     | "/bots/$botId/routines/$routineId/edit"
     | "/bots/$botId/todos/$todoId/delete"
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | "/rooms/direct/$handle/todos"
     | "/settings/devices/$deviceId/revoke"
     | "/settings/providers/$providerId/logout"
+    | "/bots/$botId/mcp/$server/remove"
     | "/bots/$botId/routines/$routineId/delete"
     | "/bots/$botId/routines/$routineId/edit"
     | "/bots/$botId/todos/$todoId/delete"
@@ -511,6 +523,7 @@ export interface FileRouteTypes {
     | "/_chat/rooms/direct/$handle/todos"
     | "/_chat/settings/devices/$deviceId/revoke"
     | "/_chat/settings/providers/$providerId/logout"
+    | "/_chat/bots/$botId/mcp/$server/remove"
     | "/_chat/bots/$botId/routines/$routineId/delete"
     | "/_chat/bots/$botId/routines/$routineId/edit"
     | "/_chat/bots/$botId/todos/$todoId/delete"
@@ -762,6 +775,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof settingsSettingsDotprovidersDotproviderIdDotlogoutRouteImport;
       parentRoute: typeof settingsSettingsRoute;
     };
+    "/_chat/bots/$botId/mcp/$server/remove": {
+      id: "/_chat/bots/$botId/mcp/$server/remove";
+      path: "/mcp/$server/remove";
+      fullPath: "/bots/$botId/mcp/$server/remove";
+      preLoaderRoute: typeof botsBotsDotbotIdDotmcpDotserverDotremoveRouteImport;
+      parentRoute: typeof botsBotsDotbotIdRoute;
+    };
     "/_chat/bots/$botId/routines/$routineId/delete": {
       id: "/_chat/bots/$botId/routines/$routineId/delete";
       path: "/routines/$routineId/delete";
@@ -834,6 +854,7 @@ interface botsBotsDotbotIdRouteChildren {
   botsBotsDotbotIdDotresetRoute: typeof botsBotsDotbotIdDotresetRoute;
   botsBotsDotbotIdDotindexRoute: typeof botsBotsDotbotIdDotindexRoute;
   botsBotsDotbotIdDotskillsDotlocalRoute: typeof botsBotsDotbotIdDotskillsDotlocalRoute;
+  botsBotsDotbotIdDotmcpDotserverDotremoveRoute: typeof botsBotsDotbotIdDotmcpDotserverDotremoveRoute;
   botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute: typeof botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute;
   botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute: typeof botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute;
   botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute: typeof botsBotsDotbotIdDottodosDottodoIdDotdeleteRoute;
@@ -846,6 +867,8 @@ const botsBotsDotbotIdRouteChildren: botsBotsDotbotIdRouteChildren = {
   botsBotsDotbotIdDotindexRoute: botsBotsDotbotIdDotindexRoute,
   botsBotsDotbotIdDotskillsDotlocalRoute:
     botsBotsDotbotIdDotskillsDotlocalRoute,
+  botsBotsDotbotIdDotmcpDotserverDotremoveRoute:
+    botsBotsDotbotIdDotmcpDotserverDotremoveRoute,
   botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute:
     botsBotsDotbotIdDotroutinesDotroutineIdDotdeleteRoute,
   botsBotsDotbotIdDotroutinesDotroutineIdDoteditRoute:

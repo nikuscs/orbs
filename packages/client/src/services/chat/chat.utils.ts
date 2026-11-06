@@ -78,6 +78,7 @@ export function chatMessages({ entries, bot, bots }: ChatTypes.ChatMessagesParam
           { type: 'text', text: chatEntryText(entry), state: 'done' },
         ])))
         .otherwise(() => undefined))
+      .with(ENTRY.botStart, () => messages.push(chatSystemMessage(entry, createdAt, bot, [{ type: 'data-botStart', data: {} }])))
       .with(ENTRY.compaction, () => messages.push(chatSystemMessage(entry, createdAt, bot, [{ type: 'data-compaction', data: { status: 'done' } }])))
       .with(ENTRY.reset, () => messages.push(chatSystemMessage(entry, createdAt, bot, [{ type: 'data-reset', data: {} }])))
       .otherwise(() => undefined);

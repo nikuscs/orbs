@@ -24,6 +24,10 @@ export default {
       createDmg: false,
       icons: 'icon.icon',
     },
+    linux: {
+      defaultRenderer: 'native',
+      icon: 'icon.png',
+    },
   },
   scripts: { postBuild: '../../scripts/desktop.ts' },
   // Read back at runtime through BuildConfig, so packaged builds keep the name and identifier.

@@ -88,14 +88,12 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
     resolver: standardSchemaResolver(botForm.pick({
       inherit: true,
       sharedSkills: true,
-      sharedMcp: true,
       disabledSkills: true,
     })),
     resetOptions: { keepDirtyValues: true },
     values: {
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
-      sharedMcp: bot.sharedMcp,
       disabledSkills: bot.disabledSkills,
     },
   });
@@ -120,10 +118,8 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
   const submit = form.handleSubmit((input) => save.mutate({
     botId: bot.id,
     inherit: input.inherit,
-    ...match(resource)
-      .with('skills', () => ({ sharedSkills: input.sharedSkills, disabledSkills: input.disabledSkills }))
-      .with('mcp', () => ({ sharedMcp: input.sharedMcp }))
-      .exhaustive(),
+    sharedSkills: input.sharedSkills,
+    disabledSkills: input.disabledSkills,
   }, {
     onSuccess: () => {
       disablePrevention();
@@ -154,17 +150,15 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
           keyboardShouldPersistTaps="handled"
         >
           <View className="gap-4">
-            {resource === 'skills' ? (
-              <Tabs
-                options={[
-                  { value: 'shared', label: m.bots_skills_tab_shared() },
-                  { value: 'local', label: m.bots_skills_tab_local() },
-                ]}
-                value={skillsTab}
-                onValueChange={setSkillsTab}
-              />
-            ) : null}
-            {resource === 'skills' && skillsTab === 'local' ? (
+            <Tabs
+              options={[
+                { value: 'shared', label: m.bots_skills_tab_shared() },
+                { value: 'local', label: m.bots_skills_tab_local() },
+              ]}
+              value={skillsTab}
+              onValueChange={setSkillsTab}
+            />
+            {skillsTab === 'local' ? (
               <BotSettingsLocalSkills
                 botId={bot.id}
                 isDisabled={save.isPending}

@@ -34,6 +34,7 @@ export const routes = rootRoute('root.tsx', [
         route('/routines/$routineId/delete', 'bots/bots.$botId.routines.$routineId.delete.tsx'),
         route('/todos/$todoId/delete', 'bots/bots.$botId.todos.$todoId.delete.tsx'),
         route('/skills/local', 'bots/bots.$botId.skills.local.tsx'),
+        route('/mcp/$server/remove', 'bots/bots.$botId.mcp.$server.remove.tsx'),
         route('/$tab', 'bots/bots.$botId.$tab.tsx'),
       ]),
     ]),

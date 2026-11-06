@@ -14,6 +14,7 @@
   "desktop_save": "Save",
   "desktop_saving": "Starting {name}…",
   "desktop_error_invalid": "A custom address needs an address.",
+  "desktop_error_prompt": "Install zenity to enter a custom address.",
   "desktop_error_start": "{name} did not start. See the log: {path}",
   "desktop_cancel": "Cancel",
   "desktop_quit": "Quit",

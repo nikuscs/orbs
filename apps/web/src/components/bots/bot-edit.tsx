@@ -16,9 +16,9 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { match, P } from 'ts-pattern';
 import { BotDialogNav } from '@/components/bots/bot-dialog-nav';
-import { BotFormMcp } from '@/components/bots/bot-form-mcp';
 import { BotFormSection } from '@/components/bots/bot-form-section';
 import { BotFormSkills } from '@/components/bots/bot-form-skills';
+import { BotMcpRemove } from '@/components/bots/bot-mcp-remove';
 import { RoutinesEdit } from '@/components/routines/routines-edit';
 import { RoutinesList } from '@/components/routines/routines-list';
 import { TodosList } from '@/components/todos/todos-list';
@@ -66,6 +66,7 @@ export function BotEdit({ bot, bots, view }: BotEditProps) {
     .with({ kind: 'section' }, ({ section: current }) => current)
     .with({ kind: 'routine-edit' }, { kind: 'routine-delete' }, () => 'routines')
     .with({ kind: 'todo-delete' }, () => 'todos')
+    .with({ kind: 'mcp-remove' }, () => 'mcp')
     .with({ kind: 'delete' }, { kind: 'reset' }, () => 'danger')
     .exhaustive();
 
@@ -81,8 +82,9 @@ export function BotEdit({ bot, bots, view }: BotEditProps) {
   }
 
   const submit = form.handleSubmit(
-    (input: BotForm) => save.mutate({
+    ({ sharedMcp: _mcp, ...input }: BotForm) => save.mutate({
       ...input,
+      inherit: [...input.inherit.filter((resource) => resource !== 'mcp'), ...bot.inherit.filter((resource) => resource === 'mcp')],
       handle: input.handle === '' ? bot.handle : input.handle,
       botId: bot.id,
     }, {
@@ -155,16 +157,7 @@ export function BotEdit({ bot, bots, view }: BotEditProps) {
                 </fieldset>
               </form>
             ))
-            .with({ kind: 'section', section: 'mcp' }, () => (
-              <>
-                <form onSubmit={submit}>
-                  <fieldset className="contents" disabled={save.isPending}>
-                    <BotFormMcp botId={bot.id} busy={save.isPending} />
-                  </fieldset>
-                </form>
-                <BotMcpPanel bot={bot} />
-              </>
-            ))
+            .with({ kind: 'section', section: 'mcp' }, () => <BotMcpPanel bot={bot} />)
             .with({ kind: 'section', section: 'todos' }, () => <TodosList bot={bot} />)
             .with({ kind: 'section', section: 'routines' }, () => <RoutinesList bot={bot} />)
             .with({ kind: 'section', section: 'danger' }, () => <BotEditDanger bot={bot} isDeletable={bots.length > 1} />)
@@ -193,6 +186,7 @@ export function BotEdit({ bot, bots, view }: BotEditProps) {
                 onBack={() => openSection('todos')}
               />
             ))
+            .with({ kind: 'mcp-remove' }, ({ server }) => <BotMcpRemove bot={bot} server={server} />)
             .exhaustive()}
         </Form>
       </SectionDialogBody>

@@ -11,7 +11,7 @@ interface Window {
   __botsAddresses?: string[];
   __botsHost?: string;
   __botsUpdate?: { status: 'idle' | 'checking' | 'downloading' | 'ready' | 'current' | 'error'; version: string; available?: string } | null;
-  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true } | { update: 'check' | 'apply' }) => void;
+  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true } | { update: 'check' | 'apply' } | { quit: true }) => void;
 }
 
 interface Navigator {

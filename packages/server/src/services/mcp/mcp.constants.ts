@@ -3,4 +3,8 @@ export const MCP = {
   defaults: {
     paths: [],
   },
-};
+  secretPrefix: 'secrets.',
+  derivedPrefix: 'mcp.',
+  maxHeaders: 8,
+  ownedFile: 'mcp.json',
+} as const;

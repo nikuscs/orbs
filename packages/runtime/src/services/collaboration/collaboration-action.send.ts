@@ -53,7 +53,7 @@ export async function collaborationActionSend(deps: CollaborationToolDeps, { inp
 
             const ownership = match(params.mode)
               .with('ask', () => ({ ownership: { kind: 'task' as const, taskId: api.taskId } }))
-              .with('send', () => ({ ownership: { kind: 'conversation' as const }, background: true }))
+              .with('send', () => ({ ownership: { kind: 'conversation' as const }, conversationId: api.conversationId, background: true }))
               .exhaustive();
 
             await match(target)

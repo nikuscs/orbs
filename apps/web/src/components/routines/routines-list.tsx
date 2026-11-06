@@ -1,8 +1,9 @@
-import { ROOMS } from '@repo/client/client';
+import { ROOMS, routinesSections } from '@repo/client/client';
 import { m } from '@repo/i18n/client';
 import { EmptyCompact } from '@repo/ui/empty';
 import { FormErrors } from '@repo/ui/forms/form';
 import { ItemGroup } from '@repo/ui/item';
+import { RoomsDetailsSection } from '@repo/ui/rooms/rooms-details-section';
 import { Skeleton } from '@repo/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { RoomsPrefillLink } from '@/components/rooms/rooms-prefill-link';
@@ -17,6 +18,7 @@ interface RoutinesListProps {
 
 export function RoutinesList({ bot }: RoutinesListProps) {
   const list = useQuery(rpc.routines.list.queryOptions({ input: { botId: bot.id }, refetchInterval: ROOMS.routinesRefreshMs }));
+  const sections = routinesSections(list.data ?? []);
 
   return (
     <div className="flex flex-col gap-3">
@@ -31,17 +33,19 @@ export function RoutinesList({ bot }: RoutinesListProps) {
           ))}
         </div>
       ) : null}
-      {list.data && list.data.length > 0 ? (
-        <ItemGroup variant="outline">
-          {list.data.map((routine) => (
-            <RoutinesItem
-              bot={bot}
-              key={routine.id}
-              routine={routine}
-            />
-          ))}
-        </ItemGroup>
-      ) : null}
+      {sections.map((section) => (
+        <RoomsDetailsSection key={section.title} title={section.title}>
+          <ItemGroup variant="outline">
+            {section.routines.map((routine) => (
+              <RoutinesItem
+                bot={bot}
+                key={routine.id}
+                routine={routine}
+              />
+            ))}
+          </ItemGroup>
+        </RoomsDetailsSection>
+      ))}
       {list.isSuccess && list.data.length === 0 ? (
         <EmptyCompact
           description={(

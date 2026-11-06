@@ -11,8 +11,7 @@ interface UseBotSharedParams {
 }
 
 export function useBotShared({ session, botId, resource }: UseBotSharedParams): BotSharedList {
-  const skills = useQuery({ ...session.rpc.skills.shared.queryOptions({ input: { botId } }), enabled: resource === 'skills' });
-  const mcp = useQuery({ ...session.rpc.mcp.shared.queryOptions({ input: { botId } }), enabled: resource === 'mcp' });
+  const skills = useQuery(session.rpc.skills.shared.queryOptions({ input: { botId } }));
 
   return match(resource)
     .with('skills', (): BotSharedList => ({
@@ -25,17 +24,6 @@ export function useBotShared({ session, botId, resource }: UseBotSharedParams): 
         loadFailed: m.bots_skills_load_failed(),
         note: m.bots_skills_note(),
         empty: m.bots_skills_empty(),
-      },
-    }))
-    .with('mcp', (): BotSharedList => ({
-      field: 'sharedMcp',
-      items: mcp.data?.map((server) => ({ name: server.name, detail: server.source, keywords: server.name })),
-      isError: mcp.isError,
-      messages: {
-        search: m.bots_mcp_pick_search(),
-        noMatch: m.bots_mcp_pick_no_match(),
-        loadFailed: m.bots_mcp_pick_load_failed(),
-        note: m.bots_mcp_pick_note(),
       },
     }))
     .exhaustive();

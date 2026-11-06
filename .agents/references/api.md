@@ -12,6 +12,7 @@ DATA_DIR/                     default ~/.config/orbs/
   data/daemon.lock            one lock for every store
   data/ipc/rpc.sock           owner-only socket, used by `orbs pair`
   data/bots/<botId>/runtime.sql   that bot's Pi store; the file is the unit of erasure
+  data/bots/<botId>/mcp.json      MCP servers the owner or the bot added for that bot only
   data/bots/<botId>/telemetry.sql model and tool spans, kept 14 days; reset with the store, not backed up
 ```
 
@@ -53,6 +54,7 @@ Read-only, Ask, Auto and Full. Auto asks Jev and approves only with a safe score
 Bot-local sources win, then configured shared sources, then Pi's global ones; shared sources need the bot's inheritance flag. A bot-local skill named in the bot's `disabledSkills` is left out of the prompt, the `$` list and expansion, and its files stay untouched. Order and file names: `runtime/src/services/skill/`, `runtime/src/services/instruction/instruction.constants.ts`, `server/src/services/mcp/mcp-files.utils.ts`.
 
 - MCP credentials are referenced by name (`envCredentials`, `headerCredentials`), only from shared sources; bot-local definitions that use them are skipped.
+- `mcp.add` and the `bot_mcp_add` tool write `data/bots/<botId>/mcp.json`, which may use credentials: a header secret must be allowed for the server's host, and only the owner can pass env secrets to a command server. `bot_mcp_add` and `bot_note` always ask the owner, except under Full.
 - MCP OAuth (`runtime/src/services/mcp-auth/`): the server URL always comes from bot config, the one-time `state` authorizes the callback browser, and `returnUrl` must be an app link or the redirect's own origin.
 - Plugins are trusted native code; approval gates their tool calls, not their imports.
 
@@ -62,7 +64,7 @@ Peers talk in one persistent private conversation per sender and recipient by de
 
 ## Routines
 
-One Pi task per routine waits with `sleep` and `watchDoc`, with no model calls (`runtime/src/services/routine/routine.task.ts`). After downtime an overdue run happens once; missed repetitions are skipped. Each store arms one host alarm at its earliest deadline, so the daemon must stay running.
+One Pi task per routine ends each wait in a stored sleep, with no model calls (`runtime/src/services/routine/routine.task.ts`). Pi cannot wake a sleeping task early, so run-now and edits replace the routine's task in the same commit and abort the old one; a task that is delivering is left alone. A task that is no longer its routine's task ends itself. Opening a bot retries routine tasks Pi parked at its restart limit. After downtime an overdue run happens once; missed repetitions are skipped. Each store arms one host alarm at its earliest deadline, so the daemon must stay running.
 
 ## Silent replies
 

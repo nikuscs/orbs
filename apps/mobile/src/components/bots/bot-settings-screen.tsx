@@ -1,7 +1,7 @@
 import { standardSchemaResolver } from '@hookform/resolvers/standard-schema';
 import { botAvatarEmoji } from '@repo/client/client';
 import { useBotUpdate } from '@repo/client/react';
-import { botAvatar, botForm } from '@repo/contracts/universal';
+import { BOT_FIELDS, botAvatar, botForm } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, usePreventRemove, useRouter } from 'expo-router';
@@ -184,7 +184,7 @@ function BotSettingsScreenForm({ session, bot, isDeletable }: BotSettingsScreenF
                 control={form.control}
                 editable={!isBusy}
                 label={m.rooms_bot_instructions()}
-                maxLength={16000}
+                maxLength={BOT_FIELDS.maxInstructions}
                 name="instructions"
                 placeholder={m.rooms_bot_instructions_placeholder()}
               />
