@@ -1,15 +1,15 @@
-import { ROOMS, routinesScheduleText, routinesSections } from '@repo/client/client';
+import { ROOMS, routinesIsFailed, routinesLastRunText, routinesScheduleText, routinesSections } from '@repo/client/client';
 import { getLocale, m } from '@repo/i18n/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { CalendarClock, Ellipsis } from 'lucide-react-native';
+import { CalendarClock, EllipsisVertical, TriangleAlert } from 'lucide-react-native';
 import { Switch, View } from 'react-native';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
 import { Card } from '@/components/ui/card';
 import { Empty, EmptyLink } from '@/components/ui/empty';
 import { Icon } from '@/components/ui/icon';
-import { Item, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
-import { Menu } from '@/components/ui/menu';
+import { Item, ItemTitle } from '@/components/ui/item';
+import { ContextMenu, Menu } from '@/components/ui/menu';
 import { Text } from '@/components/ui/text';
 import { useToast } from '@/hooks/use-toast';
 import type { BotDetailsSectionProps } from '@/types/bot-details.types';
@@ -67,21 +67,45 @@ export function RoutinesList({ session, bot, onPrefill }: RoutinesListProps) {
           <Card className="overflow-hidden">
             {section.routines.map((routine) => (
               <Item key={routine.id} size="sm">
-                <ItemContent>
-                  <ItemTitle numberOfLines={2}>{routine.name}</ItemTitle>
-                  <ItemDescription numberOfLines={1}>{routinesScheduleText({ schedule: routine.schedule, locale: getLocale() })}</ItemDescription>
-                  {routine.lastRun?.status === 'unanswered' ? <Text tone="destructive" variant="small">{m.rooms_routines_failed()}</Text> : null}
-                </ItemContent>
-                <Switch
-                  accessibilityLabel={m.rooms_routines_toggle({ name: routine.name })}
-                  disabled={isBusy}
-                  value={routine.isEnabled}
-                  onValueChange={(isEnabled) => update.mutate({
-                    botId: bot.id,
-                    routineId: routine.id,
-                    isEnabled,
-                  })}
-                />
+                {routinesIsFailed(routine) ? (
+                  <Menu items={[{ label: m.rooms_routines_failed(), systemImage: 'exclamationmark.triangle' }]}>
+                    <View
+                      accessibilityLabel={m.rooms_routines_failed()}
+                      accessibilityRole="button"
+                      className="size-8 items-center justify-center"
+                    >
+                      <Icon
+                        icon={TriangleAlert}
+                        size="sm"
+                        tone="destructive"
+                      />
+                    </View>
+                  </Menu>
+                ) : null}
+                <View className="min-w-0 flex-1">
+                  <ContextMenu
+                    isFullWidth
+                    items={[
+                      { label: routinesScheduleText({ schedule: routine.schedule, locale: getLocale() }), systemImage: 'calendar' },
+                      { label: routinesLastRunText(routine), systemImage: routinesIsFailed(routine) ? 'exclamationmark.triangle' : 'clock' },
+                    ]}
+                    title={routine.name}
+                  >
+                    <ItemTitle numberOfLines={1}>{routine.name}</ItemTitle>
+                  </ContextMenu>
+                </View>
+                <View className="h-8 justify-center">
+                  <Switch
+                    accessibilityLabel={m.rooms_routines_toggle({ name: routine.name })}
+                    disabled={isBusy}
+                    value={routine.isEnabled}
+                    onValueChange={(isEnabled) => update.mutate({
+                      botId: bot.id,
+                      routineId: routine.id,
+                      isEnabled,
+                    })}
+                  />
+                </View>
                 <Menu
                   isDisabled={isBusy}
                   items={[
@@ -111,7 +135,7 @@ export function RoutinesList({ session, bot, onPrefill }: RoutinesListProps) {
                     accessibilityRole="button"
                     className="size-8 items-center justify-center"
                   >
-                    <Icon icon={Ellipsis} tone="muted" />
+                    <Icon icon={EllipsisVertical} tone="muted" />
                   </View>
                 </Menu>
               </Item>

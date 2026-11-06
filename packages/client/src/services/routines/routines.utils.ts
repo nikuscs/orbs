@@ -51,9 +51,21 @@ export function routinesScheduleText({ schedule, locale }: RoutinesScheduleTextP
     .exhaustive();
 }
 
+export function routinesIsFailed({ lastRun }: Routine) {
+  return lastRun?.status === 'unanswered';
+}
+
+export function routinesLastRunText({ lastRun }: Routine): string {
+  return match(lastRun?.status)
+    .with('unanswered', () => m.rooms_routines_failed())
+    .with('done', () => m.rooms_routines_finished())
+    .with('running', () => m.rooms_routines_running())
+    .with(undefined, () => m.rooms_routines_not_run())
+    .exhaustive();
+}
+
 export function routinesSections(routines: Routine[]) {
   const routinesIsPast = ({ nextRunAt, lastRun }: Routine) => nextRunAt === null && lastRun !== null;
-  const routinesIsFailed = ({ lastRun }: Routine) => lastRun?.status === 'unanswered';
 
   return [
     {
