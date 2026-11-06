@@ -81,6 +81,7 @@ function BotDialogCreate() {
       inherit: ['skills', 'mcp', 'plugins'],
       sharedSkills: null,
       sharedMcp: null,
+      disabledSkills: null,
     },
   });
 

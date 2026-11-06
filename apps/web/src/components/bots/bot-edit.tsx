@@ -55,6 +55,7 @@ export function BotEdit({ bot, bots, view }: BotEditProps) {
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
       sharedMcp: bot.sharedMcp,
+      disabledSkills: bot.disabledSkills,
     },
   });
 

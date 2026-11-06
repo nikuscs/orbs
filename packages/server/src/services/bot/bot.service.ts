@@ -16,6 +16,7 @@ import { botQueryCatalog } from './bot-query.catalog';
 import { botQueryGet } from './bot-query.get';
 import { botQueryInstructions } from './bot-query.instructions';
 import { botQueryList } from './bot-query.list';
+import { botQueryLocalSkills } from './bot-query.local-skills';
 import { botQueryMcp } from './bot-query.mcp';
 import { botQueryPlugins } from './bot-query.plugins';
 import { botQueryPreferences } from './bot-query.preferences';
@@ -65,6 +66,7 @@ export function makeBotService(deps: Omit<BotTypes.BotServiceDeps, 'queues' | 'c
       catalog: (params: UniversalTypes.BotGetInput) => botQueryCatalog(serviceDeps, params),
       skills: (params: UniversalTypes.BotGetInput) => botQuerySkills(serviceDeps, params),
       sharedSkills: (params: UniversalTypes.BotGetInput) => botQuerySharedSkills(serviceDeps, params),
+      localSkills: (params: UniversalTypes.BotGetInput) => botQueryLocalSkills(serviceDeps, params),
       sharedMcp: (params: UniversalTypes.BotGetInput) => botQuerySharedMcp(serviceDeps, params),
       mcp: (params: UniversalTypes.BotGetInput) => botQueryMcp(serviceDeps, params),
       usage: (params: UniversalTypes.BotGetInput) => botQueryUsage(serviceDeps, params),

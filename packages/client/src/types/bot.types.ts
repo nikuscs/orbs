@@ -31,6 +31,12 @@ export interface BotSkillNameParams {
   name: string;
 }
 
+export interface BotDisabledSkillsParams {
+  disabled: string[] | null;
+  name: string;
+  isOn: boolean;
+}
+
 export interface BotModelBrandParams {
   providerId: string;
   modelId: string;

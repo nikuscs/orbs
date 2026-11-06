@@ -24,12 +24,13 @@ export function skillQueryResolve(deps: SkillLoaderServiceDeps, params: SkillLoa
       return result;
     });
 
-  return match(params.sharedSkills)
-    .with(null, () => catalog)
-    .otherwise((names) => ({
-      ...catalog,
-      skills: catalog.skills.filter((skill) => !skill.isShared || names.includes(skill.name)),
-    }));
+  return {
+    ...catalog,
+    skills: catalog.skills.filter((skill) => match(skill.isShared)
+      .with(true, () => params.sharedSkills === null || params.sharedSkills.includes(skill.name))
+      .with(false, () => !params.disabledSkills?.includes(skill.name))
+      .exhaustive()),
+  };
 
   function skillResolveCatalog(): SkillResolvedResult {
     const { root } = deps;

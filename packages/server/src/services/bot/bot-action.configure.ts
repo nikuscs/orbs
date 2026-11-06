@@ -63,6 +63,7 @@ export function botActionConfigure(deps: BotServiceDeps, { botId }: BotGetInput)
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
       sharedMcp: bot.sharedMcp,
+      disabledSkills: bot.disabledSkills,
       modelProvider: bot.modelProvider,
       modelId: bot.modelId,
       thinkingLevel: bot.thinkingLevel,

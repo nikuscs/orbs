@@ -4,7 +4,7 @@ export type BotSharedResource = 'skills';
 
 export type BotSharedField = 'sharedSkills';
 
-export type BotSharedForm = Pick<BotForm, 'inherit' | 'sharedSkills'>;
+export type BotSharedForm = Pick<BotForm, 'inherit' | 'sharedSkills' | 'disabledSkills'>;
 
 export interface BotSharedItem {
   name: string;
@@ -32,4 +32,11 @@ export interface BotSharedSelectedParams {
   names: string[];
   inherit: BotForm['inherit'];
   shared: BotForm['sharedSkills'];
+}
+
+export interface BotSharedSkillsSummaryParams {
+  sharedSelected: number;
+  sharedTotal: number;
+  localNames: string[];
+  disabled: BotForm['disabledSkills'];
 }

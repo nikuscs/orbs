@@ -16,6 +16,12 @@ export function botSkillName({ name }: BotTypes.BotSkillNameParams): string {
     .join(' ');
 }
 
+export function botDisabledSkills({ disabled, name, isOn }: BotTypes.BotDisabledSkillsParams): string[] {
+  const others = (disabled ?? []).filter((item) => item !== name);
+
+  return isOn ? others : [...others, name].sort();
+}
+
 export function botHandle({ name }: BotTypes.BotHandleParams): string {
   return name
     .normalize('NFKD')

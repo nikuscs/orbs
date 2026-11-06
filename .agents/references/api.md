@@ -51,7 +51,7 @@ Read-only, Ask, Auto and Full. Auto asks Jev and approves only with a safe score
 
 ## Skills, instructions, plugins and MCP
 
-Bot-local sources win, then configured shared sources, then Pi's global ones; shared sources need the bot's inheritance flag. Order and file names: `runtime/src/services/skill/`, `runtime/src/services/instruction/instruction.constants.ts`, `server/src/services/mcp/mcp-files.utils.ts`.
+Bot-local sources win, then configured shared sources, then Pi's global ones; shared sources need the bot's inheritance flag. A bot-local skill named in the bot's `disabledSkills` is left out of the prompt, the `$` list and expansion, and its files stay untouched. Order and file names: `runtime/src/services/skill/`, `runtime/src/services/instruction/instruction.constants.ts`, `server/src/services/mcp/mcp-files.utils.ts`.
 
 - MCP credentials are referenced by name (`envCredentials`, `headerCredentials`), only from shared sources; bot-local definitions that use them are skipped.
 - `mcp.add` and the `bot_mcp_add` tool write `data/bots/<botId>/mcp.json`, which may use credentials: a header secret must be allowed for the server's host, and only the owner can pass env secrets to a command server. `bot_mcp_add` and `bot_note` always ask the owner, except under Full.

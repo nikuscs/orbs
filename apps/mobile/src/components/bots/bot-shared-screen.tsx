@@ -4,13 +4,16 @@ import { botForm } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
 import { Stack, usePreventRemove, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ScrollView, View } from 'react-native';
 import { match, P } from 'ts-pattern';
 import { useCSSVariable } from 'uniwind';
 import { BotLoadState } from '@/components/bots/bot-load-state';
+import { BotSettingsLocalSkills } from '@/components/bots/bot-settings-local-skills';
 import { BotSettingsShared } from '@/components/bots/bot-settings-shared';
 import { actionSheetShow } from '@/components/ui/action-sheet';
+import { Tabs } from '@/components/ui/tabs';
 import { useBotShared } from '@/hooks/use-bot-shared';
 import { useConnection } from '@/hooks/use-connection';
 import type { BotSharedResource } from '@/types/bot-shared.types';
@@ -71,6 +74,7 @@ interface BotSharedScreenFormProps {
 
 function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProps) {
   const router = useRouter();
+  const [skillsTab, setSkillsTab] = useState<'shared' | 'local'>('shared');
 
   const list = useBotShared({
     session,
@@ -84,11 +88,13 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
     resolver: standardSchemaResolver(botForm.pick({
       inherit: true,
       sharedSkills: true,
+      disabledSkills: true,
     })),
     resetOptions: { keepDirtyValues: true },
     values: {
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
+      disabledSkills: bot.disabledSkills,
     },
   });
 
@@ -112,7 +118,8 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
   const submit = form.handleSubmit((input) => save.mutate({
     botId: bot.id,
     inherit: input.inherit,
-    [list.field]: input[list.field],
+    sharedSkills: input.sharedSkills,
+    disabledSkills: input.disabledSkills,
   }, {
     onSuccess: () => {
       disablePrevention();
@@ -142,11 +149,29 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="handled"
         >
-          <BotSettingsShared
-            isDisabled={save.isPending}
-            list={list}
-            resource={resource}
-          />
+          <View className="gap-4">
+            <Tabs
+              options={[
+                { value: 'shared', label: m.bots_skills_tab_shared() },
+                { value: 'local', label: m.bots_skills_tab_local() },
+              ]}
+              value={skillsTab}
+              onValueChange={setSkillsTab}
+            />
+            {skillsTab === 'local' ? (
+              <BotSettingsLocalSkills
+                botId={bot.id}
+                isDisabled={save.isPending}
+                session={session}
+              />
+            ) : (
+              <BotSettingsShared
+                isDisabled={save.isPending}
+                list={list}
+                resource={resource}
+              />
+            )}
+          </View>
         </ScrollView>
       </View>
     </FormProvider>

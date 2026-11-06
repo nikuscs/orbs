@@ -36,6 +36,7 @@ function BotsRoute() {
       .returnType<BotDialogView | null>()
       .with({ success: true }, ({ data }) => ({ kind: 'section', botId, section: data }))
       .otherwise(() => null))
+    .with('/_chat/bots/$botId/skills/local', () => ({ kind: 'section', botId, section: 'skills' }))
     .with('/_chat/bots/$botId/delete', () => ({ kind: 'delete', botId }))
     .with('/_chat/bots/$botId/reset', () => ({ kind: 'reset', botId }))
     .with('/_chat/bots/$botId/routines/$routineId/edit', () => ({ kind: 'routine-edit', botId, routineId }))
