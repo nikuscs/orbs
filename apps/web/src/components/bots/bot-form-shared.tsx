@@ -1,10 +1,10 @@
 import { m } from '@repo/i18n/client';
 import { Button } from '@repo/ui/button';
-import { Checkbox } from '@repo/ui/checkbox';
 import { FormErrors } from '@repo/ui/forms/form';
 import { Input } from '@repo/ui/input';
 import { Panel, PanelRow } from '@repo/ui/panel';
 import { Skeleton } from '@repo/ui/skeleton';
+import { Switch } from '@repo/ui/switch';
 import { useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { match } from 'ts-pattern';
@@ -98,18 +98,17 @@ export function BotFormShared({ resource, field, items, isError, messages, busy 
         </div>
         <Panel variant="soft">
           {visible.map((item) => (
-            <div className="flex items-start gap-3 px-4 hover:bg-muted/40" key={item.name}>
-              <Checkbox
-                checked={selected.has(item.name)}
-                className="mt-3"
-                disabled={busy}
-                id={`${resource}-${item.name}`}
-                onCheckedChange={(checked) => toggle(item.name, checked === true)}
-              />
+            <div className="flex items-center gap-3 px-4 hover:bg-muted/40" key={item.name}>
               <label className="flex min-w-0 flex-1 cursor-pointer flex-col py-2.5" htmlFor={`${resource}-${item.name}`}>
                 <span className="font-mono text-sm font-medium">{item.name}</span>
                 <span className="truncate text-xs text-muted-foreground" title={item.detail}>{item.detail}</span>
               </label>
+              <Switch
+                checked={selected.has(item.name)}
+                disabled={busy}
+                id={`${resource}-${item.name}`}
+                onCheckedChange={(isOn) => toggle(item.name, isOn)}
+              />
             </div>
           ))}
           {visible.length === 0 ? <PanelRow><span className="text-sm text-muted-foreground">{messages.noMatch}</span></PanelRow> : null}
