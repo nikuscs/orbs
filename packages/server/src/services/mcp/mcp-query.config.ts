@@ -5,15 +5,16 @@ import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { match, P } from 'ts-pattern';
 import { mcpDocument, mcpServer } from '@repo/runtime/server';
-import { mcpFiles } from './mcp-files.utils';
+import { mcpFiles, mcpFilesOwnedPath } from './mcp-files.utils';
 import type { McpConfigParams, McpServiceDeps } from '../../types/mcp.types';
 import type { McpCatalog } from '@repo/contracts/universal';
 import type { McpConfig, McpSource } from '@repo/runtime/server';
 
 export async function mcpQueryConfig(
-  { root }: McpServiceDeps,
+  deps: McpServiceDeps,
   { botId, paths, isInherited, sharedMcp }: McpConfigParams,
 ): Promise<McpConfig> {
+  const { root } = deps;
   const defaults = [join(getAgentDir(), 'mcp.json'), join(homedir(), '.agents/mcp.json')];
   const directory = join(root, 'agents', botId);
   const localPaths = [join(directory, '.agents/mcp.json'), join(directory, '.pi/mcp.json')];
@@ -23,10 +24,13 @@ export async function mcpQueryConfig(
     .with(false, () => [])
     .exhaustive();
 
-  const sharedSources = sharedPaths.map((path) => ({ path, isBotLocal: false }));
-  const localSources = localPaths.filter(existsSync).map((path) => ({ path, isBotLocal: true }));
+  const sharedSources = sharedPaths.map((path) => ({ path, isBotLocal: false, isOwned: false }));
+  const localSources = localPaths.filter(existsSync).map((path) => ({ path, isBotLocal: true, isOwned: false }));
 
-  const sources = await Promise.all([...sharedSources, ...localSources].map(async ({ path, isBotLocal }) => {
+  const ownedPath = mcpFilesOwnedPath(deps, botId);
+  const ownedSources = existsSync(ownedPath) ? [{ path: ownedPath, isBotLocal: false, isOwned: true }] : [];
+
+  const sources = await Promise.all([...sharedSources, ...localSources, ...ownedSources].map(async ({ path, isBotLocal, isOwned }) => {
     const source = resolve(root, match(path)
       .with('~', () => homedir())
       .when((value) => value.startsWith('~/'), (value) => join(homedir(), value.slice(2)))
@@ -36,21 +40,21 @@ export async function mcpQueryConfig(
       const files = await mcpFiles(source);
       const documents = await Promise.all(files.map(mcpQueryConfigRead));
 
-      return documents.map((document) => ({ ...document, isBotLocal }));
+      return documents.map((document) => ({ ...document, isBotLocal, isOwned }));
     } catch {
-      return [{ source, servers: {}, error: 'Cannot read MCP source.', isBotLocal }];
+      return [{ source, servers: {}, error: 'Cannot read MCP source.', isBotLocal, isOwned }];
     }
   }));
 
   const servers = new Map<string, McpConfig['servers'][number]>();
   const diagnostics: McpCatalog['diagnostics'] = [];
 
-  for (const { source, servers: entries, error, isBotLocal } of sources.flat()) {
+  for (const { source, servers: entries, error, isBotLocal, isOwned } of sources.flat()) {
     match(error)
       .with(P.string, (message) => diagnostics.push({ source, message }))
       .otherwise(() => undefined);
 
-    const picked = Object.entries(entries).filter(([name]) => isBotLocal || sharedMcp === null || sharedMcp.includes(name));
+    const picked = Object.entries(entries).filter(([name]) => isBotLocal || isOwned || sharedMcp === null || sharedMcp.includes(name));
 
     for (const [name, value] of picked) {
       servers.delete(name);
@@ -68,12 +72,18 @@ export async function mcpQueryConfig(
           });
         })
         .with({ result: { success: true } }, ({ result: { data } }) => {
-          servers.set(name, {
+          const entry: McpConfig['servers'][number] = {
             name,
             source,
             config: data,
             isBotLocal,
-          });
+          };
+
+          if (isOwned) {
+            entry.isOwned = true;
+          }
+
+          servers.set(name, entry);
         })
         .with({ result: { success: false } }, () => {
           diagnostics.push({

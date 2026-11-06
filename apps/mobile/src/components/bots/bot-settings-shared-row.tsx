@@ -43,7 +43,7 @@ export function BotSettingsSharedRow({ bot, session, resource, icon, title, isDi
     <ItemButton
       accessibilityLabel={title}
       disabled={isDisabled}
-      onPress={() => router.push({ pathname: resource === 'skills' ? '/bots/[botId]/skills' : '/bots/[botId]/mcp', params: { botId: bot.id } })}
+      onPress={() => router.push({ pathname: '/bots/[botId]/skills', params: { botId: bot.id } })}
     >
       <ItemMedia>
         <Icon icon={icon} tone="muted" />

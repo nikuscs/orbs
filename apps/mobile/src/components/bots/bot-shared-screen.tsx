@@ -84,13 +84,11 @@ function BotSharedScreenForm({ session, bot, resource }: BotSharedScreenFormProp
     resolver: standardSchemaResolver(botForm.pick({
       inherit: true,
       sharedSkills: true,
-      sharedMcp: true,
     })),
     resetOptions: { keepDirtyValues: true },
     values: {
       inherit: bot.inherit,
       sharedSkills: bot.sharedSkills,
-      sharedMcp: bot.sharedMcp,
     },
   });
 

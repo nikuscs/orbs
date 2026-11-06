@@ -2,6 +2,7 @@ import { match, P } from 'ts-pattern';
 import { toolActionJudge } from './tool-action.judge';
 import { toolQueryAlwaysAllowed } from './tool-query.always-allowed';
 import { toolQuerySettings } from './tool-query.settings';
+import { TOOL } from './tool.constants';
 import type { ToolAuthorizeParams, ToolServiceDeps } from '../../types/tool.types';
 import type { RuntimeToolDecision } from '@repo/runtime/server';
 
@@ -16,11 +17,14 @@ export async function toolActionAuthorize(deps: ToolServiceDeps, call: ToolAutho
     toolQueryAlwaysAllowed(deps, { botId: call.botId }),
   ]);
 
+  const isAskFirst = TOOL.askFirstTools.some((name) => name === call.name);
+
   return match({
     bot,
+    isAskFirst,
     isReadOnly: call.isReadOnly,
     isOwn: call.isOwn,
-    approved: call.approved === true || alwaysAllowed.includes(call.name),
+    approved: call.approved === true || (!isAskFirst && alwaysAllowed.includes(call.name)),
   })
     .with({ bot: P.nullish }, () => 'deny' as const)
     .with({ isReadOnly: true }, () => 'allow' as const)
@@ -28,6 +32,7 @@ export async function toolActionAuthorize(deps: ToolServiceDeps, call: ToolAutho
     .with({ bot: { permission: 'read-only' } }, () => 'deny' as const)
     .with({ isOwn: true }, () => 'allow' as const)
     .with({ approved: true }, () => 'allow' as const)
+    .with({ bot: { permission: 'auto' }, isAskFirst: true }, () => 'ask' as const)
     .with({ bot: { permission: 'auto' } }, async ({ bot: current }) => {
       const settings = await toolQuerySettings(deps);
 

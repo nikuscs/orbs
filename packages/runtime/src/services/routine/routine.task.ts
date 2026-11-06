@@ -3,7 +3,6 @@ import { ENTRY } from '@repo/contracts/universal';
 import { Errors } from '@repo/errors/universal';
 import { match, P } from 'ts-pattern';
 import { routineScheduleNextRunAt } from './routine-schedule.utils';
-import { routineWait } from './routine-wait.utils';
 import { ROUTINE, routineDocument } from './routine.constants';
 import type { RoutineTaskInput, RoutineTaskState } from '../../types/routine.types';
 
@@ -16,10 +15,12 @@ export const routineTask = defineTask<RoutineTaskInput, RoutineTaskState, null>(
       const doc = await tx.doc(routineDocument, api.conversationId);
       return match(doc.routines[task.input.routineId])
         .with(P.nullish, () => ({ status: 'terminal' as const, outcome: { status: 'completed' as const, result: null } }))
+        .when((routine) => routine.taskId !== task.id, () => ({ status: 'terminal' as const, outcome: { status: 'completed' as const, result: null } }))
         .otherwise((routine) => {
           const isManual = routine.runRequestedAt !== null;
           const until = routine.runRequestedAt ?? match(routine.isEnabled).with(true, () => routine.nextRunAt).with(false, () => null).exhaustive();
           return match(until)
+            .with(P.nullish, () => ({ status: 'terminal' as const, outcome: { status: 'completed' as const, result: null } }))
             .with(P.number.lte(api.now()), (scheduledAt) => {
               routine.occurrence += 1;
               routine.runRequestedAt = null;
@@ -38,13 +39,10 @@ export const routineTask = defineTask<RoutineTaskInput, RoutineTaskState, null>(
                 checkpoint: { phase: 'deliver' as const, scheduleRevision: routine.scheduleRevision, occurrence: routine.occurrence, prompt: routine.prompt, isManual },
               };
             })
-            .otherwise(() => ({ status: 'running' as const, checkpoint: { phase: 'wait' as const, revision: routine.revision, until } }));
+            .otherwise((wakeAt) => ({ status: 'sleeping' as const, until: wakeAt, checkpoint: { phase: 'wait' as const, until: wakeAt } }));
         });
     }, context),
-    wait: async (task, api, context) => {
-      await routineWait(api, task.input.routineId, task.state.checkpoint, context);
-      await api.commit(() => ({ status: 'running', checkpoint: { phase: 'check' } }), context);
-    },
+    wait: (_task, api, context) => api.commit(() => ({ status: 'running', checkpoint: { phase: 'check' } }), context),
     deliver: async (task, api, context) => {
       const checkpoint = task.state.checkpoint;
 

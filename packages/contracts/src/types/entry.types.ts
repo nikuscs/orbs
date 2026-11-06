@@ -11,6 +11,7 @@ export const ENTRY = {
   subagentReport: 'bots.subagent-report',
   ownerNote: 'bots.owner-note',
   routineRun: 'bots.routine-run',
+  botStart: 'bots.bot-start',
 } as const;
 
 export const entryPeerMessage = z.object({

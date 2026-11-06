@@ -7,10 +7,13 @@ export interface RuntimeBotToolsBots {
     swapModels: (params: UniversalTypes.BotSwapModelsInput) => Promise<UniversalTypes.BotSwapModelsResult>;
     create: (params: UniversalTypes.BotCreateInput) => Promise<UniversalTypes.Bot>;
     update: (params: UniversalTypes.BotUpdateInput) => Promise<UniversalTypes.Bot>;
+    addMcp: (params: UniversalTypes.McpServerAddInput) => Promise<UniversalTypes.McpCatalog['servers'][number]>;
+    removeMcp: (params: UniversalTypes.McpServerRemoveInput) => Promise<UniversalTypes.Bot>;
   };
   queries: {
     catalog: (params: UniversalTypes.BotGetInput) => Promise<UniversalTypes.BotCatalog>;
     get: (params: UniversalTypes.BotGetInput) => Promise<UniversalTypes.Bot>;
+    mcp: (params: UniversalTypes.BotGetInput) => Promise<UniversalTypes.McpCatalog>;
   };
 }
 

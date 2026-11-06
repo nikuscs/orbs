@@ -26,7 +26,7 @@ export const Route = createFileRoute('/_chat/bots')({
 
 function BotsRoute() {
   const routeId = useMatches({ select: (matches) => matches.at(-1)?.routeId });
-  const { botId = '', tab, routineId = '', todoId = '' } = useParams({ strict: false });
+  const { botId = '', tab, routineId = '', todoId = '', server = '' } = useParams({ strict: false });
   const close = useSectionDialogClose();
 
   const view = match(routeId)
@@ -41,6 +41,7 @@ function BotsRoute() {
     .with('/_chat/bots/$botId/routines/$routineId/edit', () => ({ kind: 'routine-edit', botId, routineId }))
     .with('/_chat/bots/$botId/routines/$routineId/delete', () => ({ kind: 'routine-delete', botId, routineId }))
     .with('/_chat/bots/$botId/todos/$todoId/delete', () => ({ kind: 'todo-delete', botId, todoId }))
+    .with('/_chat/bots/$botId/mcp/$server/remove', () => ({ kind: 'mcp-remove', botId, server }))
     .otherwise(() => null);
 
   if (!view) {

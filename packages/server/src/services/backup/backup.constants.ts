@@ -16,7 +16,7 @@ export const BACKUP = {
     bots: 'data/bots',
     agents: 'agents',
   },
-  botStore: /^data\/bots\/[0-9a-f-]{36}\/(runtime\.sql|carry\.json)$/,
+  botStore: /^data\/bots\/[0-9a-f-]{36}\/(runtime\.sql|carry\.json|mcp\.json)$/,
   excluded: {
     locks: true,
     ipc: true,

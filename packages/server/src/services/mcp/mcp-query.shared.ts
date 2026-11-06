@@ -14,6 +14,6 @@ export async function mcpQueryShared(deps: McpServiceDeps, { bot }: McpBotParams
   });
 
   return config.servers
-    .filter((entry) => !entry.isBotLocal)
+    .filter((entry) => !entry.isBotLocal && !entry.isOwned)
     .map((entry) => ({ name: entry.name, source: entry.source }));
 }
