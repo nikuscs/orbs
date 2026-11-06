@@ -394,6 +394,7 @@
   "bots_mcp_remove_description": "{bot} stops using {server}. You can add it again later; saved secrets stay.",
   "bots_mcp_actions": "Actions for {server}",
   "bots_mcp_use": "Use {server}",
+  "bots_mcp_turn_off": "Turn off",
   "bots_mcp_tools": "{count} tools",
   "bots_mcp_connected": "Connected",
   "bots_mcp_connecting": "Connecting…",

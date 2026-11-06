@@ -162,8 +162,10 @@
       "@pierrecapo/expo-notification-service-extension": "0.2.0"
     }
   },
+  "dependencies": {
+    "@expo/fingerprint": "catalog:mobile"
+  },
   "devDependencies": {
-    "@expo/fingerprint": "catalog:mobile",
     "@repo/contracts": "workspace:*",
     "@vitest/coverage-v8": "catalog:",
     "oxlint": "catalog:",

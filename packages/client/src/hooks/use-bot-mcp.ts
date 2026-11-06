@@ -30,7 +30,7 @@ export function useBotMcp({ bot, login: target }: BotMcpParams) {
   const selected = new Set(bot.inherit.includes('mcp') ? chosen : []);
   const servers = discover.data?.servers ?? [];
 
-  const rows: BotMcpRow[] = [
+  const rows: Omit<BotMcpRow, 'needsLogin'>[] = [
     ...servers.map((server) => ({
       name: server.name,
       server,
@@ -108,7 +108,7 @@ export function useBotMcp({ bot, login: target }: BotMcpParams) {
       .exhaustive();
   }
 
-  const status = ({ name, server }: BotMcpRow): SettingsProviderStatus => match({ server, isPending: pending === name })
+  const status = ({ name, server }: Omit<BotMcpRow, 'needsLogin'>): SettingsProviderStatus => match({ server, isPending: pending === name })
     .with({ server: null }, () => ({ tone: 'default' as const, label: m.bots_mcp_disabled() }))
     .with({ isPending: true }, () => ({ tone: 'warning' as const, label: m.bots_mcp_waiting() }))
     .with({ server: { auth: 'required' } }, () => ({ tone: 'warning' as const, label: m.bots_mcp_login_required() }))
@@ -119,7 +119,7 @@ export function useBotMcp({ bot, login: target }: BotMcpParams) {
     .otherwise(() => ({ tone: 'default' as const, label: m.bots_mcp_not_connected() }));
 
   return {
-    rows,
+    rows: rows.map((row) => ({ ...row, needsLogin: row.isOn && (pending === row.name || row.server?.auth === 'required') })),
     toggle,
     presets: MCP.presets.filter((preset) => !discover.data?.servers.some((server) => server.name === preset.name)),
     add: (preset: typeof MCP.presets[number]) => add.mutate({

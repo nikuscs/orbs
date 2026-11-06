@@ -3,7 +3,7 @@ import { m } from '@repo/i18n/client';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { LogIn, LogOut, Plug, Plus, Server, Trash2, X } from 'lucide-react-native';
+import { EllipsisVertical, LogIn, Plug, Plus, Server, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { Switch, View } from 'react-native';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
@@ -15,6 +15,7 @@ import { LabelDescription } from '@/components/ui/label';
 import { Menu } from '@/components/ui/menu';
 import { StatusDot } from '@/components/ui/status-dot';
 import { Text } from '@/components/ui/text';
+import type { MenuItem } from '@/types/menu.types';
 import type { RpcSession } from '@/types/rpc.types';
 import type { Bot } from '@repo/contracts/universal';
 
@@ -55,7 +56,7 @@ export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
             </ItemContent>
           </Item>
         ) : null}
-        {mcp.rows.map((row) => ({ ...row, status: mcp.status(row) })).map(({ name, server, isShared, isOn, status }) => (
+        {mcp.rows.map((row) => ({ ...row, status: mcp.status(row) })).map(({ name, server, isShared, isOn, needsLogin, status }) => (
           <Item key={name}>
             <ItemMedia className="mt-1 self-start">
               <Icon icon={Server} tone="muted" />
@@ -70,58 +71,75 @@ export function BotSettingsMcp({ bot, session }: BotSettingsMcpProps) {
                 </Text>
               </View>
             </ItemContent>
-            {mcp.pending === name ? (
-              <Button
-                accessibilityLabel={m.bots_mcp_cancel()}
-                disabled={mcp.isBusy}
-                size="icon-sm"
-                variant="ghost"
-                onPress={mcp.cancel}
-              >
-                <Icon icon={X} size="sm" />
-              </Button>
-            ) : null}
-            {server && mcp.pending !== name && server.auth === 'required' ? (
-              <Button
-                accessibilityLabel={m.bots_mcp_login()}
-                disabled={mcp.isBusy || mcp.pending !== null}
-                size="sm"
-                variant="outline"
-                onPress={() => mcp.connect(name)}
-              >
-                <Icon icon={LogIn} size="sm" />
-                {m.bots_mcp_login()}
-              </Button>
-            ) : null}
-            {server?.auth === 'authorized' ? (
-              <Button
-                accessibilityLabel={m.bots_mcp_logout()}
-                disabled={mcp.isBusy}
-                size="icon-sm"
-                variant="ghost"
-                onPress={() => mcp.logout(name)}
-              >
-                <Icon icon={LogOut} size="sm" />
-              </Button>
-            ) : null}
-            {server?.isOwned ? (
-              <Button
-                accessibilityLabel={m.bots_mcp_remove()}
-                size="icon-sm"
-                variant="ghost"
-                onPress={() => router.push({ pathname: '/bots/[botId]/mcp/[server]/remove', params: { botId: bot.id, server: name } })}
-              >
-                <Icon icon={Trash2} size="sm" />
-              </Button>
-            ) : null}
-            {isShared ? (
-              <Switch
-                accessibilityLabel={m.bots_mcp_use({ server: name })}
-                disabled={mcp.isBusy}
-                value={isOn}
-                onValueChange={(value) => mcp.toggle(name, value)}
-              />
-            ) : null}
+            {isShared && !needsLogin ? (
+              <View className="self-stretch justify-center">
+                <Switch
+                  accessibilityLabel={m.bots_mcp_use({ server: name })}
+                  disabled={mcp.isBusy}
+                  value={isOn}
+                  onValueChange={(value) => mcp.toggle(name, value)}
+                />
+              </View>
+            ) : (
+              <View className="flex-row">
+                {mcp.pending === name ? (
+                  <Button
+                    accessibilityLabel={m.bots_mcp_cancel()}
+                    className={server?.auth === 'authorized' || server?.isOwned || isShared ? 'rounded-r-none' : undefined}
+                    disabled={mcp.isBusy}
+                    size="sm"
+                    variant="outline"
+                    onPress={mcp.cancel}
+                  >
+                    <Icon icon={X} size="sm" />
+                    {m.bots_mcp_cancel()}
+                  </Button>
+                ) : null}
+                {server && mcp.pending !== name && server.auth === 'required' ? (
+                  <Button
+                    accessibilityLabel={m.bots_mcp_login()}
+                    className={server.isOwned || isShared ? 'rounded-r-none' : undefined}
+                    disabled={mcp.isBusy || mcp.pending !== null}
+                    size="sm"
+                    variant="outline"
+                    onPress={() => mcp.connect(name)}
+                  >
+                    <Icon icon={LogIn} size="sm" />
+                    {m.bots_mcp_login()}
+                  </Button>
+                ) : null}
+                {server && (server.auth === 'authorized' || server.isOwned || (isShared && isOn)) ? (
+                  <Menu
+                    isDisabled={mcp.isBusy}
+                    items={[
+                      ...(server.auth === 'authorized' ? [{ label: m.bots_mcp_logout(), systemImage: 'rectangle.portrait.and.arrow.right', onSelect: () => mcp.logout(name) } satisfies MenuItem] : []),
+                      ...(isShared && isOn ? [{ label: m.bots_mcp_turn_off(), systemImage: 'power', onSelect: () => mcp.toggle(name, false) } satisfies MenuItem] : []),
+                      ...(server.isOwned ? [{
+                        label: m.bots_mcp_remove(),
+                        systemImage: 'trash',
+                        isDestructive: true,
+                        hasDividerBefore: server.auth === 'authorized' || (isShared && isOn),
+                        onSelect: () => router.push({ pathname: '/bots/[botId]/mcp/[server]/remove', params: { botId: bot.id, server: name } }),
+                      } satisfies MenuItem] : []),
+                    ]}
+                    title={name}
+                  >
+                    <Button
+                      accessibilityLabel={m.bots_mcp_actions({ server: name })}
+                      className={needsLogin ? 'w-9 rounded-l-none border-l-0 px-0' : undefined}
+                      size={needsLogin ? 'sm' : 'icon-sm'}
+                      variant={needsLogin ? 'outline' : 'ghost'}
+                    >
+                      <Icon
+                        icon={EllipsisVertical}
+                        size="sm"
+                        tone="muted"
+                      />
+                    </Button>
+                  </Menu>
+                ) : null}
+              </View>
+            )}
           </Item>
         ))}
       </ItemGroup>

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import IconEllipsisVertical from '~icons/lucide/ellipsis-vertical';
 import IconLogIn from '~icons/lucide/log-in';
 import IconLogOut from '~icons/lucide/log-out';
+import IconPower from '~icons/lucide/power';
 import IconTrash2 from '~icons/lucide/trash-2';
 import IconX from '~icons/lucide/x';
 import { Button } from '../button';
@@ -97,19 +98,20 @@ export function BotMcpPanel({ bot }: BotMcpPanelProps) {
               </span>
             </div>
           </PanelContent>
-          <BotMcpPanelActions
-            bot={bot}
-            mcp={mcp}
-            row={row}
-          />
-          {row.isShared ? (
+          {row.isShared && !row.needsLogin ? (
             <Switch
               aria-label={m.bots_mcp_use({ server: row.name })}
               checked={row.isOn}
               disabled={mcp.isBusy}
               onCheckedChange={(isOn) => mcp.toggle(row.name, isOn)}
             />
-          ) : null}
+          ) : (
+            <BotMcpPanelActions
+              bot={bot}
+              mcp={mcp}
+              row={row}
+            />
+          )}
         </PanelRow>
       ))}
       {mcp.rows.length > 0 && visible.length === 0 ? (
@@ -165,7 +167,8 @@ function BotMcpPanelActions({ bot, row, mcp }: BotMcpPanelActionsProps) {
 
   const isPending = mcp.pending === name;
   const needsLogin = !isPending && server.auth === 'required';
-  const hasMenu = server.auth === 'authorized' || server.isOwned;
+  const canTurnOff = row.isShared && row.isOn;
+  const hasMenu = server.auth === 'authorized' || server.isOwned || canTurnOff;
 
   return (
     <ButtonGroup aria-label={m.bots_mcp_actions({ server: name })}>
@@ -210,6 +213,12 @@ function BotMcpPanelActions({ bot, row, mcp }: BotMcpPanelActionsProps) {
               <DropdownMenuItem onSelect={() => mcp.logout(name)}>
                 <IconLogOut />
                 {m.bots_mcp_logout()}
+              </DropdownMenuItem>
+            ) : null}
+            {canTurnOff ? (
+              <DropdownMenuItem onSelect={() => mcp.toggle(name, false)}>
+                <IconPower />
+                {m.bots_mcp_turn_off()}
               </DropdownMenuItem>
             ) : null}
             {server.auth === 'authorized' && server.isOwned ? <DropdownMenuSeparator /> : null}

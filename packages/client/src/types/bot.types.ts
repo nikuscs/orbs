@@ -109,6 +109,7 @@ export interface BotMcpRow {
   server: UniversalTypes.McpCatalog['servers'][number] | null;
   isShared: boolean;
   isOn: boolean;
+  needsLogin: boolean;
 }
 
 export interface BotMcpLogin {

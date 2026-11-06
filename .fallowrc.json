@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
     ".agents/sync.ts",
+    ".agents/skills/*/scripts/**/*.ts",
     "apps/mobile/app.config.ts",
     "apps/web/src/application/server.tanstack.ts",
     "apps/web/src/application/server.bun.ts",
