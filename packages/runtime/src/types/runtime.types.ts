@@ -27,9 +27,23 @@ export interface RuntimeServiceParams {
   env: NonNullable<PiDurableTypes.HarnessOptions['env']>;
   permissions: RuntimeToolPolicy;
   collaboration: CollaborationPolicy;
+  gifs: RuntimeGifs;
   images?: ImageProcessor;
   secrets?: RuntimeSecrets;
   toolExtensions?: PiDurableTypes.Extension[];
+}
+
+export interface RuntimeGifs {
+  actions: {
+    pick: (params: { reaction: UniversalTypes.GifReaction }) => Promise<UniversalTypes.GifToolDetails | null>;
+  };
+  queries: {
+    provider: () => Promise<UniversalTypes.GifProvider>;
+  };
+}
+
+export interface RuntimeChatToolsParams {
+  gifs: RuntimeGifs;
 }
 
 export interface RuntimeSecrets {

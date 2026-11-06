@@ -207,6 +207,11 @@ export const contract = {
       .errors({ UNAUTHORIZED: errorSchemas.UNAUTHORIZED, NOT_FOUND: errorSchemas.NOT_FOUND })
       .input(attachmentGet)
       .output(attachmentDownload),
+    poster: oc
+      .meta(openapi({ method: 'GET', path: '/{botId}/{attachmentId}/poster' }))
+      .errors({ UNAUTHORIZED: errorSchemas.UNAUTHORIZED, NOT_FOUND: errorSchemas.NOT_FOUND })
+      .input(attachmentGet)
+      .output(attachmentDownload),
     list: ocFind.input(attachmentList).output(attachmentPage),
     remove: ocBusy.input(attachmentGet).output(attachmentRemoveResult),
   },

@@ -58,3 +58,19 @@ export const TOOL_PRESENTATIONS = new Map<string, ToolTypes.ToolPresentationDefi
   ['bot_artifact_create', { label: m.tool_label_artifact_create, icon: 'artifact' }],
   ['bot_artifact_update', { label: m.tool_label_artifact_update, icon: 'artifact' }],
 ]);
+
+export const TOOL_ACTIVITY_LABELS = new Map<string, ToolTypes.ToolActivityLabel>([
+  ['bash', { plain: m.rooms_activity_tool_command, detail: (detail) => m.rooms_activity_tool_command_detail({ detail }) }],
+  ['read', { plain: m.rooms_activity_tool_read, detail: (detail) => m.rooms_activity_tool_read_detail({ detail }) }],
+  ['write', { plain: m.rooms_activity_tool_write, detail: (detail) => m.rooms_activity_tool_write_detail({ detail }) }],
+  ['edit', { plain: m.rooms_activity_tool_edit, detail: (detail) => m.rooms_activity_tool_edit_detail({ detail }) }],
+  ['tool_search', { plain: m.rooms_activity_tool_search_tools }],
+  ['bot_history', { plain: m.rooms_activity_tool_history }],
+  ['bot_search', { plain: m.rooms_activity_tool_history }],
+  ['bot_artifact_create', { plain: m.rooms_activity_tool_artifact, detail: (detail) => m.rooms_activity_tool_artifact_detail({ detail }) }],
+  ['bot_artifact_update', { plain: m.rooms_activity_tool_artifact, detail: (detail) => m.rooms_activity_tool_artifact_detail({ detail }) }],
+  ['bot_todo_create', { plain: m.rooms_activity_tool_todos }],
+  ['bot_todo_update', { plain: m.rooms_activity_tool_todos }],
+  ['bot_todo_remove', { plain: m.rooms_activity_tool_todos }],
+  ['bot_gif', { plain: m.rooms_activity_tool_gif }],
+]);

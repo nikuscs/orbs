@@ -1,15 +1,15 @@
-import { ROOMS_SEND_MODES } from '@repo/client/client';
+import { GIF_PROVIDER_LABELS, ROOMS_SEND_MODES } from '@repo/client/client';
 import { useChatDefaults, useChatHideVerbose, useNotificationSettings } from '@repo/client/react';
-import { conversationWhenBusy, notificationPlatform } from '@repo/contracts/universal';
+import { conversationWhenBusy, gifProvider, notificationPlatform } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { useRouter } from 'expo-router';
-import { BellRing, EyeOff, ListOrdered, Monitor, Palette, Settings } from 'lucide-react-native';
+import { BellRing, EyeOff, ListOrdered, Monitor, Palette, Settings, ShieldCheck, Smile } from 'lucide-react-native';
 import { useState } from 'react';
-import { Switch } from 'react-native';
+import { Linking, Switch } from 'react-native';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
 import { BotSettingsMenuRow } from '@/components/bots/bot-settings-menu-row';
 import { Icon } from '@/components/ui/icon';
-import { Item, ItemContent, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Item, ItemButton, ItemContent, ItemGroup, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { useAppearance } from '@/hooks/use-appearance';
 import { useToast } from '@/hooks/use-toast';
 import { appearanceRead, appearanceSave } from '@/services/appearance/appearance.client';
@@ -67,6 +67,18 @@ export function SettingsGeneral() {
           value={whenBusy ? ROOMS_SEND_MODES[whenBusy]() : '…'}
         />
         <BotSettingsMenuRow
+          description={m.settings_gifs_credit()}
+          icon={Smile}
+          isDisabled={!defaults.settings || defaults.isPending}
+          items={gifProvider.options.map((provider) => ({
+            label: GIF_PROVIDER_LABELS[provider](),
+            systemImage: provider === defaults.settings?.gifProvider ? 'checkmark' : undefined,
+            onSelect: () => defaults.configure({ gifProvider: provider }),
+          }))}
+          title={m.settings_gifs()}
+          value={defaults.settings ? GIF_PROVIDER_LABELS[defaults.settings.gifProvider]() : '…'}
+        />
+        <BotSettingsMenuRow
           icon={BellRing}
           isDisabled={!notify.prefer || notify.isPending}
           items={notificationPlatform.options.map((platform) => ({
@@ -108,6 +120,14 @@ export function SettingsGeneral() {
           title={m.settings_appearance_theme()}
           value={palettes.themes.find((palette) => palette.id === palettes.selected)?.name ?? ''}
         />
+        <ItemButton onPress={() => void Linking.openSettings()}>
+          <ItemMedia>
+            <Icon icon={ShieldCheck} tone="muted" />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{m.settings_general_permissions()}</ItemTitle>
+          </ItemContent>
+        </ItemButton>
       </ItemGroup>
     </BotDetailsSection>
   );

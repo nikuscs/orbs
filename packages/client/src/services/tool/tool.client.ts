@@ -1,4 +1,4 @@
-import { toolCallArtifact, toolCallSubagent, toolCallSubagentDetails } from '@repo/contracts/universal';
+import { GIF, gifToolDetails, toolCallArtifact, toolCallSubagent, toolCallSubagentDetails } from '@repo/contracts/universal';
 import { toolEvent, toolEventsAppend } from '../tool-event/tool-event.utils';
 import { TOOL_ARTIFACT_NAMES, TOOL_QUESTIONS, TOOL_SUBAGENT } from './tool.constants';
 import type * as ToolTypes from '../../types/tool.types';
@@ -27,6 +27,16 @@ export function toolBlocks({ parts, hideVerbose = false }: ToolTypes.ToolBlocksP
 
     if (artifact) {
       return [...blocks, { kind: 'artifact', index, artifact }];
+    }
+
+    const gif = part.toolName === GIF.toolName && part.state === 'output-available' ? gifToolDetails.safeParse(part.toolMetadata?.details).data : undefined;
+
+    if (gif) {
+      return [...blocks, { kind: 'gif', index, gif }];
+    }
+
+    if (part.toolName === GIF.toolName && !part.state.startsWith('output-')) {
+      return blocks;
     }
 
     const subagentInput = part.toolName === TOOL_SUBAGENT ? toolCallSubagent.safeParse(part.input).data : undefined;

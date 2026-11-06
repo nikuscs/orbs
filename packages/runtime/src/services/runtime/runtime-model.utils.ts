@@ -4,17 +4,15 @@ import { match, P } from 'ts-pattern';
 import { runtimeModelRoute } from '../../types/runtime-model.types';
 import { runtimeModelStream, runtimeModelStreamFailure } from './runtime-model-stream.utils';
 import { runtimeModelTrace } from './runtime-model-trace.utils';
-import { RUNTIME_MAX_MODEL_REQUESTS } from './runtime.constants';
+import { RUNTIME_FALLBACK_PROVIDER, RUNTIME_MAX_MODEL_REQUESTS } from './runtime.constants';
 import type { RuntimeBotParams } from '../../types/runtime.types';
 import type { Models } from '@earendil-works/pi-ai/models';
 import type { ModelRef } from '@earendil-works/pi-durable';
 
-const ROUTE_PROVIDER = 'bots-fallback';
-
 export function runtimeModelRef(bot: RuntimeBotParams): ModelRef {
   return match(bot.fallbackModel)
     .with(P.nonNullable, (fallback) => ({
-      provider: ROUTE_PROVIDER,
+      provider: RUNTIME_FALLBACK_PROVIDER,
       modelId: JSON.stringify({
         primary: { modelProvider: bot.modelProvider, modelId: bot.modelId, thinkingLevel: bot.thinkingLevel },
         fallback,
@@ -37,7 +35,7 @@ export function runtimeModels(source: Models): Models {
   });
 
   const runtimeModelGet: Models['getModel'] = (provider, id) => match(provider)
-    .with(ROUTE_PROVIDER, () => {
+    .with(RUNTIME_FALLBACK_PROVIDER, () => {
       return match(runtimeModelParse(id)).with(P.nonNullable, (route) => {
         const primary = models.getModel(route.primary.modelProvider, route.primary.modelId);
         const fallback = models.getModel(route.fallback.modelProvider, route.fallback.modelId);
@@ -55,7 +53,7 @@ export function runtimeModels(source: Models): Models {
     .otherwise(() => models.getModel(provider, id));
 
   const runtimeModelRoutedStream: Models['streamSimple'] = (model, context, options) => match(model.provider)
-    .with(ROUTE_PROVIDER, () => runtimeModelStream(models, {
+    .with(RUNTIME_FALLBACK_PROVIDER, () => runtimeModelStream(models, {
       route: runtimeModelRoute.parse(JSON.parse(model.id)),
       context,
       options,

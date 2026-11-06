@@ -1,7 +1,20 @@
+import { GIF, REACTION } from '@repo/contracts/universal';
+
 export const CHAT = {
+  activityDetailMaxLength: 160,
+  activityElapsedMinSeconds: 5,
+  activityReplyTools: new Set<string>([REACTION.toolName, GIF.toolName]),
+  preambleMaxLength: 200,
+  preambleKey: 'orbsPreamble',
+  preambleMetadata: { orbsPreamble: {} },
+  commentaryPhase: '"phase":"commentary"',
+  finalAnswerPhase: '"phase":"final_answer"',
   contextWarningPercent: 60,
   contextCriticalPercent: 80,
   attachmentScheme: 'attachment:',
+  filesPath: '/files',
+  posterPath: 'poster',
+  videoFirstFrame: '#t=0.001',
   attachmentUrlKey: 'objectUrl',
   entryPrefix: 'entry-',
   liveMessageId: 'live',

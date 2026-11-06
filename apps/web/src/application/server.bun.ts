@@ -1,7 +1,7 @@
 import { env } from '@repo/env/server';
 import { initNativeLogger, log } from '@repo/logger/server';
 import { join, posix, sep } from 'node:path';
-import { connectionHasAddresses, connectionTarget } from '@/services/connection/connection.utils';
+import { connectionFileHeaders, connectionHasAddresses, connectionTarget } from '@/services/connection/connection.utils';
 import type { RpcProxySocket } from '@/types/rpc.types';
 import type { ServerWebSocket, WebSocketOptions } from 'bun';
 
@@ -92,6 +92,10 @@ try {
         const target = new URL(pathname + search, daemon);
         const headers = new Headers(request.headers);
         headers.delete('host');
+
+        if (pathname.startsWith('/files/') && !headers.has('authorization')) {
+          Object.entries(connectionFileHeaders(cookies)).forEach(([name, value]) => headers.set(name, value));
+        }
 
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
           target.protocol = target.protocol === 'https:' ? 'wss:' : 'ws:';

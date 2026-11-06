@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import type { RPCSchema } from 'electrobun';
 
+export type DesktopPlatform = 'macos' | 'linux';
+
 export const desktopNetwork = z.enum(['all', 'local', 'custom']);
 
 const desktopTheme = z.enum(['light', 'dark']);
@@ -9,6 +11,8 @@ export type DesktopTheme = z.infer<typeof desktopTheme>;
 export const desktopMenuClick = z.object({ data: z.object({ action: z.string() }) });
 
 export const desktopConnectionMessage = z.object({ data: z.object({ detail: z.object({ connection: z.literal(true) }) }) });
+
+export const desktopQuitMessage = z.object({ data: z.object({ detail: z.object({ quit: z.literal(true) }) }) });
 
 export const desktopThemeMessage = z.object({ data: z.object({ detail: z.object({ theme: desktopTheme }) }) });
 
@@ -32,6 +36,10 @@ export const desktopPairMessage = z.object({ data: z.object({ detail: z.object({
 export const desktopCopyMessage = z.object({ data: z.object({ detail: z.object({ copy: z.string() }) }) });
 
 export const desktopTitleBarMessage = z.object({ data: z.object({ detail: z.object({ titleBar: z.literal('double-click') }) }) });
+
+export const desktopUpdateMessage = z.object({ data: z.object({ detail: z.object({ update: z.enum(['check', 'apply']) }) }) });
+
+export const desktopUpdatePrepared = z.object({ retained_tar_path: z.string() });
 
 export const desktopNewWindow = z.object({ data: z.object({ detail: z.object({ url: z.url({ protocol: /^https?$/u }) }) }) });
 
@@ -89,6 +97,7 @@ export interface DesktopOrigins {
 export interface DesktopServer extends DesktopOrigins {
   url: string;
   daemonEntry: string[];
+  canAutoPair: boolean;
   port: number;
   portFallback: boolean;
   exited: Promise<number>;
@@ -130,4 +139,14 @@ export interface DesktopRPC {
     messages: Record<never, never>;
   }>;
   webview: RPCSchema<{ requests: Record<never, never>; messages: Record<never, never> }>;
+}
+
+export type DesktopUpdateStatus = 'idle' | 'checking' | 'downloading' | 'ready' | 'current' | 'error';
+
+export interface DesktopUpdateState {
+  status: DesktopUpdateStatus;
+  /** The version this app runs. */
+  version: string;
+  /** The downloaded version waiting for a restart. */
+  available?: string;
 }

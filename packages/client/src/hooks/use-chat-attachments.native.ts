@@ -5,9 +5,9 @@ import * as ImagePicker from 'expo-image-picker';
 import { chatReadPicked } from '../services/chat/chat.native';
 import { chatFileType } from '../services/chat/chat.utils';
 import { useChatUploads } from './use-chat-uploads';
-import type { ChatAttachmentsPlatformParams, ChatPicked } from '../types/chat.types';
+import type { ChatAttachmentsNativeParams, ChatPicked } from '../types/chat.types';
 
-export function useChatAttachmentsNative({ botId, onProblem }: ChatAttachmentsPlatformParams) {
+export function useChatAttachmentsNative({ botId, onProblem, onCameraBlocked }: ChatAttachmentsNativeParams) {
   const files = useChatUploads<ChatPicked>({
     botId,
     describe: (picked) => picked,
@@ -39,7 +39,24 @@ export function useChatAttachmentsNative({ botId, onProblem }: ChatAttachmentsPl
     preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
   }));
 
-  const takePhoto = async () => addPhotos(await ImagePicker.launchCameraAsync({ mediaTypes: ['images'] }));
+  const takePhoto = async () => {
+    try {
+      const current = await ImagePicker.getCameraPermissionsAsync();
+
+      if (!current.granted && !current.canAskAgain) {
+        onCameraBlocked();
+        return;
+      }
+
+      const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+
+      if (granted) {
+        addPhotos(await ImagePicker.launchCameraAsync({ mediaTypes: ['images'] }));
+      }
+    } catch {
+      onProblem(m.mobile_chat_attach_camera_failed());
+    }
+  };
 
   const pickFiles = async () => {
     const result = await DocumentPicker.getDocumentAsync({ type: [...ATTACHMENT.mediaTypes], multiple: true });

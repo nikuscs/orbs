@@ -2,6 +2,7 @@ import { attachmentActionRemove } from './attachment-action.remove';
 import { attachmentActionSend } from './attachment-action.send';
 import { attachmentActionUpload } from './attachment-action.upload';
 import { attachmentQueryDownload } from './attachment-query.download';
+import { attachmentQueryPoster } from './attachment-query.poster';
 import type * as AttachmentTypes from '../../types/attachment.types';
 import type * as UniversalTypes from '@repo/contracts/universal';
 
@@ -16,6 +17,7 @@ export function makeAttachmentService(deps: AttachmentTypes.AttachmentServiceDep
     },
     queries: {
       download: (params: AttachmentTypes.AttachmentDownloadParams) => attachmentQueryDownload(deps, params),
+      poster: (params: UniversalTypes.AttachmentGetInput) => attachmentQueryPoster(deps, params),
       list: (params: UniversalTypes.AttachmentListInput) => deps.runtime.queries.attachments(params),
     },
   };

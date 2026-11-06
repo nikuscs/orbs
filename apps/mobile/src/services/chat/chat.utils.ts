@@ -75,6 +75,7 @@ export function chatMessageSegments(message: ChatMessage, hideVerbose: boolean):
         kind: 'artifact',
         artifact: artifact.artifact,
       }])
+      .with({ kind: 'gif' }, (gif) => [{ key: `${block.index}`, kind: 'gif', gif: gif.gif }])
       .otherwise(() => []);
 
     const last = segments.at(-1);
@@ -103,6 +104,12 @@ export function chatFileSource(session: RpcSession, botId: string, file: RoomsFi
   return file.url.startsWith(CHAT.attachmentScheme)
     ? connectionFileSource(session, { botId, attachmentId: file.url.slice(CHAT.attachmentScheme.length) })
     : { uri: file.url };
+}
+
+export function chatPosterSource(session: RpcSession, botId: string, file: RoomsFilePart): ImageURISource | undefined {
+  const source = chatFileSource(session, botId, file);
+
+  return file.url.startsWith(CHAT.attachmentScheme) ? { ...source, uri: `${source.uri ?? ''}/${CHAT.posterPath}` } : undefined;
 }
 
 export function chatPlaybackStart(player: ChatTypes.ChatPlayback) {

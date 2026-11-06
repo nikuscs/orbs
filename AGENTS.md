@@ -1,6 +1,6 @@
 # Orbs
 
-A bot backend for one owner. A native daemon runs each bot as a persistent Pi Durable agent; the web (`apps/web`), iOS (`apps/mobile`) and macOS (`apps/desktop`) clients pair with it and talk over oRPC.
+A bot backend for one owner. A native daemon runs each bot as a persistent Pi Durable agent; the web (`apps/web`), iOS (`apps/mobile`) and macOS and Linux (`apps/desktop`) clients pair with it and talk over oRPC.
 
 ## Read first
 

@@ -1,6 +1,6 @@
 {
   "name": "@repo/i18n",
-  "version": "0.0.2",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "exports": {

@@ -5,13 +5,13 @@ import { runtimeActionRetry } from './runtime-action.retry';
 import { runtimeQueryConversation } from './runtime-query.conversation';
 import type { RuntimeContextInput, RuntimeServiceDeps } from '../../types/runtime.types';
 import type { JsonValue } from '@earendil-works/chord';
-import type { ConversationId, SubmissionId, TaskId } from '@earendil-works/pi-durable';
-import type { CommandExecuteInput } from '@repo/contracts/universal';
+import type * as PiDurableTypes from '@earendil-works/pi-durable';
+import type { CommandExecuteInput, CommandExecuteResult } from '@repo/contracts/universal';
 
 export async function runtimeActionExecuteCommand(
   deps: RuntimeServiceDeps,
   params: CommandExecuteInput & RuntimeContextInput,
-): Promise<void> {
+): Promise<CommandExecuteResult> {
   const { context } = params;
 
   function runtimeCommandId(value: string | undefined) {
@@ -24,9 +24,9 @@ export async function runtimeActionExecuteCommand(
       });
   }
 
-  async function runtimeCommandCancel(conversationId: ConversationId, value: string | undefined) {
+  async function runtimeCommandCancel(conversationId: PiDurableTypes.ConversationId, value: string | undefined) {
     // SAFETY: a submission ID is only a lookup key; abortSubmission reports not_found outside this conversation.
-    const id = runtimeCommandId(value) as SubmissionId;
+    const id = runtimeCommandId(value) as PiDurableTypes.SubmissionId;
 
     return match(await deps.harness.abortSubmission(id, context, conversationId))
       .with('aborted', 'settled', () => undefined)
@@ -39,19 +39,35 @@ export async function runtimeActionExecuteCommand(
       .exhaustive();
   }
 
+  async function runtimeCommandCompact(id: PiDurableTypes.TaskId<PiDurableTypes.CompactionResult>): Promise<CommandExecuteResult> {
+    const { outcome } = (await deps.harness.waitForTask(id, context)).state;
+
+    return match(outcome)
+      .with({ status: 'completed' }, ({ result }) => ({ compacted: result.entryId !== undefined || result.submissionId !== undefined }))
+      .with({ status: 'aborted' }, () => ({}))
+      .otherwise(() => {
+        throw new Errors.INTERNAL_ERROR({ internal: `Compaction ended ${outcome.status}.` });
+      });
+  }
+
   const conversation = await runtimeQueryConversation(deps, params);
 
-  await match(params.name)
-    .with('compact', () => conversation.compact(params.arguments, context))
-    .with('reset', () => conversation.reset(params.arguments, context))
-    .with('retry', () => runtimeActionRetry(deps, {
-      conversationId: conversation.id,
-      // SAFETY: a task ID is only a lookup key; retry accepts it only when it is this conversation's latest failed generation.
-      taskId: runtimeCommandId(params.arguments) as TaskId<JsonValue>,
-      context,
-    }))
-    .with('cancel', () => runtimeCommandCancel(conversation.id, params.arguments))
-    .otherwise(() => {
-      throw new Errors.NOT_FOUND({ resource: 'command', resourceId: params.name });
+  return match(params.name)
+    .with('compact', async () => runtimeCommandCompact(await conversation.compact(params.arguments, context)))
+    .otherwise(async (name) => {
+      await match(name)
+        .with('reset', () => conversation.reset(params.arguments, context))
+        .with('retry', () => runtimeActionRetry(deps, {
+          conversationId: conversation.id,
+          // SAFETY: a task ID is only a lookup key; retry accepts it only when it is this conversation's latest failed generation.
+          taskId: runtimeCommandId(params.arguments) as PiDurableTypes.TaskId<JsonValue>,
+          context,
+        }))
+        .with('cancel', () => runtimeCommandCancel(conversation.id, params.arguments))
+        .otherwise(() => {
+          throw new Errors.NOT_FOUND({ resource: 'command', resourceId: name });
+        });
+
+      return {};
     });
 }

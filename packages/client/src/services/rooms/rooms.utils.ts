@@ -1,5 +1,6 @@
 import { m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
+import { CHAT } from '../chat/chat.constants';
 import { toolInputText } from '../tool/tool.utils';
 import { ROOMS } from './rooms.constants';
 import type { ChatMessage } from '../../types/chat.types';
@@ -171,6 +172,14 @@ export function roomsFileRows(files: RoomsTypes.RoomsFilePart[]): RoomsTypes.Roo
     .otherwise((kind) => [{ key: file.url, kind, file }]));
 }
 
+export function roomsImageFrame(size?: { width: number, height: number }) {
+  const { box, minRatio, maxRatio, loadingRatio } = ROOMS.image;
+  const ratio = size && size.width > 0 && size.height > 0 ? size.width / size.height : loadingRatio;
+  const aspectRatio = Math.min(maxRatio, Math.max(minRatio, ratio));
+
+  return { width: Math.round(aspectRatio >= 1 ? box : box * aspectRatio), aspectRatio };
+}
+
 export function roomsFileImages(message: ChatMessage | undefined): RoomsTypes.RoomsFilePart[] {
   return (message?.parts ?? []).flatMap((part) => (part.type === 'file' && roomsFileKind(part.mediaType) === 'images' ? [part] : []));
 }
@@ -179,4 +188,14 @@ export function roomsMediaTime(seconds: number): string {
   const whole = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
 
   return `${String(Math.floor(whole / 60))}:${String(whole % 60).padStart(2, '0')}`;
+}
+
+export function roomsAttachmentPath(botId: string, url: string, isPoster = false): string {
+  if (!url.startsWith(CHAT.attachmentScheme)) {
+    return url;
+  }
+
+  const path = `${CHAT.filesPath}/${encodeURIComponent(botId)}/${encodeURIComponent(url.slice(CHAT.attachmentScheme.length))}`;
+
+  return isPoster ? `${path}/${CHAT.posterPath}` : path;
 }

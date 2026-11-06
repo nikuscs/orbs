@@ -11,6 +11,7 @@ export interface SecretProxyServiceDeps extends SecretProxyServiceParams {
 }
 
 export interface SecretProxyState {
+  token: string;
   server: Mockttp | null;
   starting: Promise<void> | null;
   swapped: Map<string, SecretProxySwap[]>;

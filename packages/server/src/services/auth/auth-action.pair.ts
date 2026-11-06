@@ -13,9 +13,9 @@ export async function authActionPair(deps: AuthServiceDeps, params: AuthPairPara
     pin: grant.pin,
   } satisfies AuthPairPayload)).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/u, '');
 
-  const svg = renderSVG(payload, { ecc: 'M', border: 4 });
-
   const link = `${deps.appScheme}://connect#code=${payload}`;
+
+  const svg = renderSVG(link, { ecc: 'M', border: 4 });
 
   return { ...grant, qr: { payload, svg, link } };
 }

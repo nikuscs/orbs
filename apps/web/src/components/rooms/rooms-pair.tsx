@@ -1,4 +1,4 @@
-import { CHAT, chatPairMessages } from '@repo/client/client';
+import { chatActivityMessage, chatActivityStartedAt, chatPairMessages } from '@repo/client/client';
 import { chatQueries, useChatRoom } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
 import { Button } from '@repo/ui/button';
@@ -44,9 +44,10 @@ function RoomsPairView({ sender, peer, bots, view }: RoomsPairViewProps) {
             activity={room.activity}
             approvals={room.approvals}
             bot={peer}
-            draft={room.messages.find((message) => message.id === CHAT.liveMessageId)}
+            draft={chatActivityMessage(room.messages)}
             failure={room.failure}
             questions={room.questions}
+            startedAt={chatActivityStartedAt(room.messages)}
           />
         )}
         messages={chatPairMessages(room.messages, sender.id)}

@@ -1,5 +1,5 @@
 import { connectionAddressPick } from '@repo/client/client';
-import { connectionPairingStored, connectionStored } from '@repo/contracts/universal';
+import { connectionPairingStored, connectionStored, SERVER_PROTOCOL } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { parse, serialize } from 'cookie-es';
 import { CONNECTION } from './connection.constants';
@@ -11,6 +11,18 @@ const connectionTargets = new Map<string, { url: string; pickedAt: number }>();
 
 export function connectionParse(cookies: string): ConnectionSaved | null {
   return connectionStored.safeParse(parse(cookies)[CONNECTION.storageKey]).data ?? null;
+}
+
+export function connectionFileHeaders(cookies: string): Record<string, string> {
+  const connection = connectionParse(cookies);
+
+  return connection
+    ? {
+      'authorization': `Bearer ${connection.token}`,
+      [SERVER_PROTOCOL.versionHeader]: String(SERVER_PROTOCOL.version),
+      [SERVER_PROTOCOL.serverIdHeader]: connection.serverId,
+    }
+    : {};
 }
 
 export function connectionCookie(connection: ConnectionSaved | null, secure: boolean): string {

@@ -15,6 +15,7 @@ export const attachments = {
 
     return file;
   }),
+  poster: authedRouter.attachments.poster.handler(({ context, input }) => context.attachments.queries.poster(input)),
   list: authedRouter.attachments.list.handler(({ context, input }) => context.attachments.queries.list(input)),
   remove: authedRouter.attachments.remove.handler(({ context, input }) => context.attachments.actions.remove(input)),
 };

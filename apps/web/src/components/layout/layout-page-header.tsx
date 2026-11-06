@@ -7,7 +7,7 @@ interface LayoutPageHeaderProps {
 
 export function LayoutPageHeader({ children }: LayoutPageHeaderProps) {
   return (
-    <header className="relative z-20 flex h-12 shrink-0 cursor-default items-center justify-between gap-2 border-b pr-2 pl-12 electrobun-webkit-app-region-drag md:pl-6">
+    <header className="relative z-20 flex h-12 shrink-0 cursor-default items-center justify-between gap-2 border-b pr-2 pl-14 electrobun-webkit-app-region-drag md:pl-6">
       <div className="min-w-0 electrobun-webkit-app-region-no-drag">
         <LayoutBreadcrumbs />
       </div>

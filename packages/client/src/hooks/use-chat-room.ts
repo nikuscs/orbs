@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { chatQueries } from '../services/chat/chat.client';
-import { chatActivity, chatEntryIds, chatFailure, chatLive, chatMessages, chatOutgoingMessages, chatQueued } from '../services/chat/chat.utils';
+import { chatActivity, chatCompaction, chatEntryIds, chatFailure, chatLive, chatMessages, chatOutgoingMessages, chatQueued } from '../services/chat/chat.utils';
 import { useChatReactions } from './use-chat-reactions';
 import { useRpc } from './use-rpc';
 import type { ChatRoomParams } from '../types/chat.types';
@@ -42,6 +42,7 @@ export function useChatRoom({ bot, bots, view, outgoing, isMain = false }: ChatR
     }),
     queued,
     activity: chatActivity(view),
+    compaction: chatCompaction(view),
     failure: chatFailure(view),
     isBusy: view.live.run !== undefined || queued.length > 0,
     reactions: useChatReactions({

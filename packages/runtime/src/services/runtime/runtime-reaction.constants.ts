@@ -1,9 +1,11 @@
-import { defineDocFamily } from '@earendil-works/pi-durable';
-import { REACTION } from '@repo/contracts/universal';
+import { defineDocFamily, UserEntry } from '@earendil-works/pi-durable';
+import { ATTACHMENT, REACTION, REPLY } from '@repo/contracts/universal';
 import { match, P } from 'ts-pattern';
 import type { RuntimeReaction } from '../../types/runtime-reaction.types';
 
 export const RUNTIME_REACTION_TASK = 'bots.reaction';
+
+export const RUNTIME_REACTION_OWNER_KINDS = new Set<string>([UserEntry.kind, ATTACHMENT.entryKind, REPLY.entryKind]);
 
 export const runtimeReactions = defineDocFamily<RuntimeReaction, null>({
   kind: REACTION.docKind,

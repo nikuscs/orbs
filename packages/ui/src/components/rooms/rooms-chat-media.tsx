@@ -1,8 +1,9 @@
-import { roomsMediaTime } from '@repo/client/client';
+import { CHAT, roomsAttachmentPath, roomsMediaTime } from '@repo/client/client';
 import { useChatAttachmentUrl } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { useRef, useState } from 'react';
 import { match } from 'ts-pattern';
+import IconLucideDownload from '~icons/lucide/download';
 import IconLucideLoaderCircle from '~icons/lucide/loader-circle';
 import IconLucidePause from '~icons/lucide/pause';
 import IconLucidePlay from '~icons/lucide/play';
@@ -10,7 +11,7 @@ import { cn } from '../../lib/cn';
 import { messageSurface } from '../ai/message';
 import { Button } from '../button';
 import type { RoomsFilePart } from '@repo/client/client';
-import type { SyntheticEvent } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 
 interface RoomsChatMediaProps {
   botId: string
@@ -33,45 +34,53 @@ function RoomsChatMediaProblem({ name }: { name: string }) {
   );
 }
 
-export function RoomsChatVideo({ botId, file }: RoomsChatMediaProps) {
-  const [isRequested, setIsRequested] = useState(false);
-  const [isFailed, setIsFailed] = useState(false);
-  const loaded = useChatAttachmentUrl(botId, file.url, isRequested);
-  const url = isRequested ? loaded : undefined;
-  const name = file.filename ?? '';
+interface RoomsChatVideoProps extends RoomsChatMediaProps {
+  fallback: ReactNode
+}
 
-  if (isFailed) {
-    return <RoomsChatMediaProblem name={name} />;
+export function RoomsChatVideo({ botId, file, fallback }: RoomsChatVideoProps) {
+  const [isFailed, setIsFailed] = useState(false);
+  const [hasPoster, setHasPoster] = useState(file.url.startsWith(CHAT.attachmentScheme));
+  const name = file.filename ?? '';
+  const src = roomsAttachmentPath(botId, file.url);
+
+  if (isFailed && !hasPoster) {
+    return fallback;
   }
 
   return (
     <div className="relative aspect-video w-72 max-w-full overflow-hidden rounded-3xl border border-input bg-black">
-      {url ? (
+      {isFailed ? (
+        <a
+          aria-label={m.rooms_media_download({ name })}
+          className="group/play absolute inset-0 flex-center outline-none"
+          download={name}
+          href={src}
+        >
+          <img
+            alt=""
+            className="absolute inset-0 size-full object-cover"
+            src={roomsAttachmentPath(botId, file.url, true)}
+            onError={() => setHasPoster(false)}
+          />
+          <span className="relative flex-center size-11 rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover/play:scale-105 group-focus-visible/play:ring-2 group-focus-visible/play:ring-ring motion-reduce:transition-none">
+            <IconLucideDownload className="size-5" />
+          </span>
+          <span className="absolute inset-x-4 bottom-3 truncate text-left text-xs text-white/80">{m.rooms_media_unplayable({ name })}</span>
+        </a>
+      ) : (
         <video
           aria-label={name}
-          autoPlay
           className="size-full object-contain"
           controls
           playsInline
-          src={url}
+          preload="metadata"
+          src={`${src}${CHAT.videoFirstFrame}`}
           onError={() => setIsFailed(true)}
           onPlay={roomsChatMediaSolo}
         >
           <track kind="captions" />
         </video>
-      ) : (
-        <button
-          aria-label={m.rooms_media_play({ name })}
-          className="group/play absolute inset-0 flex-center cursor-pointer outline-none disabled:cursor-progress"
-          disabled={isRequested}
-          type="button"
-          onClick={() => setIsRequested(true)}
-        >
-          <span className="flex-center size-11 rounded-full bg-background/90 text-foreground shadow-sm transition-transform group-hover/play:scale-105 group-focus-visible/play:ring-2 group-focus-visible/play:ring-ring motion-reduce:transition-none">
-            {isRequested ? <IconLucideLoaderCircle className="size-5 animate-spin motion-reduce:animate-none" /> : <IconLucidePlay className="ml-0.5 size-5 fill-current" />}
-          </span>
-          <span className="absolute inset-x-4 bottom-3 truncate text-left text-xs text-white/80">{name}</span>
-        </button>
       )}
     </div>
   );

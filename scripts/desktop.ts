@@ -6,6 +6,7 @@ const root = path.resolve(import.meta.dir, '..');
 const desktop = path.join(root, 'apps/desktop');
 const name = process.env.APP_NAME ?? 'Orbs';
 const entitlements = ['allow-jit', 'allow-unsigned-executable-memory', 'disable-library-validation'];
+const isDarwin = process.platform === 'darwin';
 
 function fail(message: string): never {
   console.error(message);
@@ -77,9 +78,20 @@ async function bundle() {
 
   cpSync(path.join(root, 'apps/web/dist/client'), path.join(target, 'web/dist/client'), { recursive: true });
   cpSync(path.join(root, 'packages/server/src/services/database/migrations'), path.join(target, 'daemon/migrations'), { recursive: true });
+
+  // Bun cannot bundle Takumi's native binding; without a local copy it auto-installs the latest one, which breaks the bundled JS.
+  const binding = `@takumi-rs/core-${process.platform}-${process.arch}`;
+  const resolve = (pkg: string, from: string) => path.dirname(Bun.resolveSync(`${pkg}/package.json`, from));
+  const core = resolve('@takumi-rs/core', resolve('takumi-js', path.join(root, 'packages/server')));
+
+  cpSync(resolve(binding, core), path.join(target, 'daemon/node_modules', binding), { recursive: true, dereference: true });
 }
 
 function plist() {
+  if (!isDarwin) {
+    return;
+  }
+
   const { ELECTROBUN_BUILD_DIR: buildDir, ELECTROBUN_APP_NAME: appName } = process.env;
 
   if (!buildDir || !appName) {
@@ -116,7 +128,7 @@ function release() {
   }
 
   console.log(`Building ${name} ${version}`);
-  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:macos'], { ...process.env, DESKTOP_VERSION: version });
+  run(['bun', 'run', '--cwd', 'apps/desktop', 'build:app'], { ...process.env, DESKTOP_VERSION: version });
 
   const temp = mkdtempSync(path.join(tmpdir(), 'desktop-release-'));
   const resources = path.join(app, 'Contents/Resources');
@@ -163,6 +175,14 @@ function release() {
   run(['ditto', '-c', '-k', '--keepParent', app, zip]);
   run(['spctl', '--assess', '--type', 'execute', app]);
   rmSync(temp, { recursive: true, force: true });
+
+  // The in-app updater downloads the manifest Electrobun wrote and a bundle of this signed, stapled app under the same name.
+  const manifest = JSON.parse(readFileSync(path.join(desktop, 'artifacts/stable-macos-arm64-update.json'), 'utf8'));
+  const updateTar = path.join(desktop, 'artifacts', `${manifest.artifact.file}.tar`);
+
+  run(['tar', '--no-mac-metadata', '-cf', updateTar, '-C', path.dirname(app), path.basename(app)], { ...process.env, COPYFILE_DISABLE: '1' });
+  writeFileSync(path.join(desktop, 'artifacts', manifest.artifact.file), Bun.zstdCompressSync(readFileSync(updateTar)));
+  rmSync(updateTar);
   console.log(`Notarized: ${zip}`);
 }
 

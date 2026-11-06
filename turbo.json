@@ -25,7 +25,7 @@
         "@repo/daemon#dev"
       ]
     },
-    "dev:macos": {
+    "dev:app": {
       "with": [
         "@repo/daemon#dev"
       ],

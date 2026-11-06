@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { createFilesPlugin } from './vite/files.vite.ts';
 import { createI18nPlugin } from './vite/i18n.vite.ts';
 import { createIconsPlugin } from './vite/icons.vite.ts';
 import { createMarkdownPlugin } from './vite/markdown.vite.ts';
@@ -35,6 +36,7 @@ export default defineConfig({
     createTanstackStartPlugin(),
     createIconsPlugin(),
     createMarkdownPlugin(),
+    createFilesPlugin(),
     createI18nPlugin(__dirname),
     ...createReactPlugins(),
   ],

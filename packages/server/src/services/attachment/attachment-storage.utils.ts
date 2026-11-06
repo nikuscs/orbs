@@ -1,12 +1,17 @@
 import { Errors } from '@repo/errors/universal';
 import { realpath } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { match, P } from 'ts-pattern';
+import { ATTACHMENT_STORAGE } from './attachment-storage.constants';
 import type { AttachmentStorageDeps, AttachmentStorageParams, AttachmentStorageRange } from '../../types/attachment-storage.types';
 import type { FileHandle } from 'node:fs/promises';
 
 export async function attachmentStoragePath({ root }: AttachmentStorageDeps, { botId, conversationId, attachment }: AttachmentStorageParams) {
   return resolve(await realpath(root), 'agents', botId, '.attachments', String(conversationId), attachment.id, attachment.name);
+}
+
+export function attachmentStoragePosterPath(path: string) {
+  return join(dirname(path), ATTACHMENT_STORAGE.posterName);
 }
 
 export async function attachmentStorageDirectory(path: string) {

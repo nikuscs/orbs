@@ -10,7 +10,8 @@ interface Window {
   __electrobunWindowId?: number;
   __botsAddresses?: string[];
   __botsHost?: string;
-  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true }) => void;
+  __botsUpdate?: { status: 'idle' | 'checking' | 'downloading' | 'ready' | 'current' | 'error'; version: string; available?: string } | null;
+  __electrobunSendToHost?: (message: { theme: 'light' | 'dark' } | { notify: { title: string; body: string; botId?: string } } | { connection: true } | { pair: true } | { update: 'check' | 'apply' } | { quit: true }) => void;
 }
 
 interface Navigator {

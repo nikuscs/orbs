@@ -1,6 +1,7 @@
 import { AssistantEntry, GenerationTask } from '@earendil-works/pi-durable';
 import { replySilent } from '@repo/contracts/universal';
 import { match, P } from 'ts-pattern';
+import { COLLABORATION } from '../collaboration/collaboration.constants';
 import { questionDocument } from '../question/question.constants';
 import { runtimeToolApproval } from '../runtime/runtime.constants';
 import { NOTIFICATION_RECENT_LIMIT } from './notification.constants';
@@ -77,6 +78,29 @@ export function notificationCommitIsRelevant(changes: readonly PiDurableTypes.Co
   const attention = notificationCommitAttention(changes);
 
   return attention.replies.length > 0 || attention.failures.length > 0 || attention.shouldRebuild;
+}
+
+export async function notificationReplyIsForOwner({ harness }: NotificationServiceDeps, entry: PiDurableTypes.EntryRecord, context: Context) {
+  return harness.commit(async (tx) => {
+    return notificationReadInput();
+
+    async function notificationReadInput(cursor?: PiDurableTypes.Cursor): Promise<boolean> {
+      const page = await tx.scanEntries({
+        conversationId: entry.conversationId,
+        maxEntryId: entry.id,
+        order: 'descending',
+      }, 50, cursor);
+
+      const input = page.items.find((item) => COLLABORATION.turnInputs.has(item.kind));
+
+      return match(input)
+        .with({ kind: P.union(COLLABORATION.message, COLLABORATION.reply) }, () => false)
+        .with(P.nonNullable, () => true)
+        .otherwise(() => match(page.next)
+          .with(P.nonNullable, notificationReadInput)
+          .otherwise(() => true));
+    }
+  }, context);
 }
 
 export async function notificationPendingItems(

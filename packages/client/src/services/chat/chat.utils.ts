@@ -1,7 +1,8 @@
 import { ATTACHMENT, attachmentMessage, attachmentSent, ENTRY, entryOwnerNote, entryPeerMessage, entryRoutineRun, entrySubagentReport, REACTION, REPLY, replyMessage, replySilent, toolCallJson } from '@repo/contracts/universal';
-import { getLocale, m } from '@repo/i18n/client';
+import { m } from '@repo/i18n/client';
 import { match, P } from 'ts-pattern';
 import { mentionHref, mentionSubmission } from '../mention/mention.utils';
+import { chatActivityPreamble } from './chat-activity.utils';
 import { CHAT, CHAT_FILE_TYPES } from './chat.constants';
 import type * as ChatTypes from '../../types/chat.types';
 import type * as UniversalTypes from '@repo/contracts/universal';
@@ -144,13 +145,21 @@ export function chatActivity(state: UniversalTypes.ConversationState | undefined
 
   return match({ live, state })
     .returnType<ChatTypes.ChatActivity>()
-    .with({ live: { compactions: P.array({ blocking: true }).select() } }, (compactions) => (compactions.length > 0 ? 'compacting' : 'thinking'))
+    .when(() => chatCompaction(state) === 'blocking', () => 'compacting')
     .when(() => (live?.tools ?? []).some((slot) => slot.status !== 'done'), () => 'working')
     .when(() => content.some((part) => part.type === 'text'), () => 'writing')
     .when(() => live?.run !== undefined, () => 'thinking')
+    .when(() => chatCompaction(state) === 'background', () => 'compacting')
     .when(() => (state?.inbox.items.length ?? 0) > 0, () => 'queued')
     .with({ state: { lastRun: { outcome: { status: 'failed' } } } }, () => 'failed')
     .otherwise(() => 'idle');
+}
+
+export function chatCompaction(state: UniversalTypes.ConversationState | undefined): ChatTypes.ChatCompaction | undefined {
+  return match(state?.live.compactions ?? [])
+    .returnType<ChatTypes.ChatCompaction | undefined>()
+    .with([], () => undefined)
+    .otherwise((items) => (items.some((item) => item.blocking) ? 'blocking' : 'background'));
 }
 
 export function chatQueued(state: UniversalTypes.ConversationState | undefined): ChatTypes.ChatQueued[] {
@@ -159,9 +168,16 @@ export function chatQueued(state: UniversalTypes.ConversationState | undefined):
     .with({ mode: P.union('steer', 'followUp') }, (queued) => [{
       submissionId: queued.id,
       mode: queued.mode,
-      text: chatContentText(queued.content),
+      ...chatQueuedText(queued),
     }])
     .otherwise(() => []));
+}
+
+function chatQueuedText({ entry, content }: ChatTypes.ChatQueuedInput): Pick<ChatTypes.ChatQueued, 'text' | 'skills'> {
+  const attachment = entry?.kind === ATTACHMENT.entryKind ? attachmentMessage.safeParse(entry.data).data : undefined;
+  const reply = entry?.kind === REPLY.entryKind ? replyMessage.safeParse(entry.data).data : undefined;
+
+  return { text: (attachment ?? reply)?.content ?? chatContentText(content), skills: attachment?.skills ?? [] };
 }
 
 export function chatOutgoingMessages(outgoing: ChatTypes.ChatOutgoing[], params: ChatTypes.ChatOutgoingParams): ChatTypes.ChatMessage[] {
@@ -267,12 +283,18 @@ function chatAssistantEntry(messages: ChatTypes.ChatMessage[], entry: ChatTypes.
             entryId: hasText ? entry.id : current.metadata.entryId,
             entryIds: [...current.metadata.entryIds, entry.id],
             usage: chatUsageAdd(current.metadata.usage, answer.usage),
+            endedAt: createdAt,
           };
         })
         .otherwise(() => messages.push({
           id: chatMessageId(entry),
           role: 'assistant',
-          metadata: { ...chatMetadata(entry.id, createdAt, bot.id, bot.name), usage: chatUsageAdd(null, answer.usage) },
+          metadata: {
+            ...chatMetadata(entry.id, createdAt, bot.id, bot.name),
+            usage: chatUsageAdd(null, answer.usage),
+            startedAt: last && last.role !== 'assistant' ? last.metadata?.createdAt ?? createdAt : createdAt,
+            endedAt: createdAt,
+          },
           parts,
         }));
     })
@@ -280,8 +302,10 @@ function chatAssistantEntry(messages: ChatTypes.ChatMessage[], entry: ChatTypes.
 }
 
 function chatAssistantParts(content: readonly ChatTypes.ChatContentPart[], state: 'streaming' | 'done'): ChatTypes.ChatPart[] {
-  return content.flatMap((part): ChatTypes.ChatPart[] => match(part)
-    .with({ type: 'text' }, ({ text }) => (text.trim() === '' || replySilent.safeParse(text).success ? [] : [{ type: 'text' as const, text, state }]))
+  return content.flatMap((part, index): ChatTypes.ChatPart[] => match(part)
+    .with({ type: 'text' }, ({ text }) => text.trim() === '' || replySilent.safeParse(text).success ? [] : [chatActivityPreamble(content, index)
+      ? { type: 'reasoning' as const, text: text.trim(), state, providerMetadata: CHAT.preambleMetadata }
+      : { type: 'text' as const, text, state }])
     .with({ type: 'thinking', redacted: P.optional(P.not(true)) }, ({ thinking }) => (thinking.trim() === '' ? [] : [{ type: 'reasoning' as const, text: thinking, state }]))
     .with({ type: 'toolCall', name: REACTION.toolName }, () => [])
     .with({ type: 'toolCall' }, (call) => [{
@@ -426,29 +450,4 @@ export function chatFileType({ name, mediaType }: ChatTypes.ChatFileTypeParams):
   const extension = name.split('.').at(-1)?.toLowerCase();
 
   return mediaType ?? Object.entries(CHAT_FILE_TYPES).find(([type]) => type === extension)?.[1] ?? '';
-}
-
-export function chatContextView({ contextWindow, estimatedTokens }: UniversalTypes.ConversationContextUsage): ChatTypes.ChatContextView {
-  const number = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 });
-
-  const chatTokens = (value: number) => match(value)
-    .with(P.number.gte(1_000_000), (count) => `${number.format(count / 1_000_000)}M`)
-    .with(P.number.gte(1000), (count) => `${number.format(count / 1000)}K`)
-    .otherwise((count) => number.format(count));
-
-  const used = chatTokens(estimatedTokens);
-  const percent = contextWindow ? Math.min(100, Math.round((estimatedTokens / contextWindow) * 100)) : null;
-  const shown = percent === null ? null : new Intl.NumberFormat(getLocale(), { style: 'percent' }).format(percent / 100);
-
-  return {
-    percent,
-    shown,
-    used,
-    label: shown ? m.rooms_context_full({ percent: shown }) : m.rooms_context_tokens_only({ used }),
-    tokens: contextWindow ? m.rooms_context_tokens({ used, total: chatTokens(contextWindow) }) : m.rooms_context_tokens_only({ used }),
-    tone: match(percent)
-      .with(P.number.gte(CHAT.contextCriticalPercent), () => 'destructive' as const)
-      .with(P.number.gte(CHAT.contextWarningPercent), () => 'warning' as const)
-      .otherwise(() => 'muted' as const),
-  };
 }

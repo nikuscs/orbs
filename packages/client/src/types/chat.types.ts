@@ -6,6 +6,7 @@ import type { UIMessage } from 'ai';
 export type ChatApprovalDecision = 'approve' | 'always' | 'deny';
 
 export type ChatActivity = 'idle' | 'queued' | 'thinking' | 'working' | 'writing' | 'compacting' | 'failed';
+export type ChatCompaction = 'blocking' | 'background';
 
 export interface ChatUsage {
   input: number;
@@ -32,6 +33,8 @@ export interface ChatMetadata {
   authorName: string;
   replyTo: ChatReplyTo | null;
   usage: ChatUsage | null;
+  startedAt?: number;
+  endedAt?: number;
 }
 
 interface ChatDataPartPayloads {
@@ -50,6 +53,20 @@ export type ChatMessage = UIMessage<ChatMetadata, ChatDataParts>;
 
 export type ChatPart = ChatMessage['parts'][number];
 
+export interface ChatActivitySteps {
+  steps: number;
+  seconds: number | null;
+}
+
+export type ChatActivityWait = 'approval' | 'question';
+
+export type ChatActivityBot = Pick<UniversalTypes.Bot, 'id' | 'name'>;
+
+export interface ChatActivityDetailParams {
+  draft?: ChatMessage;
+  bots: ChatActivityBot[];
+}
+
 export interface ChatMessagesParams {
   entries: readonly ChatEntry[];
   bot: UniversalTypes.Bot;
@@ -66,6 +83,7 @@ export interface ChatQueued {
   submissionId: number;
   mode: 'steer' | 'followUp';
   text: string;
+  skills: string[];
 }
 
 export interface ChatOutgoing {
@@ -83,7 +101,7 @@ export interface ChatOutgoingParams {
   queued: ChatQueued[];
 }
 
-type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
+export type ChatQueuedInput = Extract<UniversalTypes.ConversationState['inbox']['items'][number], { mode: 'steer' | 'followUp' }>;
 
 export type ChatInputContent = ChatQueuedInput['content'] | Extract<ChatPiMessage, { role: 'user' | 'toolResult' }>['content'];
 
@@ -106,6 +124,7 @@ export interface ChatContextUsageParams {
   botId: string;
   conversationId: number;
   revision?: number;
+  onCompacted?: (message: string) => void;
 }
 
 export interface ChatContextView {
@@ -218,4 +237,8 @@ export interface ChatPicked {
 export interface ChatAttachmentsPlatformParams {
   botId: string;
   onProblem: (message: string) => void;
+}
+
+export interface ChatAttachmentsNativeParams extends ChatAttachmentsPlatformParams {
+  onCameraBlocked: () => void;
 }
