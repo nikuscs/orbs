@@ -4,6 +4,7 @@ import { log } from '@repo/logger/server';
 import { match, P } from 'ts-pattern';
 import { ARTIFACT_BLOCKS_CATALOG } from '../artifact/artifact.constants';
 import { makeCollaborationExtensionService } from '../collaboration/collaboration-extension.service';
+import { makeComputerExtensionService } from '../computer/computer-extension.service';
 import { makeNoteExtensionService } from '../note/note-extension.service';
 import { notificationItemKey, notificationRecentAppend } from '../notification/notification.utils';
 import { makeQuestionExtensionService } from '../question/question-extension.service';
@@ -16,12 +17,14 @@ import { runtimeActionApprove } from './runtime-action.approve';
 import { runtimeActionCarryOver } from './runtime-action.carry-over';
 import { runtimeActionConfigureBot } from './runtime-action.configure-bot';
 import { runtimeActionCreateArtifact } from './runtime-action.create-artifact';
+import { runtimeActionCreateComputerViewer } from './runtime-action.create-computer-viewer';
 import { runtimeActionCreateRoutine } from './runtime-action.create-routine';
 import { runtimeActionCreateTodo } from './runtime-action.create-todo';
 import { runtimeActionExecuteCommand } from './runtime-action.execute-command';
 import { runtimeActionExpireAttachments } from './runtime-action.expire-attachments';
 import { runtimeActionRegisterAttachmentTools } from './runtime-action.register-attachment-tools';
 import { runtimeActionRegisterBotTools } from './runtime-action.register-bot-tools';
+import { runtimeActionReleaseComputerControl } from './runtime-action.release-computer-control';
 import { runtimeActionRemoveAttachment } from './runtime-action.remove-attachment';
 import { runtimeActionRemoveRoutine } from './runtime-action.remove-routine';
 import { runtimeActionRemoveTodo } from './runtime-action.remove-todo';
@@ -31,7 +34,14 @@ import { runtimeActionRetainAttachments } from './runtime-action.retain-attachme
 import { runtimeActionRunRoutine } from './runtime-action.run-routine';
 import { runtimeActionSaveArtifactState } from './runtime-action.save-artifact-state';
 import { runtimeActionSetReaction } from './runtime-action.set-reaction';
+import { runtimeActionShutdownComputer } from './runtime-action.shutdown-computer';
+import { runtimeActionSleepComputer } from './runtime-action.sleep-computer';
+import { runtimeActionStartComputer } from './runtime-action.start-computer';
 import { runtimeActionSubmit } from './runtime-action.submit';
+import { runtimeActionSweepComputers } from './runtime-action.sweep-computers';
+import { runtimeActionTakeComputerControl } from './runtime-action.take-computer-control';
+import { runtimeActionThumbnailComputer } from './runtime-action.thumbnail-computer';
+import { runtimeActionTouchComputer } from './runtime-action.touch-computer';
 import { runtimeActionUpdateArtifact } from './runtime-action.update-artifact';
 import { runtimeActionUpdateRoutine } from './runtime-action.update-routine';
 import { runtimeActionUpdateSubmission } from './runtime-action.update-submission';
@@ -52,6 +62,8 @@ import { runtimeQueryAttachments } from './runtime-query.attachments';
 import { runtimeQueryBotUsage } from './runtime-query.bot-usage';
 import { runtimeQueryCarry } from './runtime-query.carry';
 import { runtimeQueryCommands } from './runtime-query.commands';
+import { runtimeQueryComputerEndpoint } from './runtime-query.computer-endpoint';
+import { runtimeQueryComputerStatus } from './runtime-query.computer-status';
 import { runtimeQueryContextUsage } from './runtime-query.context-usage';
 import { runtimeQueryContexts } from './runtime-query.contexts';
 import { runtimeQueryConversation } from './runtime-query.conversation';
@@ -93,6 +105,7 @@ export function makeRuntimeService({
   gifs,
   images,
   secrets,
+  computers: computerHost,
   toolExtensions = [],
 }: RuntimeTypes.RuntimeServiceParams) {
   const codingTools = runtimeCodingToolsExtension({ images, secrets });
@@ -107,6 +120,7 @@ export function makeRuntimeService({
   const subagents = makeSubagentExtensionService();
   const routines = makeRoutineExtensionService();
   const todos = makeTodoExtensionService();
+  const computers = computerHost ? makeComputerExtensionService(computerHost) : undefined;
 
   const shared: RuntimeTypes.RuntimeSharedDeps = {
     appName,
@@ -116,6 +130,7 @@ export function makeRuntimeService({
     env,
     permissions,
     directory,
+    computers: computerHost,
     extensions: [
       codingTools,
       runtimeSkillsExtension,
@@ -127,6 +142,7 @@ export function makeRuntimeService({
       runtimeReactionExtension,
       todos.extension,
       notes.extension,
+      ...(computers ? [computers.extension] : []),
       toolSearch,
       ...(secrets ? [runtimeSecretsExtension({ secrets })] : []),
       ...toolExtensions,
@@ -186,11 +202,23 @@ export function makeRuntimeService({
       },
       removeBot: async ({ botId }: UniversalTypes.BotGetInput) => {
         directory.unregister(botId);
+        await computerHost?.actions.remove({ botId }).catch((error: unknown) => log.error({
+          tag: 'computer-remove',
+          message: 'Cannot remove the bot computer.',
+          botId,
+          error,
+        }));
         await directory.close(botId, () => storage.remove({ botId }));
       },
       clearBot: async ({ botId }: UniversalTypes.BotGetInput, context: Context = BACKGROUND_CONTEXT) => {
         const { deps } = await directory.bot(botId);
         await storage.saveCarry({ botId, carry: await runtimeQueryCarry(deps, context) });
+        await computerHost?.actions.shutdown({ botId }).catch((error: unknown) => log.error({
+          tag: 'computer-shutdown',
+          message: 'Cannot shut down the bot computer.',
+          botId,
+          error,
+        }));
         await directory.close(botId, () => storage.reset({ botId }));
       },
       submit: runtimeBotCall<RuntimeTypes.RuntimeSubmitParams, Awaited<ReturnType<typeof runtimeActionSubmit>>>(directory, runtimeActionSubmit),
@@ -199,11 +227,24 @@ export function makeRuntimeService({
       removeAttachment: runtimeBotCall(directory, runtimeActionRemoveAttachment),
       retainAttachments: runtimeBotCall(directory, runtimeActionRetainAttachments),
       expireAttachments: runtimeBotCall(directory, runtimeActionExpireAttachments),
+      sweepComputers: async () => {
+        await (computerHost ? runtimeActionSweepComputers({ directory, host: computerHost }) : Promise.resolve());
+      },
+      computerStart: runtimeBotCall(directory, runtimeActionStartComputer),
+      computerSleep: runtimeBotCall(directory, runtimeActionSleepComputer),
+      computerShutdown: runtimeBotCall(directory, runtimeActionShutdownComputer),
+      computerThumbnail: runtimeBotCall(directory, runtimeActionThumbnailComputer),
+      computerTouch: runtimeBotCall(directory, runtimeActionTouchComputer),
+      computerTakeControl: runtimeBotCall(directory, runtimeActionTakeComputerControl),
+      computerReleaseControl: runtimeBotCall(directory, runtimeActionReleaseComputerControl),
+      computerViewer: runtimeBotCall(directory, runtimeActionCreateComputerViewer),
       stop: runtimeBotCall(directory, (deps, params: RuntimeTypes.RuntimeConversationParams & RuntimeTypes.RuntimeContextInput) => (
         runtimeQueryConversation(deps, params).then((conversation) => conversation.abort(params.context))
       )),
     },
     queries: {
+      computerStatus: runtimeBotCall(directory, runtimeQueryComputerStatus),
+      computerEndpoint: runtimeBotCall(directory, runtimeQueryComputerEndpoint),
       artifactBlocks: () => ARTIFACT_BLOCKS_CATALOG,
       artifactVersions: runtimeBotCall(directory, runtimeQueryArtifactVersions),
       artifact: runtimeBotCall(directory, runtimeQueryArtifact),
