@@ -10,8 +10,10 @@ import type { Pointer } from 'bun:ffi';
 
 let authorized: Promise<boolean> | null = null;
 
-desktopFramework(DESKTOP.notify.frameworks.notifications);
-desktopFramework(DESKTOP.notify.frameworks.intents);
+if (DESKTOP.isDarwin) {
+  desktopFramework(DESKTOP.notify.frameworks.notifications);
+  desktopFramework(DESKTOP.notify.frameworks.intents);
+}
 
 function desktopNotifyCenter() {
   return desktopSend.none(desktopClass('UNUserNotificationCenter'), desktopSelector('currentNotificationCenter'));
@@ -117,6 +119,12 @@ function desktopNotifyLegacy({ title, body }: DesktopNotify, avatar: Buffer): vo
 
 /** A notification from the web app: with a bot, macOS shows the bot avatar; anything that fails falls back to Electrobun's plain notification. */
 export async function desktopNotify({ notify, serverUrl }: DesktopNotifyParams): Promise<void> {
+  // macOS Communication Notifications (Intents framework with bot avatars) are Darwin-specific; use Electrobun's cross-platform notifications on Linux.
+  if (!DESKTOP.isDarwin) {
+    Utils.showNotification(notify);
+    return;
+  }
+
   const avatar = notify.botId ? await desktopNotifyAvatar({ serverUrl, botId: notify.botId }) : null;
 
   if (!avatar) {

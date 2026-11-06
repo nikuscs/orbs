@@ -32,6 +32,13 @@
       "persistent": true,
       "cache": false
     },
+    "dev:linux": {
+      "with": [
+        "@repo/daemon#dev"
+      ],
+      "persistent": true,
+      "cache": false
+    },
     "dev:native": {
       "dependsOn": [
         "@repo/i18n#i18n:compile"

@@ -6,6 +6,7 @@ const root = path.resolve(import.meta.dir, '..');
 const desktop = path.join(root, 'apps/desktop');
 const name = process.env.APP_NAME ?? 'Orbs';
 const entitlements = ['allow-jit', 'allow-unsigned-executable-memory', 'disable-library-validation'];
+const isDarwin = process.platform === 'darwin';
 
 function fail(message: string): never {
   console.error(message);
@@ -80,6 +81,11 @@ async function bundle() {
 }
 
 function plist() {
+  // Info.plist modification via PlistBuddy is strictly for macOS .app bundles.
+  if (!isDarwin) {
+    return;
+  }
+
   const { ELECTROBUN_BUILD_DIR: buildDir, ELECTROBUN_APP_NAME: appName } = process.env;
 
   if (!buildDir || !appName) {

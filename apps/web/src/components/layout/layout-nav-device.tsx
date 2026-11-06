@@ -12,6 +12,7 @@ import { rpc } from '@/services/rpc/rpc.client';
 import BrandsLogo from '~icons/brands/logo';
 import LucideChevronsUpDown from '~icons/lucide/chevrons-up-down';
 import IconLogOut from '~icons/lucide/log-out';
+import IconPower from '~icons/lucide/power';
 import type { ConnectionInfo } from '@repo/client/client';
 
 interface LayoutNavDeviceProps {
@@ -74,6 +75,12 @@ export function LayoutNavDevice({ connection }: LayoutNavDeviceProps) {
               <IconLogOut className="size-4" />
               <span className="flex-1">{m.layout_disconnect()}</span>
             </DropdownMenu.DropdownMenuItem>
+            {window.__electrobunSendToHost ? (
+              <DropdownMenu.DropdownMenuItem onSelect={() => window.__electrobunSendToHost?.({ quit: true })}>
+                <IconPower className="size-4" />
+                <span className="flex-1">{m.desktop_tray_quit({ name: env.VITE_APP_NAME })}</span>
+              </DropdownMenu.DropdownMenuItem>
+            ) : null}
           </DropdownMenu.DropdownMenuContent>
         </DropdownMenu.DropdownMenu>
       </Sidebar.SidebarMenuItem>

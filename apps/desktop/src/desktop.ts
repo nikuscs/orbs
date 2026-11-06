@@ -1,14 +1,18 @@
 import { m } from '@repo/i18n/client';
 import Electrobun, { ApplicationMenu, BrowserView, BrowserWindow, PATHS, Screen, Tray, Utils } from 'electrobun/main';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { connect, createServer } from 'node:net';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { DESKTOP_BUILD } from './desktop-build';
 import { desktopNetworkFind, desktopNetworkHost, desktopNetworkProbe, desktopNetworkSelf, desktopNetworkTailscale } from './desktop-network';
 import { desktopNotify } from './desktop-notify';
 import { desktopProcessRuns, desktopServerLeftovers, desktopServerPairLink, desktopServerStart } from './desktop-server';
-import { desktopLoginEnabled, desktopLoginSet, desktopSettingsPrompt, desktopSettingsRead, desktopSettingsWrite, desktopStateRead, desktopStateWrite } from './desktop-settings';
+import { desktopHome, desktopLoginEnabled, desktopLoginSet, desktopSettingsPrompt, desktopSettingsRead, desktopSettingsWrite, desktopStateRead, desktopStateWrite } from './desktop-settings';
 import { desktopUpdateApply, desktopUpdateCheck, desktopUpdateStart, desktopUpdateState } from './desktop-update';
 import { desktopWindowAppearance, desktopWindowTitleBarDoubleClick, desktopWindowToolbar } from './desktop-window';
 import { DESKTOP } from './desktop.constants';
-import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopPairMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage, desktopUpdateMessage } from './types/desktop.types';
+import { desktopConnectionMessage, desktopConnectParams, desktopCopyMessage, desktopMenuClick, desktopNetwork, desktopNewWindow, desktopNotifyMessage, desktopPairMessage, desktopQuitMessage, desktopSettings, desktopThemeMessage, desktopTitleBarMessage, desktopUpdateMessage } from './types/desktop.types';
 import type * as DesktopTypes from './types/desktop.types';
 import type { ElectrobunEvent } from 'electrobun/main';
 
@@ -25,6 +29,44 @@ let updates = false;
 
 const appName = DESKTOP_BUILD.name;
 
+// Ensure Linux AppIndicator can access the user session bus even when launched from environments without DBus exported.
+if (DESKTOP.isLinux && !process.env.DBUS_SESSION_BUS_ADDRESS) {
+  const uid = typeof process.getuid === 'function' ? process.getuid() : 1000;
+  process.env.DBUS_SESSION_BUS_ADDRESS = `unix:path=/run/user/${uid}/bus`;
+}
+
+// On Linux, ensure .desktop shortcuts point to the absolute icon path so desktop environments resolve the brand icon immediately.
+function desktopLinuxIconSync(): void {
+  const icon = join(PATHS.RESOURCES_FOLDER, 'appIcon.png');
+
+  if (!existsSync(icon)) {
+    return;
+  }
+
+  const files = [
+    join(homedir(), '.local/share/applications/Orbs.desktop'),
+    join(homedir(), 'Desktop/Orbs.desktop'),
+  ];
+
+  for (const file of files) {
+    if (existsSync(file)) {
+      try {
+        const text = readFileSync(file, 'utf8');
+
+        if (text.includes('Icon=appIcon')) {
+          writeFileSync(file, text.replace('Icon=appIcon', `Icon=${icon}`));
+        }
+      } catch {
+        // Ignore permission or file lock issues
+      }
+    }
+  }
+}
+
+if (DESKTOP.isLinux) {
+  desktopLinuxIconSync();
+}
+
 const headless = process.env[DESKTOP.headless.env] === '1';
 const atLogin = process.env[DESKTOP.login.env] === '1';
 // Electrobun always enables the WebKit inspector, so release builds hide the native menu that offers "Inspect Element".
@@ -35,9 +77,13 @@ const clipboardBridge = "{ const copy = (text) => { window.__electrobunSendToHos
 // This Mac's own daemon pairs the app without a code: the connect page asks the host for a one-time link.
 const pairBridge = "if (location.pathname === '/connect' && !location.hash.includes('code=')) window.__electrobunSendToHost({ pair: true });";
 const titleBarBridge = "window.addEventListener('dblclick', (event) => { const target = event.target instanceof Element ? event.target : null; if (target?.closest('.electrobun-webkit-app-region-drag') && !target.closest('.electrobun-webkit-app-region-no-drag')) window.__electrobunSendToHost({ titleBar: 'double-click' }); });";
+// Forward Ctrl+Q / Cmd+Q from the webview to the desktop shell for graceful application quit.
+const quitBridge = "window.addEventListener('keydown', (event) => { if ((event.ctrlKey || event.metaKey) && event.key === 'q') window.__electrobunSendToHost?.({ quit: true }); });";
 
 function desktopDockSync(): void {
-  Utils.setDockIconVisible(Boolean(mainWindow ?? connectWindow));
+  if (DESKTOP.isDarwin) {
+    Utils.setDockIconVisible(Boolean(mainWindow ?? connectWindow));
+  }
 }
 
 function desktopRemote(): string | undefined {
@@ -204,7 +250,7 @@ function desktopMainOpen(url: string): void {
   const window = new BrowserWindow({
     title: appName,
     url,
-    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${desktopUpdateScript()} ${clipboardBridge} ${titleBarBridge} ${server?.canAutoPair && new URL(url).origin === new URL(server.url).origin ? pairBridge : ''} ${nativeMenuBlock}`,
+    preload: `document.documentElement.dataset.shell = 'desktop'; window.__botsAddresses = ${JSON.stringify(server?.urls.filter((address) => address !== server?.url) ?? [])}; window.__botsHost = ${JSON.stringify(desktopNetworkHost())}; ${desktopUpdateScript()} ${clipboardBridge} ${titleBarBridge} ${quitBridge} ${server?.canAutoPair && new URL(url).origin === new URL(server.url).origin ? pairBridge : ''} ${nativeMenuBlock}`,
     frame: saved && desktopFrameVisible(saved) ? saved : desktopFrameDefault(),
     titleBarStyle: 'hiddenInset',
     trafficLightOffset: DESKTOP.mainWindow.trafficLights,
@@ -236,6 +282,10 @@ function desktopMainOpen(url: string): void {
 
     if (pointer && desktopTitleBarMessage.safeParse(event).success) {
       desktopWindowTitleBarDoubleClick(pointer);
+    }
+
+    if (desktopQuitMessage.safeParse(event).success) {
+      void desktopQuit();
     }
 
     if (desktopConnectionMessage.safeParse(event).success) {
@@ -527,6 +577,8 @@ function desktopConnectOpen(screen: DesktopTypes.DesktopConnectScreen): void {
 async function desktopQuit(): Promise<void> {
   await operation;
 
+  rmSync(desktopSocketPath(), { force: true });
+
   const running = server;
 
   server = null;
@@ -541,6 +593,7 @@ function desktopOpen(): void {
 
   if (window) {
     window.show();
+    window.activate();
   } else if (server) {
     desktopMainOpen(server.url);
   } else if (desktopRemote()) {
@@ -590,7 +643,7 @@ function desktopShellStart(): void {
   ]);
 
   tray = new Tray({
-    image: DESKTOP.tray.image,
+    image: DESKTOP.isDarwin ? DESKTOP.tray.image : 'appIcon',
     template: true,
     width: DESKTOP.tray.width,
     height: DESKTOP.tray.height,
@@ -654,8 +707,52 @@ async function desktopHeadlessStart(): Promise<void> {
   }
 }
 
-if (desktopProcessRuns(desktopStateRead().appPid, PATHS.RESOURCES_FOLDER)) {
-  Utils.quit(0);
+const desktopSocketPath = () => join(desktopHome.root, DESKTOP.ipcSocket);
+
+/** On Linux, check if another instance is already running via the local Unix domain socket and signal it to reopen. */
+async function desktopInstanceCheck(): Promise<boolean> {
+  const socketPath = desktopSocketPath();
+
+  return new Promise((resolve) => {
+    const client = connect(socketPath, () => {
+      client.end();
+      resolve(true);
+    });
+
+    client.on('error', () => {
+      rmSync(socketPath, { force: true });
+      resolve(false);
+    });
+  });
+}
+
+/** On Linux, listen for reopen requests from subsequent instance launches and bring the window forward. */
+function desktopInstanceListen(): void {
+  const socketPath = desktopSocketPath();
+
+  rmSync(socketPath, { force: true });
+  mkdirSync(desktopHome.root, { recursive: true, mode: 0o700 });
+
+  const ipcServer = createServer(() => {
+    desktopOpen();
+  });
+
+  ipcServer.unref();
+  ipcServer.listen(socketPath);
+}
+
+if (DESKTOP.isDarwin) {
+  // macOS LaunchServices manages application activation and sends reopen events natively.
+  if (desktopProcessRuns(desktopStateRead().appPid, PATHS.RESOURCES_FOLDER)) {
+    Utils.quit(0);
+  }
+} else {
+  // Linux executes a new binary per click; use socket IPC to notify the background instance to reopen.
+  if (await desktopInstanceCheck()) {
+    Utils.quit(0);
+  }
+
+  desktopInstanceListen();
 }
 
 desktopStateWrite({ appPid: process.pid });

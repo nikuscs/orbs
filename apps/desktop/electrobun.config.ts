@@ -24,6 +24,11 @@ export default {
       createDmg: false,
       icons: 'icon.icon',
     },
+    linux: {
+      // Use native WebKitGTK renderer and provide standard application icon for .desktop generation.
+      defaultRenderer: 'native',
+      icon: 'icon.png',
+    },
   },
   scripts: { postBuild: '../../scripts/desktop.ts' },
   // Read back at runtime through BuildConfig, so packaged builds keep the name and identifier.

@@ -1,24 +1,40 @@
+/**
+ * macOS Objective-C runtime bridge via Bun FFI.
+ * Dynamically loads libobjc and libSystem on Darwin only; on non-macOS platforms,
+ * all functions safely return null / no-op to allow unconditional imports without crashing.
+ */
+
 import { dlopen, FFIType, JSCallback, ptr } from 'bun:ffi';
+import { DESKTOP } from './desktop.constants';
 import type { Pointer } from 'bun:ffi';
 
+const { isDarwin } = DESKTOP;
 const objcPath = '/usr/lib/libobjc.A.dylib';
 
 function desktopObjcSend(args: FFIType[]): (...values: unknown[]) => Pointer | null {
+  if (!isDarwin) {
+    return () => null;
+  }
+
   const send = dlopen(objcPath, { objc_msgSend: { args: [FFIType.ptr, FFIType.ptr, ...args], returns: FFIType.ptr } }).symbols.objc_msgSend;
 
   // SAFETY: a `ptr` return is an object pointer or null; Bun types it with `bigint` only for the generic FFI signature.
   return (...values) => send(...values) as Pointer | null;
 }
 
-const objc = dlopen(objcPath, {
-  objc_getClass: { args: [FFIType.ptr], returns: FFIType.ptr },
-  sel_registerName: { args: [FFIType.ptr], returns: FFIType.ptr },
-});
+const objc = isDarwin
+  ? dlopen(objcPath, {
+    objc_getClass: { args: [FFIType.ptr], returns: FFIType.ptr },
+    sel_registerName: { args: [FFIType.ptr], returns: FFIType.ptr },
+  })
+  : null;
 
-const system = dlopen('/usr/lib/libSystem.B.dylib', {
-  dlopen: { args: [FFIType.ptr, FFIType.i32], returns: FFIType.ptr },
-  dlsym: { args: [FFIType.ptr, FFIType.ptr], returns: FFIType.ptr },
-});
+const system = isDarwin
+  ? dlopen('/usr/lib/libSystem.B.dylib', {
+    dlopen: { args: [FFIType.ptr, FFIType.i32], returns: FFIType.ptr },
+    dlsym: { args: [FFIType.ptr, FFIType.ptr], returns: FFIType.ptr },
+  })
+  : null;
 
 export const desktopSend = {
   none: desktopObjcSend([]),
@@ -36,7 +52,11 @@ export const desktopSend = {
 };
 
 const BLOCK_IS_GLOBAL = 1 << 28;
-const blockIsa = system.symbols.dlsym(system.symbols.dlopen(null, 0), desktopCString('_NSConcreteGlobalBlock'));
+
+const blockIsa = isDarwin && system
+  ? system.symbols.dlsym(system.symbols.dlopen(null, 0), desktopCString('_NSConcreteGlobalBlock'))
+  : null;
+
 const blockDescriptor = Buffer.alloc(16);
 const blocksAlive = new Map<Buffer, JSCallback>();
 
@@ -46,24 +66,34 @@ function desktopCString(text: string): Buffer {
   return Buffer.from(`${text}\0`);
 }
 
-export function desktopSelector(name: string) {
-  return objc.symbols.sel_registerName(desktopCString(name));
+export function desktopSelector(name: string): Pointer | null {
+  return objc ? (objc.symbols.sel_registerName(desktopCString(name)) as Pointer | null) : null;
 }
 
-export function desktopClass(name: string) {
-  return objc.symbols.objc_getClass(desktopCString(name));
+export function desktopClass(name: string): Pointer | null {
+  return objc ? (objc.symbols.objc_getClass(desktopCString(name)) as Pointer | null) : null;
 }
 
 export function desktopString(text: string) {
+  if (!isDarwin) {
+    return null;
+  }
+
   return desktopSend.one(desktopClass('NSString'), desktopSelector('stringWithUTF8String:'), desktopCString(text));
 }
 
 export function desktopNew(name: string) {
+  if (!isDarwin) {
+    return null;
+  }
+
   return desktopSend.none(desktopSend.none(desktopClass(name), desktopSelector('alloc')), desktopSelector('init'));
 }
 
 export function desktopFramework(path: string): void {
-  system.symbols.dlopen(desktopCString(path), 1);
+  if (isDarwin && system) {
+    system.symbols.dlopen(desktopCString(path), 1);
+  }
 }
 
 /** An Objective-C block that calls back into JS once, for completion handlers: `args` follow the block's own pointer. */

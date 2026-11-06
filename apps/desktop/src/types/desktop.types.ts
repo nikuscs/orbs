@@ -10,6 +10,8 @@ export const desktopMenuClick = z.object({ data: z.object({ action: z.string() }
 
 export const desktopConnectionMessage = z.object({ data: z.object({ detail: z.object({ connection: z.literal(true) }) }) });
 
+export const desktopQuitMessage = z.object({ data: z.object({ detail: z.object({ quit: z.literal(true) }) }) });
+
 export const desktopThemeMessage = z.object({ data: z.object({ detail: z.object({ theme: desktopTheme }) }) });
 
 const desktopNotify = z.object({

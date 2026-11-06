@@ -119,6 +119,11 @@ export function desktopNetworkHost(): string {
 }
 
 export function desktopNetworkAdvertise(port: number): () => void {
+  // /usr/bin/dns-sd is built-in on macOS; on Linux, fall back silently if not installed.
+  if (!existsSync(DESKTOP.find.dnsSd)) {
+    return () => undefined;
+  }
+
   const name = `${DESKTOP_BUILD.name} on ${desktopNetworkHost()}`;
   const child = Bun.spawn([DESKTOP.find.dnsSd, '-R', name, DESKTOP.find.service, 'local', String(port)], { stdout: 'ignore', stderr: 'ignore' });
 
@@ -137,6 +142,11 @@ export async function desktopNetworkFind(server: DesktopTypes.DesktopServer | nu
   }
 
   async function desktopNetworkBonjour(): Promise<DesktopTypes.DesktopFound[]> {
+    // /usr/bin/dns-sd is built-in on macOS; if absent on Linux, skip Bonjour and fall back to candidate port probing.
+    if (!existsSync(DESKTOP.find.dnsSd)) {
+      return [];
+    }
+
     const browse = await desktopNetworkRun([DESKTOP.find.dnsSd, '-B', DESKTOP.find.service, 'local'], DESKTOP.find.browseMs);
     const names = new Set(browse.split('\n').flatMap((line) => (/\sAdd\s/u.test(line) ? [line.split(`${DESKTOP.find.service}.`)[1]?.trim() ?? ''] : [])).filter(Boolean));
 

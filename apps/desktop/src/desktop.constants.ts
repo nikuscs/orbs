@@ -1,4 +1,6 @@
 export const DESKTOP = {
+  isDarwin: process.platform === 'darwin',
+  isLinux: process.platform === 'linux',
   ports: Array.from({ length: 10 }, (_, index) => 47190 + index),
   daemonPortOffset: 100,
   localHost: '127.0.0.1',
@@ -17,6 +19,8 @@ export const DESKTOP = {
   stopTimeoutMs: 12_000,
   saveDelayMs: 500,
   dataDir: '~/.config/orbs/',
+  // Local Unix domain socket used on Linux for single-instance detection and window reopen notifications.
+  ipcSocket: 'desktop.sock',
   bundle: { web: 'server/web/src/application/server.bun.js', daemon: 'server/daemon/entry.native.js' },
   dev: { web: ['x', 'vite', 'dev', '--strictPort'], daemon: '../daemon/src/entry.native.ts' },
   markers: ['server/web/', 'server/daemon/', 'vite dev', 'daemon/src/entry.native.ts'],
@@ -25,7 +29,8 @@ export const DESKTOP = {
   stateFile: 'desktop.json',
   logsFolder: 'logs',
   serverLog: 'server.log',
-  tailscaleBinaries: ['/Applications/Tailscale.app/Contents/MacOS/Tailscale', '/usr/local/bin/tailscale', '/opt/homebrew/bin/tailscale'],
+  // Tailscale CLI candidate paths across macOS and Linux installations.
+  tailscaleBinaries: ['/Applications/Tailscale.app/Contents/MacOS/Tailscale', '/usr/local/bin/tailscale', '/opt/homebrew/bin/tailscale', '/usr/bin/tailscale', '/usr/sbin/tailscale'],
   mainWindow: { width: 1280, height: 840, trafficLights: { x: -6, y: -5 } },
   tray: { image: 'views://server/web/dist/client/img/brand/tray.svg', width: 19, height: 16 },
   login: { env: 'DESKTOP_LOGIN', agents: 'Library/LaunchAgents' },
