@@ -15,14 +15,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Dev always runs the local dev daemon next to Vite; built web servers pick the paired daemon's address from the connection cookie.
 const DEV_DAEMON = `http://127.0.0.1:${env.DAEMON_PORT}`;
 
+// Vite's default CORS middleware answers preflights itself; the sandboxed computer viewer sends Origin: null, and the daemon's /computers route must answer those.
+const DEV_ORIGINS = /^https?:\/\/(?:(?:[^:]+\.)?localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/u;
+
 export default defineConfig({
   clearScreen: false,
   envDir: '../..',
   server: {
     host: true,
+    cors: { origin: DEV_ORIGINS, preflightContinue: true },
     proxy: {
       '/rpc': { target: DEV_DAEMON, ws: true },
       '/files': { target: DEV_DAEMON },
+      '/computers': { target: DEV_DAEMON, ws: true },
       '/avatars': { target: DEV_DAEMON },
       '/health': { target: DEV_DAEMON },
       '/mcp/callback': { target: DEV_DAEMON },

@@ -23,6 +23,7 @@ import { match, P } from 'ts-pattern';
 import { renderUnicodeCompact } from 'uqr';
 import {
   makeAlarmService,
+  makeComputerHostService,
   makeImageService,
   makeInstructionLoaderService,
   makeMcpAuthService,
@@ -49,11 +50,11 @@ import {
   workspacePathsRootNative,
 } from '@repo/server/native';
 import { coreHandler, makeCredentialsService, makeSecretService, makeServices, makeSettingsService, router } from '@repo/server/server';
+import { coreComputersHandler, coreComputersSocketClose, coreComputersSocketMessage, coreComputersSocketOpen } from './core-computers.native';
 import { coreFilesRange } from './core-files.native';
 import type * as CoreTypes from '../types/core.types';
 import type { RouterClient } from '@orpc/server';
 import type { RPCHandlerOptions } from '@orpc/server/fetch';
-import type { Server } from 'bun';
 
 const HELP = `Usage:
   orbs start [--detach]
@@ -178,6 +179,12 @@ async function coreNativeServices(resources: AsyncDisposableStack): Promise<Core
   const mcpClients = makeMcpClientService({ root: paths.root, auth: mcpAuth });
   resources.defer(() => mcpClients.close());
 
+  const computers = makeComputerHostService({
+    folder: join(paths.data, 'computers'),
+    credentials,
+    dockerHost: env.DOCKER_HOST,
+  });
+
   const services = await makeServices({
     database,
     attachmentStorage: makeAttachmentStorageService({ root: paths.root }),
@@ -208,6 +215,7 @@ async function coreNativeServices(resources: AsyncDisposableStack): Promise<Core
       models: providers.models,
       env: runtimeEnvNative(paths.root),
       images: await makeImageService(),
+      computers,
       secrets: makeSecretBrokerService({
         source: secrets,
         proxy: secretProxy,
@@ -217,6 +225,7 @@ async function coreNativeServices(resources: AsyncDisposableStack): Promise<Core
     },
   });
 
+  resources.defer(() => computers.close());
   resources.defer(() => services.runtime.close());
   resources.defer(await services.notifications.actions.watch());
 
@@ -265,7 +274,7 @@ function coreNativeRpc(services: CoreTypes.CoreServices, isLocal: boolean) {
 
 function coreNativeNetwork(services: CoreTypes.CoreServices) {
   const rpc = coreNativeRpc(services, false);
-  const peer = (request: Request, server: Server<undefined>) => server.requestIP(request)?.address ?? null;
+  const peer = (request: Request, server: CoreTypes.CoreServer) => server.requestIP(request)?.address ?? null;
 
   const handleRpc = coreNativeOrigin(services, async (request, server) => coreNativeReply(
     await rpc.http.handle(request, { prefix: '/rpc', context: { ...rpc.context, peerAddress: peer(request, server) } }),
@@ -283,7 +292,7 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
     maxRequestBodySize: 12 * 1024 * 1024,
     routes: {
       '/rpc': {
-        GET: coreNativeOrigin(services, (request, server) => (server.upgrade(request, { data: undefined }) ? undefined : new Response(null, { status: 426 }))),
+        GET: coreNativeOrigin(services, (request, server) => (server.upgrade(request, { data: { kind: 'rpc' } satisfies CoreTypes.CoreSocket }) ? undefined : new Response(null, { status: 426 }))),
         POST: handleRpc,
         OPTIONS: handleRpc,
       },
@@ -338,6 +347,7 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
             }));
         }),
       },
+      '/computers/:botId/*': coreNativeOrigin(services, coreComputersHandler(services.computers.queries.endpoint), { isOpaqueAllowed: true }),
       '/embed/*': { GET: async (request) => await embedFile(new URL(request.url).pathname) ?? new Response(null, { status: 404 }) },
     },
     fetch: (request) => coreHandler(request, services),
@@ -345,11 +355,18 @@ function coreNativeNetwork(services: CoreTypes.CoreServices) {
       maxPayloadLength: 1024 * 1024,
       backpressureLimit: 4 * 1024 * 1024,
       closeOnBackpressureLimit: true,
+      open(socket) {
+        match(socket.data).with({ kind: 'computer' }, (state) => coreComputersSocketOpen(socket, state)).otherwise(() => undefined);
+      },
       async message(socket, message) {
-        await rpc.websocket.message(socket, message, { context: { ...rpc.context, peerAddress: socket.remoteAddress } });
+        await match(socket.data)
+          .with({ kind: 'computer' }, (state) => coreComputersSocketMessage(socket, state, message))
+          .otherwise(() => rpc.websocket.message(socket, message, { context: { ...rpc.context, peerAddress: socket.remoteAddress } }));
       },
       async close(socket) {
-        await rpc.websocket.close(socket);
+        await match(socket.data)
+          .with({ kind: 'computer' }, (state) => coreComputersSocketClose(state))
+          .otherwise(() => rpc.websocket.close(socket));
       },
     },
   });
@@ -401,13 +418,18 @@ async function coreNativeLocal(services: CoreTypes.CoreServices) {
   return server;
 }
 
-function coreNativeOrigin<T extends Request>(services: CoreTypes.CoreServices, handler: CoreTypes.CoreHandler<T>): CoreTypes.CoreHandler<T> {
+function coreNativeOrigin<T extends Request>(
+  services: CoreTypes.CoreServices,
+  handler: CoreTypes.CoreHandler<T>,
+  options: CoreTypes.CoreOriginOptions = { isOpaqueAllowed: false },
+): CoreTypes.CoreHandler<T> {
   return (request, server) => {
     const origin = request.headers.get('origin');
     const parsed = URL.parse(origin ?? '');
     const hostname = parsed?.hostname.replace(/^\[|\]$/gu, '') ?? '';
 
     const isAllowed = origin === null
+      || (options.isOpaqueAllowed && origin === 'null')
       || env.DAEMON_ALLOWED_ORIGINS.includes(parsed?.origin ?? origin)
       || isIP(hostname) !== 0
       || hostname === 'localhost'
