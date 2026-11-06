@@ -4,6 +4,7 @@ import { log } from '@repo/logger/server';
 import { match, P } from 'ts-pattern';
 import { artifactBlocksCatalog } from '../artifact/artifact-blocks.utils';
 import { makeCollaborationExtensionService } from '../collaboration/collaboration-extension.service';
+import { makeNoteExtensionService } from '../note/note-extension.service';
 import { notificationItemKey, notificationRecentAppend } from '../notification/notification.utils';
 import { makeQuestionExtensionService } from '../question/question-extension.service';
 import { makeRoutineExtensionService } from '../routine/routine-extension.service';
@@ -100,6 +101,8 @@ export function makeRuntimeService({
   const questions = makeQuestionExtensionService();
   const chatTools = runtimeChatToolsExtension();
   const toolSearch = createToolSearchExtension();
+
+  const notes = makeNoteExtensionService();
   const subagents = makeSubagentExtensionService();
   const routines = makeRoutineExtensionService();
   const todos = makeTodoExtensionService();
@@ -122,6 +125,7 @@ export function makeRuntimeService({
       routines.extension,
       runtimeReactionExtension,
       todos.extension,
+      notes.extension,
       toolSearch,
       ...(secrets ? [runtimeSecretsExtension({ secrets })] : []),
       ...toolExtensions,

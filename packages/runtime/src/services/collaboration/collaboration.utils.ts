@@ -33,10 +33,11 @@ export function collaborationFailureNote(recipientName: string, reason: string) 
 
 export function collaborationPeerNote({ senderName, hops, maxHops }: Pick<CollaborationDeliveryInput, 'senderName' | 'hops' | 'maxHops'>) {
   const left = maxHops - hops;
+  const owner = `The owner cannot see this chat, and ${senderName} will not pass on your details. When the result is something the owner should know or decide in your own area, tell them yourself with bot_notify_owner, then reply here briefly.`;
 
   return match(left > 0)
-    .with(true, () => `[Private message from ${senderName}. Answer this request yourself when you can. If another bot must help, you may forward it; ${left} more ${left === 1 ? 'hop is' : 'hops are'} left.]`)
-    .with(false, () => `[Private message from ${senderName}. Answer this request; it cannot be forwarded to another bot.]`)
+    .with(true, () => `[Private message from ${senderName}. Answer this request yourself when you can. ${owner} If another bot must help, you may forward it; ${left} more ${left === 1 ? 'hop is' : 'hops are'} left.]`)
+    .with(false, () => `[Private message from ${senderName}. Answer this request; it cannot be forwarded to another bot. ${owner}]`)
     .exhaustive();
 }
 

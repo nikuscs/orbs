@@ -27,7 +27,7 @@ export function collaborationDeliveryTask({ directory }: Pick<CollaborationTypes
           .with('ask', () => ({ status: 'terminal' as const, outcome: { status: 'completed' as const, result } }))
           .with('send', () => {
             const report = match(result)
-              .with({ status: 'answered' }, ({ text }) => `[${input.recipientName} replied privately. Tell the user what matters in a short message; do not message ${input.recipientName} again about this.]\n\n${text}`)
+              .with({ status: 'answered' }, ({ text }) => `[${input.recipientName} replied privately and tells the owner about its own work itself. Do not repeat its details to the user; mention only what changes for your own work, briefly, if anything. Do not message ${input.recipientName} again about this.]\n\n${text}`)
               .with({ status: 'unanswered', reason: 'aborted' }, () => null)
               .with({ status: 'unanswered' }, ({ reason }) => collaborationFailureNote(input.recipientName, reason))
               .exhaustive();
