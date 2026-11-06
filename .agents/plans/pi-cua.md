@@ -38,6 +38,11 @@ Repos read at their main branch on the plan dates (2026-10-24, updated 2026-11-0
 - Docker builds use the `docker-` tag prefix, for example `docker-build-slim-20261003-66e0b66-arm64`, about 485 MB compressed. The slim tier is enough. (registry tags, 2026-11-06)
 - Docker's default seccomp profile blocks Chromium's user-namespace sandbox ("No usable sandbox!"). A copy of the default profile that also allows `clone`, `clone3`, `unshare` and `setns` keeps the sandbox on without `--no-sandbox` or extra capabilities. (Orbs spike on Debian Chromium, 2026-11-06; to confirm on Cua's image)
 
+**Cua's TypeScript packages**
+
+- `@trycua/cua` 0.10.1 on npm: the cua SDK for Node and the browser on a Rust core (`@ubjs/core`, `@ubjs/node`). Its `SpacesdClient` has `callJson(method, json)` for unary `cua.env.v1` RPCs in proto3-JSON, plus `spawn`, `upload` and `download`. Whether Bun loads it is checked in phase 1.
+- `@trycua/pi-durable` 0.1.0 (MIT, not on npm, `libs/cua/typescript/integrations/pi-durable`): `SpacesExecutionEnv`, Pi's `ExecutionEnv` on a Space (needs the `process.exec_ledger` capability), and `durableSpaces()` with fenced commands and workspace or machine checkpoints that keep a Space consistent with the conversation log across crashes. It has no computer-use tools; it is the base for running a bot's file and shell tools inside its computer later.
+
 **Orbs**
 
 - File and shell tools run on the host through Pi's `NodeExecutionEnv`, built in `runtimeEnvNative()` (`packages/runtime/src/services/runtime/runtime-env.utils.ts`). They stay on the host.
