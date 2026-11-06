@@ -78,6 +78,13 @@ async function bundle() {
 
   cpSync(path.join(root, 'apps/web/dist/client'), path.join(target, 'web/dist/client'), { recursive: true });
   cpSync(path.join(root, 'packages/server/src/services/database/migrations'), path.join(target, 'daemon/migrations'), { recursive: true });
+
+  // Bun cannot bundle Takumi's native binding; without a local copy it auto-installs the latest one, which breaks the bundled JS.
+  const binding = `@takumi-rs/core-${process.platform}-${process.arch}`;
+  const resolve = (pkg: string, from: string) => path.dirname(Bun.resolveSync(`${pkg}/package.json`, from));
+  const core = resolve('@takumi-rs/core', resolve('takumi-js', path.join(root, 'packages/server')));
+
+  cpSync(resolve(binding, core), path.join(target, 'daemon/node_modules', binding), { recursive: true, dereference: true });
 }
 
 function plist() {
