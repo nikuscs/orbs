@@ -5,6 +5,7 @@ import { useChatDraft } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { Link, useMatch } from '@tanstack/react-router';
 import { useState } from 'react';
+import { match } from 'ts-pattern';
 import IconBellOff from '~icons/lucide/bell-off';
 import IconEllipsisVertical from '~icons/lucide/ellipsis-vertical';
 import IconPin from '~icons/lucide/pin';
@@ -86,12 +87,20 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
                 cheer={false}
                 size={state === 'collapsed' && !isMobile && buttonSize ? buttonSize : 48}
               />
-              {chat.hasUnread && !isActive ? (
-                <>
-                  <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-orange-400 ring-1 ring-sidebar" />
-                  <span className="sr-only">{m.rooms_unread()}</span>
-                </>
-              ) : null}
+              {match({ isRunning: chat.isRunning, isUnread: chat.hasUnread && !isActive })
+                .with({ isRunning: true }, () => (
+                  <>
+                    <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-green-500 ring-1 ring-sidebar" />
+                    <span className="sr-only">{m.rooms_working()}</span>
+                  </>
+                ))
+                .with({ isUnread: true }, () => (
+                  <>
+                    <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-orange-400 ring-1 ring-sidebar" />
+                    <span className="sr-only">{m.rooms_unread()}</span>
+                  </>
+                ))
+                .otherwise(() => null)}
             </span>
             <span className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
               <span className="flex min-w-0 items-center gap-1.5">
