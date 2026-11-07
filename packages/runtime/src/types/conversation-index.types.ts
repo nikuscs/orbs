@@ -7,7 +7,7 @@ export type ConversationIndexItem = Pick<ConversationSummary, 'botId' | 'convers
   lastAssistantEntryId: number;
 };
 
-export type ConversationIndexSummary = ConversationIndexItem & { isRunning: boolean };
+export type ConversationIndexSummary = ConversationIndexItem & { isRunning: boolean; isWorking: boolean };
 
 export interface ConversationIndexPreview {
   lastMessage: ConversationSummary['lastMessage'];
