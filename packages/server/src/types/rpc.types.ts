@@ -4,6 +4,7 @@ import type { AttachmentService } from '../services/attachment/attachment.servic
 import type { AuthService } from '../services/auth/auth.service';
 import type { AvatarService } from '../services/avatar/avatar.service';
 import type { BotService } from '../services/bot/bot.service';
+import type { ComputerService } from '../services/computer/computer.service';
 import type { ConversationService } from '../services/conversation/conversation.service';
 import type { CredentialsService } from '../services/credentials/credentials.service';
 import type { InstructionService } from '../services/instruction/instruction.service';
@@ -33,6 +34,7 @@ export interface RpcContext extends RequestHeadersPluginContext, ResponseHeaders
   mcpAuth: McpAuthService;
   routines: RoutineService;
   todos: TodoService;
+  computers: ComputerService;
   activity: ActivityService;
   artifacts: ArtifactService;
   notifications: NotificationService;

@@ -7,6 +7,7 @@ export * from './types/avatar.types';
 export * from './types/bot.types';
 export * from './types/chat.types';
 export * from './types/command.types';
+export * from './types/computer.types';
 export * from './types/connection.types';
 export * from './types/conversation-context-usage.types';
 export * from './types/conversation-usage.types';
