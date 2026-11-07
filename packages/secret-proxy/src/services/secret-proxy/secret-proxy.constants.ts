@@ -1,6 +1,7 @@
 export const SECRET_PROXY = {
   placeholderPrefix: 'bots-secret-',
   placeholderSuffix: '-placeholder',
+  placeholderTagLength: 32,
   bundleFile: 'ca-bundle.pem',
   scrubMaxBytes: 2 * 1024 * 1024,
   loopback: ['127.0.0.1', '::1', '::ffff:127.0.0.1'],

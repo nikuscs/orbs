@@ -8,7 +8,7 @@ export async function secretProxyActionSwap(
 ): Promise<requestSteps.CallbackRequestResult | undefined> {
   const url = new URL(request.url);
   const carried = JSON.stringify([request.url, request.headers]);
-  const rules = (await source.queries.rules()).filter((rule) => carried.includes(secretProxyPlaceholder(rule.name)));
+  const rules = (await source.queries.rules()).filter((rule) => carried.includes(secretProxyPlaceholder(state.token, rule.name)));
   const refused = rules.find((rule) => url.protocol !== 'https:' || !secretProxyAllows(rule, url.hostname));
 
   if (refused) {
@@ -17,7 +17,7 @@ export async function secretProxyActionSwap(
 
   const swaps = await Promise.all(rules.map(async ({ name }) => ({
     name,
-    placeholder: secretProxyPlaceholder(name),
+    placeholder: secretProxyPlaceholder(state.token, name),
     value: await source.queries.value({ name }),
   })));
 
