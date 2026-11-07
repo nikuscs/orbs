@@ -23,6 +23,7 @@ export * from './hooks/use-chat-question';
 export * from './hooks/use-chat-queue';
 export * from './hooks/use-chat-reaction';
 export * from './hooks/use-chat-search';
+export * from './hooks/use-chat-waiting';
 export * from './hooks/use-chat-subagent';
 export * from './hooks/use-chat-reactions';
 export * from './hooks/use-chat-reset';
