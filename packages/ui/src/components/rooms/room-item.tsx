@@ -87,8 +87,8 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
                 cheer={false}
                 size={state === 'collapsed' && !isMobile && buttonSize ? buttonSize : 48}
               />
-              {match({ isRunning: chat.isRunning, isUnread: chat.hasUnread && !isActive })
-                .with({ isRunning: true }, () => (
+              {match({ isWorking: chat.isWorking, isUnread: chat.hasUnread && !isActive })
+                .with({ isWorking: true }, () => (
                   <>
                     <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-green-500 ring-1 ring-sidebar" />
                     <span className="sr-only">{m.rooms_working()}</span>
