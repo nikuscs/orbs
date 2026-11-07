@@ -2,6 +2,8 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
     "tsBuildInfoFile": "./node_modules/.cache/typescript/tsbuildinfo.json",
     "types": [
       "bun"
