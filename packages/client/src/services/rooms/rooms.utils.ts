@@ -152,6 +152,20 @@ export function roomsDayLabel({ createdAt, previous, now, locale }: RoomsTypes.R
     })).format(date);
 }
 
+export function roomsMessageDay({ messages, index, now, locale }: RoomsTypes.RoomsMessageDayParams): string | undefined {
+  const message = messages[index];
+  const previous = messages.slice(0, index).reverse().find((item) => item.parts.length > 0);
+
+  return message.metadata && message.parts.length > 0
+    ? roomsDayLabel({
+      createdAt: message.metadata.createdAt,
+      previous: previous?.metadata?.createdAt,
+      now,
+      locale,
+    })
+    : undefined;
+}
+
 export function roomsFileKind(mediaType: string): RoomsTypes.RoomsFileRow['kind'] {
   return match(mediaType.split('/', 1)[0])
     .with('image', () => 'images' as const)

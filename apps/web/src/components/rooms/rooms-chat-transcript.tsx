@@ -1,4 +1,4 @@
-import { CHAT, roomsDayLabel, roomsMessageTime, roomsReactionGroups } from '@repo/client/client';
+import { CHAT, roomsMessageDay, roomsMessageTime, roomsReactionGroups } from '@repo/client/client';
 import { m } from '@repo/i18n/client';
 import { getLocale } from '@repo/i18n/runtime';
 import { botBubbleStyle } from '@repo/ui/bot.client';
@@ -52,14 +52,12 @@ export function RoomsChatTranscript({
           {unread && message.id === firstUnreadId ? <RoomsChatUnread seen={unread.isSeen} onSeen={unread.onSeen} /> : null}
           <RoomsChatTranscriptItem
             bot={bot}
-            day={message.metadata
-              ? roomsDayLabel({
-                createdAt: message.metadata.createdAt,
-                previous: messages[index - 1]?.metadata?.createdAt,
-                now,
-                locale: getLocale(),
-              })
-              : undefined}
+            day={roomsMessageDay({
+              messages,
+              index,
+              now,
+              locale: getLocale(),
+            })}
             groups={isReadOnly ? [] : roomsReactionGroups({ reaction: reactions.get(message.metadata?.entryId ?? 0), bots })}
             isCollapsible={index < messages.length - 1}
             isFocused={message.id === focusedId}

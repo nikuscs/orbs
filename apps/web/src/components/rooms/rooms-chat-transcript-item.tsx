@@ -63,7 +63,7 @@ export function RoomsChatTranscriptItem({
             onReply={() => onReply(message)}
           />
         ))}
-      {sentAt && message.role !== 'system' && !isLive && !isSending ? (
+      {sentAt && message.role !== 'system' && message.parts.length > 0 && !isLive && !isSending ? (
         <time
           className="block px-1 pb-1 text-center text-xxs text-muted-foreground tabular-nums"
           dateTime={sentAt.iso}

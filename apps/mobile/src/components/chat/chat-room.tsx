@@ -1,5 +1,5 @@
 import { useKeyboardChatComposerInset } from '@legendapp/list/keyboard';
-import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, roomsDayLabel, roomsMessageText, roomsMessageTime, roomsReactionGroups } from '@repo/client/client';
+import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, roomsMessageDay, roomsMessageText, roomsMessageTime, roomsReactionGroups } from '@repo/client/client';
 import { useChatUnread } from '@repo/client/native';
 import { chatQueries, useChatPendingSync, useChatReaction, useChatRoom } from '@repo/client/react';
 import { getLocale, m } from '@repo/i18n/client';
@@ -156,14 +156,12 @@ function ChatRoomView({ session, bot, bots, view, focusEntryId, replyToEntryId, 
       bot={bot}
       bots={bots}
       bubble={bubble}
-      day={message.metadata
-        ? roomsDayLabel({
-          createdAt: message.metadata.createdAt,
-          previous: shown[shown.indexOf(message) - 1]?.metadata?.createdAt,
-          now,
-          locale: getLocale(),
-        })
-        : undefined}
+      day={roomsMessageDay({
+        messages: shown,
+        index: shown.indexOf(message),
+        now,
+        locale: getLocale(),
+      })}
       isCollapsible={shown.indexOf(message) < shown.length - 1}
       isLive={message.id === CHAT.liveMessageId}
       isSending={message.id.startsWith(CHAT.outgoingPrefix)}

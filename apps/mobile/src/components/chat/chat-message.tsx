@@ -93,7 +93,7 @@ export function ChatMessage({
   }
 
   if (segments.length === 0) {
-    return null;
+    return dayLabel;
   }
 
   function openLink(url: string) {

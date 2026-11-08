@@ -44,6 +44,13 @@ export interface RoomsDayLabelParams {
   locale: string;
 }
 
+export interface RoomsMessageDayParams {
+  messages: ChatMessage[];
+  index: number;
+  now: Date;
+  locale: string;
+}
+
 export interface RoomsMessageTimeParams {
   createdAt: number;
   locale: string;
