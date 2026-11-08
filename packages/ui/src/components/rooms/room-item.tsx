@@ -89,7 +89,7 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
               />
               {chat.hasUnread && !isActive ? (
                 <>
-                  <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-orange-400 ring-1 ring-sidebar" />
+                  <span aria-hidden="true" className="absolute inset-e-0 top-0 size-2 rounded-full bg-orange-400 ring-2 ring-sidebar" />
                   <span className="sr-only">{m.rooms_unread()}</span>
                 </>
               ) : null}
