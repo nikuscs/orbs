@@ -1,6 +1,8 @@
 import { Errors } from '@repo/errors/universal';
+import { log } from '@repo/logger/server';
 import { match, P } from 'ts-pattern';
 import { runtimeBotConversations } from '../runtime/runtime.constants';
+import { computerActionShutdown } from './computer-action.shutdown';
 import { computerDocument } from './computer.constants';
 import { computerTaskAbort, computerTaskIsLive, computerTaskReplace } from './computer.utils';
 import type { ComputerActionDeps, ComputerContextParams } from '../../types/computer.types';
@@ -17,7 +19,25 @@ export async function computerActionStart(
     })
     .otherwise(() => undefined);
 
-  await host.actions.start({ botId });
+  const wasAwake = (await harness.snapshot(computerDocument, context))?.state === 'running';
+
+  await host.actions.start({ botId }).catch(async (error: unknown) => {
+    await match(wasAwake)
+      .with(true, () => undefined)
+      .with(false, () => computerActionShutdown({
+        harness,
+        host,
+        botId,
+      }, { context }).catch((cause: unknown) => log.error({
+        tag: 'computer',
+        message: 'Cannot shut down a computer that failed to start.',
+        botId,
+        error: cause,
+      })))
+      .exhaustive();
+
+    throw error;
+  });
 
   const replaced = await harness.commit(async (tx) => {
     const record = await tx.doc(computerDocument);
