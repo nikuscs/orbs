@@ -37,7 +37,7 @@ export function RoomsSidebarSectionGroup({ section, children, onCollapsedChange 
   return (
     <Collapsible open={!section.isCollapsed} onOpenChange={(open) => onCollapsedChange(!open)}>
       <Sidebar.SidebarGroup
-        className="data-[dragging=true]:opacity-40"
+        className="py-1 data-[dragging=true]:opacity-40"
         data-dragging={isDragging}
         ref={setNodeRef}
         style={{ transform: CSS.Translate.toString(transform), transition }}
