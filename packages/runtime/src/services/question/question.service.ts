@@ -1,15 +1,17 @@
 import { questionActionAnswer } from './question-action.answer';
+import { questionActionAsk } from './question-action.ask';
 import { questionQueryPending } from './question-query.pending';
-import type { QuestionAnswerParams, QuestionPendingParams, QuestionServiceDeps } from '../../types/question.types';
+import type * as QuestionTypes from '../../types/question.types';
 import type { Context } from '@earendil-works/chord/context';
 
-export function makeQuestionService(deps: QuestionServiceDeps) {
+export function makeQuestionService(deps: QuestionTypes.QuestionServiceDeps) {
   return {
     actions: {
-      answer: (params: QuestionAnswerParams, context: Context) => questionActionAnswer(deps, { ...params, context }),
+      answer: (params: QuestionTypes.QuestionAnswerParams, context: Context) => questionActionAnswer(deps, { ...params, context }),
+      ask: (params: Omit<QuestionTypes.QuestionAskCall, 'context'>, context: Context) => questionActionAsk({ ...params, context }),
     },
     queries: {
-      pending: (params: QuestionPendingParams, context: Context) => questionQueryPending(deps, { ...params, context }),
+      pending: (params: QuestionTypes.QuestionPendingParams, context: Context) => questionQueryPending(deps, { ...params, context }),
     },
   };
 }

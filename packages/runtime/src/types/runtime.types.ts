@@ -3,12 +3,14 @@ import { z } from 'zod';
 import { note } from './note.types';
 import type { ActivityService } from '../services/activity/activity.service';
 import type { ArtifactService } from '../services/artifact/artifact.service';
+import type { ComputerService } from '../services/computer/computer.service';
 import type { NotificationService } from '../services/notification/notification.service';
 import type { QuestionService } from '../services/question/question.service';
 import type { RoutineService } from '../services/routine/routine.service';
 import type { TodoService } from '../services/todo/todo.service';
 import type { AlarmService } from './alarm.types';
 import type { CollaborationDirectory, CollaborationPolicy } from './collaboration.types';
+import type { ComputerHost, ComputerReleaseControlParams, ComputerViewerParams } from './computer.types';
 import type { ConversationIndexService } from './conversation-index.types';
 import type { StorageService } from './storage.types';
 import type { Draft, JsonValue } from '@earendil-works/chord';
@@ -30,6 +32,7 @@ export interface RuntimeServiceParams {
   gifs: RuntimeGifs;
   images?: ImageProcessor;
   secrets?: RuntimeSecrets;
+  computers?: ComputerHost;
   toolExtensions?: PiDurableTypes.Extension[];
 }
 
@@ -108,6 +111,7 @@ export interface RuntimeSharedDeps extends RuntimeModelsDeps {
   readOnlyTools: PiDurableTypes.ToolRegistration[];
   ownTools: PiDurableTypes.ToolRegistration[];
   directory: CollaborationDirectory;
+  computers?: ComputerHost;
 }
 
 export interface RuntimeServiceDeps extends RuntimeModelsDeps {
@@ -119,6 +123,7 @@ export interface RuntimeServiceDeps extends RuntimeModelsDeps {
   routines: RoutineService;
   todos: TodoService;
   artifacts: ArtifactService;
+  computers?: ComputerService;
   activity: ActivityService;
   index: ConversationIndexService;
   registry: PiDurableTypes.Registry;
@@ -336,3 +341,16 @@ export const runtimeCarry = z.object({
 });
 
 export type RuntimeCarry = z.infer<typeof runtimeCarry>;
+
+export interface RuntimeComputerSweepDeps {
+  directory: RuntimeDirectory;
+  host: ComputerHost;
+}
+
+export interface RuntimeComputerSweepParams {
+  botIds: string[];
+}
+
+export type RuntimeComputerReleaseParams = UniversalTypes.BotGetInput & ComputerReleaseControlParams & RuntimeContextInput;
+export type RuntimeComputerControlParams = UniversalTypes.BotGetInput & UniversalTypes.ComputerControl & RuntimeContextInput;
+export type RuntimeComputerViewerParams = UniversalTypes.ComputerViewerInput & ComputerViewerParams & RuntimeContextInput;

@@ -16,4 +16,6 @@ export const envServerSchema = {
   WEB_PUBLIC_URL: z.url({ protocol: /^https?$/ }).default('http://127.0.0.1:47190'),
 
   MOBILE_SCHEME: z.string().trim().min(1).default('orbs'),
+
+  DOCKER_HOST: z.string().trim().min(1).optional(),
 };

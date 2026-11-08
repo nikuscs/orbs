@@ -9,3 +9,4 @@ export { makePluginLoaderService } from './services/plugin/plugin-loader.service
 export { makeInstructionLoaderService } from './services/instruction/instruction-loader.service';
 export { makeAlarmService } from './services/alarm/alarm.service';
 export { createNodePhotonImages as makeImageService } from '@earendil-works/pi-durable/images/node';
+export { makeComputerHostService } from './services/computer/computer-host.service';
