@@ -1,9 +1,8 @@
 import { GIF_PROVIDER_LABELS } from '@repo/client/client';
-import { useAvatarSettings, useChatDefaults, useChatHideVerbose, useNotificationSettings } from '@repo/client/react';
-import { avatarSettings, gifProvider, notificationPlatform } from '@repo/contracts/universal';
+import { useChatDefaults, useChatHideVerbose, useNotificationSettings } from '@repo/client/react';
+import { gifProvider, notificationPlatform } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { Button } from '@repo/ui/button';
-import { Input } from '@repo/ui/input';
 import { Label } from '@repo/ui/label';
 import { PanelContent, PanelDescription, PanelRow, PanelTitle } from '@repo/ui/panel';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/select';
@@ -41,86 +40,6 @@ function SettingsGeneralNotifications() {
         {permission === 'granted' ? m.settings_general_notifications_on() : m.settings_general_notifications_enable()}
       </Button>
     </PanelRow>
-  );
-}
-
-function SettingsGeneralAvatarGenerator() {
-  const avatars = useAvatarSettings();
-  const [draft, setDraft] = useState<string | null>(null);
-  const id = useId();
-  const value = draft ?? avatars.generatorUrl ?? '';
-  const parsed = avatarSettings.shape.generatorUrl.safeParse(value.trim());
-  const isLoading = avatars.generatorUrl === undefined;
-
-  function save() {
-    if (parsed.success && parsed.data !== avatars.generatorUrl) {
-      avatars.setGeneratorUrl(parsed.data);
-    }
-
-    setDraft(null);
-  }
-
-  function statusLabel() {
-    if (!avatars.isAvailable) {
-      return m.settings_avatar_generator_disconnected();
-    }
-
-    return avatars.model ? m.settings_avatar_generator_connected_model({ model: avatars.model }) : m.settings_avatar_generator_connected();
-  }
-
-  return (
-    <>
-      <PanelRow>
-        <PanelContent>
-          <PanelTitle asChild>
-            <h3>{m.settings_avatar_generator()}</h3>
-          </PanelTitle>
-          <PanelDescription>
-            {m.settings_avatar_generator_help_before()}
-            {' '}
-            <code className="font-mono text-foreground">{m.settings_avatar_generator_help_command()}</code>
-            {m.settings_avatar_generator_help_after()}
-          </PanelDescription>
-        </PanelContent>
-      </PanelRow>
-      <PanelRow>
-        <PanelContent>
-          <Label htmlFor={id}>{m.settings_avatar_generator_url()}</Label>
-        </PanelContent>
-        <Input
-          aria-invalid={!parsed.success}
-          className="w-64"
-          disabled={avatars.isPending || isLoading}
-          id={id}
-          inputMode="url"
-          value={value}
-          onBlur={save}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.currentTarget.blur();
-            }
-          }}
-        />
-      </PanelRow>
-      <PanelRow>
-        <PanelContent>
-          <output
-            className={avatars.isAvailable ? 'text-sm text-success' : 'text-sm text-muted-foreground'}
-          >
-            {isLoading ? m.settings_avatar_generator_checking() : statusLabel()}
-          </output>
-        </PanelContent>
-        <Button
-          disabled={avatars.isChecking || avatars.isPending || isLoading}
-          size="sm"
-          variant="ghost"
-          onClick={avatars.recheck}
-        >
-          {avatars.isChecking ? m.settings_avatar_generator_checking() : m.settings_avatar_generator_check()}
-        </Button>
-      </PanelRow>
-    </>
   );
 }
 
@@ -181,7 +100,6 @@ export function SettingsGeneral() {
           </SelectContent>
         </Select>
       </PanelRow>
-      <SettingsGeneralAvatarGenerator />
     </SettingsGroup>
   );
 }

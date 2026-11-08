@@ -1,5 +1,5 @@
 export * from './context/rpc';
-export * from './hooks/use-avatar-settings';
+export * from './hooks/use-avatar-generator';
 export * from './hooks/use-bot-avatar-flash';
 export * from './hooks/use-bot-avatar-generate';
 export * from './hooks/use-bot-avatar-upload';

@@ -124,7 +124,7 @@ export async function makeServices({
       avatars: makeAvatarService({
         bots,
         images: avatarImages,
-        settings,
+        providers,
       }),
       database,
       auth,

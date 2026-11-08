@@ -22,7 +22,7 @@ import {
   authRedeem,
   authRedeemResult,
 } from '../types/auth.types';
-import { avatarConfigure, avatarGenerate, avatarStatus, avatarUpload } from '../types/avatar.types';
+import { avatarGenerate, avatarGenerator, avatarUpload } from '../types/avatar.types';
 import { bot, botAvatarImage, botCatalog, botCreate, botDeleteResult, botGet, botList, botSwapModels, botSwapModelsResult, botUpdate } from '../types/bot.types';
 import { commandCatalog, commandExecute, commandExecuteResult, commandList } from '../types/command.types';
 import { conversationContextUsage } from '../types/conversation-context-usage.types';
@@ -200,8 +200,7 @@ export const contract = {
   avatars: {
     upload: ocAuth.input(avatarUpload).output(botAvatarImage),
     generate: ocAuth.errors({ UPSTREAM_UNAVAILABLE: errorSchemas.UPSTREAM_UNAVAILABLE }).input(avatarGenerate).output(botAvatarImage),
-    settings: ocAuth.output(avatarStatus),
-    configure: ocAuth.input(avatarConfigure).output(avatarStatus),
+    generator: ocAuth.output(avatarGenerator),
   },
   attachments: {
     upload: ocFind.input(attachmentUpload).output(attachment),

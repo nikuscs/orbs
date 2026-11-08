@@ -80,6 +80,7 @@
   "avatars_generate_placeholder": "A cheerful robot fox with headphones",
   "avatars_generate_submit": "Generate",
   "avatars_generate_pending": "Painting…",
-  "avatars_generate_error": "Couldn’t generate this avatar. Check that the image generator is running.",
+  "avatars_generate_error": "Couldn’t generate this avatar. Try again, or try another description.",
+  "avatars_generate_unavailable": "To generate avatars, add a provider with image models, such as OpenRouter, in Settings, under Providers.",
   "avatars_upload_error": "Could not upload the image"
 }

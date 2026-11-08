@@ -1,4 +1,4 @@
-import { useBotAvatarGenerate } from '@repo/client/react';
+import { useAvatarGenerator, useBotAvatarGenerate } from '@repo/client/react';
 import { AVATAR } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { useId, useState } from 'react';
@@ -20,6 +20,7 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState('');
   const generate = useBotAvatarGenerate();
+  const { isAvailable } = useAvatarGenerator();
   const fieldId = useId();
   const errorId = useId();
   const canSubmit = description.trim().length > 0 && !generate.isPending;
@@ -78,26 +79,33 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
         </Button>
       </PopoverTrigger>
       <PopoverContent arrow={false} className="w-80">
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
-          <Label htmlFor={fieldId}>{m.avatars_generate_label()}</Label>
-          <Textarea
-            aria-describedby={generate.isError ? errorId : undefined}
-            aria-invalid={generate.isError}
-            disabled={generate.isPending}
-            id={fieldId}
-            maxLength={AVATAR.generateDescriptionMaxLength}
-            placeholder={m.avatars_generate_placeholder()}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          {generate.isError
-            ? <p className="text-sm text-destructive" id={errorId} role="alert">{m.avatars_generate_error()}</p>
-            : null}
-          <Button className="self-end" disabled={!canSubmit} size="sm" type="submit">
-            {generate.isPending ? m.avatars_generate_pending() : m.avatars_generate_submit()}
-          </Button>
-        </form>
+        {isAvailable
+          ? (
+            <form
+              className="flex flex-col gap-2"
+              onSubmit={handleSubmit}
+            >
+              <Label htmlFor={fieldId}>{m.avatars_generate_label()}</Label>
+              <Textarea
+                aria-describedby={generate.isError ? errorId : undefined}
+                aria-invalid={generate.isError}
+                disabled={generate.isPending}
+                id={fieldId}
+                maxLength={AVATAR.generateDescriptionMaxLength}
+                placeholder={m.avatars_generate_placeholder()}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              {generate.isError
+                ? <p className="text-sm text-destructive" id={errorId} role="alert">{m.avatars_generate_error()}</p>
+                : null}
+              <Button className="self-end" disabled={!canSubmit} size="sm" type="submit">
+                {generate.isPending ? m.avatars_generate_pending() : m.avatars_generate_submit()}
+              </Button>
+            </form>
+          )
+          : <p className="text-sm text-muted-foreground">{m.avatars_generate_unavailable()}</p>}
       </PopoverContent>
     </Popover>
   );
