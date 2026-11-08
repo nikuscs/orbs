@@ -2,6 +2,8 @@ import { m } from '@repo/i18n/client';
 import type { ExpressionId } from '@repo/avatar-blobs/expressions';
 import type { BodyId, ColorId } from '@repo/avatar-blobs/skins';
 
+export const AVATAR_SETTINGS = { staleMs: 30_000 } as const;
+
 export const AVATAR_BODY_LABELS = {
   circle: m.avatars_body_circle,
   pebble: m.avatars_body_pebble,

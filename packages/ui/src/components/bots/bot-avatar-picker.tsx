@@ -1,7 +1,7 @@
 import { EXPRESSIONS } from '@repo/avatar-blobs/expressions';
 import { BODIES, COLORS } from '@repo/avatar-blobs/skins';
 import { AVATAR_BODY_LABELS, AVATAR_COLOR_LABELS, AVATAR_EXPRESSION_LABELS, BOT, botAvatarColor, botAvatarEmoji, botAvatarRecolor } from '@repo/client/client';
-import { useBotAvatarFlash, useBotAvatarUpload } from '@repo/client/react';
+import { useAvatarSettings, useBotAvatarFlash, useBotAvatarUpload } from '@repo/client/react';
 import { AVATAR } from '@repo/contracts/universal';
 import { m } from '@repo/i18n/client';
 import { useRef } from 'react';
@@ -12,6 +12,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../button';
 import { BotAvatar } from './bot-avatar';
 import { BotAvatarEmoji } from './bot-avatar-emoji';
+import { BotAvatarGenerate } from './bot-avatar-generate';
 import type { BotAvatar as BotAvatarValue } from '@repo/client/client';
 import type { MouseEvent } from 'react';
 
@@ -38,6 +39,7 @@ export function BotAvatarPicker({ name, value, onChange, disabled = false, densi
   const { moving, label, flash } = useBotAvatarFlash();
   const color = botAvatarColor({ avatar: value });
   const upload = useBotAvatarUpload();
+  const { isAvailable: canGenerate } = useAvatarSettings();
   const fileInput = useRef<HTMLInputElement>(null);
 
   function shiftBody(step: number) {
@@ -128,6 +130,15 @@ export function BotAvatarPicker({ name, value, onChange, disabled = false, densi
           <IconImageUp />
           {isCompact ? null : m.avatars_upload()}
         </Button>
+        {canGenerate
+          ? (
+            <BotAvatarGenerate
+              density={density}
+              disabled={disabled}
+              onGenerated={onChange}
+            />
+          )
+          : null}
         <BotAvatarEmoji
           density={density}
           disabled={disabled}
