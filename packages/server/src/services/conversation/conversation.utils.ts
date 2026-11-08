@@ -11,6 +11,7 @@ export function conversationSummaries(summaries: ConversationIndexSummary[], pre
       lastMessage: summary.lastMessage,
       isRunning: summary.isRunning,
       isWorking: summary.isWorking,
+      isWaiting: summary.isWaiting,
       ...conversationPreferencesView(preference, summary.lastAssistantEntryId),
     }])
     .otherwise(() => []));

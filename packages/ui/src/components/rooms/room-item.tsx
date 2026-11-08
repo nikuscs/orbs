@@ -1,7 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { MENTION } from '@repo/client/client';
-import { useChatWaiting } from '@repo/client/react';
 import { useChatDraft } from '@repo/client/web';
 import { m } from '@repo/i18n/client';
 import { Link, useMatch } from '@tanstack/react-router';
@@ -39,7 +38,6 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: chat.botId, disabled: !isSortable });
   const isActive = current?.params.handle === chat.handle;
   const { draft } = useChatDraft(chat.botId);
-  const isWaiting = useChatWaiting(chat.botId);
   const lastActivity = chat.lastMessage?.preview ?? m.rooms_last_activity_none();
 
   return (
@@ -90,7 +88,7 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
                 size={state === 'collapsed' && !isMobile && buttonSize ? buttonSize : 48}
               />
               {match({
-                isWaiting,
+                isWaiting: chat.isWaiting,
                 isWorking: chat.isWorking,
                 isUnread: chat.hasUnread && !isActive,
               })
