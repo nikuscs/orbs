@@ -68,7 +68,13 @@ export function SettingsProviders() {
                 <ItemDescription numberOfLines={0}>
                   {m.settings_providers_login_command()}
                   {' '}
-                  <Text className="font-mono" tone="muted">{provider.loginCommand}</Text>
+                  <Text
+                    className="font-mono"
+                    tone="muted"
+                    variant="item-description"
+                  >
+                    {provider.loginCommand}
+                  </Text>
                 </ItemDescription>
               ) : null}
             </ItemContent>
