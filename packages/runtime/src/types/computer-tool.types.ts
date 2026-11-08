@@ -66,10 +66,10 @@ export const computerToolBrowserAct = z.object({
   text: z.string().optional(),
 }).strict();
 
-export const computerToolBrowserTabs = z.object({
-  action: z.enum(['switch', 'close']).optional(),
-  index: z.number().int().min(0).optional(),
-}).strict().refine((value) => (value.action === undefined) === (value.index === undefined));
+export const computerToolBrowserTab = z.object({
+  action: z.enum(['switch', 'close']),
+  index: z.number().int().min(0),
+}).strict();
 
 export const computerToolEmptyParameters = Type.Object({}, { additionalProperties: false });
 export const computerToolReadParameters = Type.Unsafe<z.infer<typeof computerToolRead>>(z.toJSONSchema(computerToolRead, { io: 'input' }));
@@ -77,4 +77,4 @@ export const computerToolActParameters = Type.Unsafe<z.infer<typeof computerTool
 export const computerToolHandoffParameters = Type.Unsafe<z.infer<typeof computerToolHandoff>>(z.toJSONSchema(computerToolHandoff, { io: 'input' }));
 export const computerToolBrowserOpenParameters = Type.Unsafe<z.infer<typeof computerToolBrowserOpen>>(z.toJSONSchema(computerToolBrowserOpen, { io: 'input' }));
 export const computerToolBrowserActParameters = Type.Unsafe<z.infer<typeof computerToolBrowserAct>>(z.toJSONSchema(computerToolBrowserAct, { io: 'input' }));
-export const computerToolBrowserTabsParameters = Type.Unsafe<z.infer<typeof computerToolBrowserTabs>>(z.toJSONSchema(computerToolBrowserTabs, { io: 'input' }));
+export const computerToolBrowserTabParameters = Type.Unsafe<z.infer<typeof computerToolBrowserTab>>(z.toJSONSchema(computerToolBrowserTab, { io: 'input' }));

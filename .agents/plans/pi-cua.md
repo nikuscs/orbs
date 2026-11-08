@@ -147,7 +147,8 @@ Cheaper and more reliable than pixels on ordinary pages; the visual tools cover 
 | `bot_browser_open({ url })` | start the computer if needed, open or reuse a tab |
 | `bot_browser_snapshot()` | the page's accessibility snapshot with element references |
 | `bot_browser_act({ ref, action, text?, keys? })` | click, fill, select, press on an element |
-| `bot_browser_tabs()` | list, switch and close tabs |
+| `bot_browser_tabs()` | list tabs |
+| `bot_browser_tab({ action, index })` | switch to or close a tab |
 
 - Chromium's DevTools port stays inside the container and is reached through the container's published loopback port; `playwright-core` connects over CDP.
 - Whether cua-driver's browser core can replace Playwright is checked in phase 1.

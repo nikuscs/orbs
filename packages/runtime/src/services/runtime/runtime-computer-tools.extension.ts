@@ -9,8 +9,8 @@ import {
   computerToolBrowserActParameters,
   computerToolBrowserOpen,
   computerToolBrowserOpenParameters,
-  computerToolBrowserTabs,
-  computerToolBrowserTabsParameters,
+  computerToolBrowserTab,
+  computerToolBrowserTabParameters,
   computerToolEmptyParameters,
   computerToolHandoff,
   computerToolHandoffParameters,
@@ -202,26 +202,31 @@ export function runtimeComputerToolsExtension(deps: ComputerToolDeps) {
   const browserTabs = defineTool({
     name: 'bot_browser_tabs',
     description: m.ui_tool_bot_browser_tabs_description(),
-    parameters: computerToolBrowserTabsParameters,
+    parameters: computerToolEmptyParameters,
+    replay: 'safe',
+    execute: (_params, api, context) => runtimeComputerToolUse(deps, api, context, { isActing: false }, async (botId) => (
+      runtimeToolOutput(await deps.host.actions.browser({ botId, input: { call: 'tabs' } }))
+    )),
+  });
+
+  const browserTab = defineTool({
+    name: 'bot_browser_tab',
+    description: m.ui_tool_bot_browser_tab_description(),
+    parameters: computerToolBrowserTabParameters,
     replay: 'unsafe',
     execute: (params, api, context) => {
-      const input = computerToolBrowserTabs.parse(params);
+      const tab = computerToolBrowserTab.parse(params);
 
-      const tab = match(input)
-        .with({ action: 'switch' }, ({ index }) => ({ action: 'switch' as const, index: index ?? 0 }))
-        .with({ action: 'close' }, ({ index }) => ({ action: 'close' as const, index: index ?? 0 }))
-        .otherwise(() => undefined);
-
-      return runtimeComputerToolUse(deps, api, context, { isActing: tab !== undefined }, async (botId) => (
+      return runtimeComputerToolUse(deps, api, context, { isActing: true }, async (botId) => (
         runtimeToolOutput(await deps.host.actions.browser({ botId, input: { call: 'tabs', tab } }))
       ));
     },
   });
 
-  const tools = [status, start, sleep, shutdown, windows, read, act, handoff, browserOpen, browserSnapshot, browserAct, browserTabs];
+  const tools = [status, start, sleep, shutdown, windows, read, act, handoff, browserOpen, browserSnapshot, browserAct, browserTabs, browserTab];
 
   return {
     extension: defineExtension({ name: COMPUTER.toolsExtension, tools }),
-    readOnlyTools: [status, windows, read, browserSnapshot],
+    readOnlyTools: [status, windows, read, browserSnapshot, browserTabs],
   };
 }
