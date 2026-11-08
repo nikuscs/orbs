@@ -33,14 +33,22 @@ export function computerTask(host: ComputerHost) {
         const { botId } = task.input;
 
         const current = await api.snapshot(computerDocument, context);
+        const now = api.now();
 
-        const outcome = await match({ isOwner: current?.taskId === task.id, transition })
-          .with({ isOwner: false }, () => Promise.resolve({ isFailed: false as const }))
+        const next = match(current)
+          .with({ taskId: task.id }, (record) => computerSchedule(record, now)?.next ?? null)
+          .otherwise(() => null);
+
+        const isDue = next?.transition === transition && next.at <= now;
+
+        const outcome = await match({ isDue, transition })
+          .with({ isDue: false }, () => null)
           .with({ transition: 'sleep' }, () => computerAttempt(() => host.actions.sleep({ botId })))
           .with({ transition: 'shutdown' }, () => computerAttempt(() => host.actions.shutdown({ botId })))
           .exhaustive();
 
         return match(outcome)
+          .with(null, () => api.commit(() => ({ status: 'running', checkpoint: { phase: 'check' } }), context))
           .with({ isFailed: true }, ({ error }) => {
             log.error({
               tag: 'computer-task',
