@@ -17,16 +17,45 @@ interface RoomsComputerActionsProps {
 export function RoomsComputerActions({ computer, handle, isInView }: RoomsComputerActionsProps) {
   const state = computer.status?.state ?? 'off';
 
+  const shutdown = (
+    <Button
+      asChild
+      disabled={computer.isBusy}
+      size="sm"
+      variant="outline"
+    >
+      {isInView ? (
+        <Link params={{ handle }} to="/rooms/direct/$handle/computer/shutdown">
+          <IconPower className="size-3.5" />
+          {m.rooms_computer_shutdown()}
+        </Link>
+      ) : (
+        <Link params={{ handle }} to="/rooms/direct/$handle/computer-shutdown">
+          <IconPower className="size-3.5" />
+          {m.rooms_computer_shutdown()}
+        </Link>
+      )}
+    </Button>
+  );
+
+  const start = (
+    <ButtonLoading
+      loading={computer.isBusy}
+      size="sm"
+      onClick={() => void computer.start()}
+    >
+      <IconPlay className="size-3.5" />
+      {m.rooms_computer_start()}
+    </ButtonLoading>
+  );
+
   return match(state)
-    .with('off', 'sleeping', () => (
-      <ButtonLoading
-        loading={computer.isBusy}
-        size="sm"
-        onClick={() => void computer.start()}
-      >
-        <IconPlay className="size-3.5" />
-        {m.rooms_computer_start()}
-      </ButtonLoading>
+    .with('off', () => start)
+    .with('sleeping', () => (
+      <>
+        {start}
+        {shutdown}
+      </>
     ))
     .with('running', () => (
       <>
@@ -39,24 +68,7 @@ export function RoomsComputerActions({ computer, handle, isInView }: RoomsComput
           <IconMoon className="size-3.5" />
           {m.rooms_computer_sleep()}
         </ButtonLoading>
-        <Button
-          asChild
-          disabled={computer.isBusy}
-          size="sm"
-          variant="outline"
-        >
-          {isInView ? (
-            <Link params={{ handle }} to="/rooms/direct/$handle/computer/shutdown">
-              <IconPower className="size-3.5" />
-              {m.rooms_computer_shutdown()}
-            </Link>
-          ) : (
-            <Link params={{ handle }} to="/rooms/direct/$handle/computer-shutdown">
-              <IconPower className="size-3.5" />
-              {m.rooms_computer_shutdown()}
-            </Link>
-          )}
-        </Button>
+        {shutdown}
       </>
     ))
     .exhaustive();
