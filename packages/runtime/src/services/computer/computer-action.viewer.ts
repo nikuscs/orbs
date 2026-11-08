@@ -6,7 +6,7 @@ import type { ComputerActionDeps, ComputerContextParams, ComputerViewerParams } 
 
 export async function computerActionViewer(
   deps: ComputerActionDeps,
-  { context, mode, principal }: ComputerViewerParams & ComputerContextParams,
+  { context, mode, isRenewal, principal }: ComputerViewerParams & ComputerContextParams,
 ) {
   await computerActionTouch(deps, { context });
 
@@ -24,6 +24,7 @@ export async function computerActionViewer(
       deviceId: principal.id,
       deviceName: principal.displayName,
       until: ticket.expiresAt,
+      isRenewal,
     }))
     .exhaustive();
 

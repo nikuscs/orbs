@@ -15,5 +15,6 @@ export interface ComputerReleaseParams {
 export interface ComputerViewerParams {
   botId: string;
   mode: ComputerViewerMode;
+  isRenewal?: boolean;
   device: { id: string; name: string };
 }

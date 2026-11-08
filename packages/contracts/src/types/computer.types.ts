@@ -37,7 +37,7 @@ export const computerThumbnail = z.object({
 
 export const computerViewerMode = z.enum(['watch', 'control']);
 
-export const computerViewer = botGet.extend({ mode: computerViewerMode });
+export const computerViewer = botGet.extend({ mode: computerViewerMode, isRenewal: z.boolean().optional() });
 
 export const computerViewerResult = z.object({
   url: z.string(),

@@ -138,10 +138,11 @@ export interface ComputerActionDeps extends ComputerServiceDeps {
 
 export interface ComputerViewerParams {
   mode: UniversalTypes.ComputerViewerMode;
+  isRenewal?: boolean;
   principal: { id: string; displayName: string };
 }
 
-export type ComputerTakeControlParams = UniversalTypes.ComputerControl;
+export type ComputerTakeControlParams = UniversalTypes.ComputerControl & { isRenewal?: boolean };
 
 export type ComputerHandoffParams = UniversalTypes.ComputerHandoff;
 

@@ -56,7 +56,12 @@ export function useComputer(botId: string) {
   const { mutate: touchMutate } = touch;
   const { mutateAsync: viewerMutate } = viewer;
   const sendTouch = useCallback(() => touchMutate({ botId }), [touchMutate, botId]);
-  const openViewer = useCallback((mode: ComputerViewerMode) => viewerMutate({ botId, mode }), [viewerMutate, botId]);
+
+  const openViewer = useCallback((mode: ComputerViewerMode, isRenewal = false) => viewerMutate({
+    botId,
+    mode,
+    isRenewal,
+  }), [viewerMutate, botId]);
 
   return {
     status: status.data ?? null,

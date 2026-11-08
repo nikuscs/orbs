@@ -28,8 +28,8 @@ export function useComputerViewer(botId: string) {
       .exhaustive();
   }, []);
 
-  const show = useCallback(async (mode: ComputerViewerMode, from: number | null) => {
-    const result = await openViewer(mode);
+  const show = useCallback(async (mode: ComputerViewerMode, from: number | null, isRenewal = false) => {
+    const result = await openViewer(mode, isRenewal);
 
     setTicket({
       url: result.url,
@@ -55,7 +55,7 @@ export function useComputerViewer(botId: string) {
 
         match(held.current)
           .with({ isControlling: true }, (current) => current.expiresAt - Date.now() < COMPUTER.renewControlMs, (current) => {
-            show('control', current.startedAt)
+            show('control', current.startedAt, true)
               .catch(() => show('watch', current.startedAt))
               .catch(() => setTicket(null));
           })
