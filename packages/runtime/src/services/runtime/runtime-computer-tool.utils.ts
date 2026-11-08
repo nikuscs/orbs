@@ -38,12 +38,10 @@ export async function runtimeComputerToolUse(
   run: (botId: string) => Promise<ToolExecutionResult>,
 ): Promise<ToolExecutionResult> {
   const { botId } = await runtimeToolTarget(api, context);
-  const status = await deps.computers.queries.status(context);
 
-  const blocked = match({ isActing: options.isActing, state: status.state })
-    .with({ isActing: true }, () => runtimeComputerToolBlocked(status))
-    .with({ isActing: false, state: 'off' }, () => ({ output: [{ type: 'text' as const, text: m.ui_tool_bot_computer_is_off() }] }))
-    .with({ isActing: false }, () => null)
+  const blocked = await match(options.isActing)
+    .with(true, async () => runtimeComputerToolBlocked(await deps.computers.queries.status(context)))
+    .with(false, () => null)
     .exhaustive();
 
   return match(blocked)
