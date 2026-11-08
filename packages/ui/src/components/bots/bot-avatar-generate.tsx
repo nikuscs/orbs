@@ -20,7 +20,8 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState('');
   const generate = useBotAvatarGenerate();
-  const { isAvailable } = useAvatarGenerator();
+  const { isAvailable, model } = useAvatarGenerator();
+  const hintId = useId();
   const fieldId = useId();
   const errorId = useId();
   const canSubmit = description.trim().length > 0 && !generate.isPending;
@@ -87,7 +88,7 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
             >
               <Label htmlFor={fieldId}>{m.avatars_generate_label()}</Label>
               <Textarea
-                aria-describedby={generate.isError ? errorId : undefined}
+                aria-describedby={generate.isError ? `${hintId} ${errorId}` : hintId}
                 aria-invalid={generate.isError}
                 disabled={generate.isPending}
                 id={fieldId}
@@ -97,6 +98,7 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
                 onChange={(event) => setDescription(event.target.value)}
                 onKeyDown={handleKeyDown}
               />
+              <p className="text-xs text-muted-foreground" id={hintId}>{m.avatars_generate_model({ model: model ?? '' })}</p>
               {generate.isError
                 ? <p className="text-sm text-destructive" id={errorId} role="alert">{m.avatars_generate_error()}</p>
                 : null}

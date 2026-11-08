@@ -11,5 +11,7 @@ export function useAvatarGenerator() {
     refetchOnWindowFocus: true,
   });
 
-  return { isAvailable: Boolean(generator.data?.model) };
+  const model = generator.data?.model ?? null;
+
+  return { isAvailable: model !== null, model };
 }

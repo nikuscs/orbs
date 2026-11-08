@@ -1,7 +1,7 @@
 import { AVATAR } from '@repo/contracts/universal';
 import { Errors } from '@repo/errors/universal';
 import { log } from '@repo/logger/server';
-import { AVATAR_IMAGE } from './avatar.constants';
+import { AVATAR_GENERATE, AVATAR_IMAGE } from './avatar.constants';
 import type { AvatarServiceDeps } from '../../types/avatar.types';
 
 export function avatarSrc(imageId: string) {
@@ -14,8 +14,9 @@ export function avatarImageIdFromSrc(src: string) {
 
 export async function avatarImageModel({ providers }: Pick<AvatarServiceDeps, 'providers'>) {
   const models = await providers.models.getAvailableOfType('image');
+  const { provider, id } = AVATAR_GENERATE.preferredModel;
 
-  return models.at(0);
+  return models.find((model) => model.provider === provider && model.id === id) ?? models.at(0);
 }
 
 export function avatarUnavailable(message: string, cause?: ErrorOptions['cause']): never {

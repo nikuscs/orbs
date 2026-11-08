@@ -9,6 +9,7 @@ export const AVATAR_IMAGE = {
 
 export const AVATAR_GENERATE = {
   timeoutMs: 180_000,
+  preferredModel: { provider: 'openrouter', id: 'google/gemini-2.5-flash-image' },
   prompt: 'A square head and shoulders portrait avatar of',
   style: 'Centered, facing the viewer, painted digital illustration, soft studio lighting, plain warm background, high detail. No text, watermark, signature or border.',
 } as const;
