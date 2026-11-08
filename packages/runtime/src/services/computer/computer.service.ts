@@ -23,7 +23,9 @@ export function makeComputerService(deps: ComputerTypes.ComputerServiceDeps) {
       thumbnail: () => computerActionThumbnail(deps),
       touch: (context: Context) => computerActionTouch(actionDeps, { context }),
       takeControl: (params: ComputerTypes.ComputerTakeControlParams, context: Context) => computerActionTakeControl(deps, { ...params, context }),
-      releaseControl: (context: Context) => computerActionReleaseControl(actionDeps, { context }),
+      releaseControl: (params: ComputerTypes.ComputerReleaseControlParams, context: Context) => (
+        computerActionReleaseControl(actionDeps, { ...params, context })
+      ),
       viewer: (params: ComputerTypes.ComputerViewerParams, context: Context) => computerActionViewer(actionDeps, { ...params, context }),
     },
     queries: {

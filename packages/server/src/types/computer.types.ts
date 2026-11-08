@@ -7,6 +7,11 @@ export interface ComputerServiceDeps {
   runtime: RuntimeService;
 }
 
+export interface ComputerReleaseParams {
+  botId: string;
+  deviceId: string;
+}
+
 export interface ComputerViewerParams {
   botId: string;
   mode: ComputerViewerMode;

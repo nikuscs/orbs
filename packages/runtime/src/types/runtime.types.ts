@@ -10,7 +10,7 @@ import type { RoutineService } from '../services/routine/routine.service';
 import type { TodoService } from '../services/todo/todo.service';
 import type { AlarmService } from './alarm.types';
 import type { CollaborationDirectory, CollaborationPolicy } from './collaboration.types';
-import type { ComputerHost, ComputerViewerParams } from './computer.types';
+import type { ComputerHost, ComputerReleaseControlParams, ComputerViewerParams } from './computer.types';
 import type { ConversationIndexService } from './conversation-index.types';
 import type { StorageService } from './storage.types';
 import type { Draft, JsonValue } from '@earendil-works/chord';
@@ -351,5 +351,6 @@ export interface RuntimeComputerSweepParams {
   botIds: string[];
 }
 
+export type RuntimeComputerReleaseParams = UniversalTypes.BotGetInput & ComputerReleaseControlParams & RuntimeContextInput;
 export type RuntimeComputerControlParams = UniversalTypes.BotGetInput & UniversalTypes.ComputerControl & RuntimeContextInput;
 export type RuntimeComputerViewerParams = UniversalTypes.ComputerViewerInput & ComputerViewerParams & RuntimeContextInput;

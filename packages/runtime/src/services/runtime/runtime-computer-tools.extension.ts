@@ -145,7 +145,7 @@ export function runtimeComputerToolsExtension(deps: ComputerToolDeps) {
         api,
       }, context);
 
-      await deps.computers.actions.releaseControl(context);
+      await deps.computers.actions.releaseControl({ deviceId: null }, context);
 
       return answer;
     },

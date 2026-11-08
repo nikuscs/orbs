@@ -7,7 +7,7 @@ import { computerActionTouch } from './computer-action.touch';
 import { computerActionViewer } from './computer-action.viewer';
 import { computerQueryEndpoint } from './computer-query.endpoint';
 import { computerQueryStatus } from './computer-query.status';
-import type { ComputerServiceDeps, ComputerViewerParams } from '../../types/computer.types';
+import type { ComputerReleaseParams, ComputerServiceDeps, ComputerViewerParams } from '../../types/computer.types';
 import type * as UniversalTypes from '@repo/contracts/universal';
 
 export function makeComputerService(deps: ComputerServiceDeps) {
@@ -18,7 +18,7 @@ export function makeComputerService(deps: ComputerServiceDeps) {
       shutdown: (params: UniversalTypes.BotGetInput) => computerActionShutdown(deps, params),
       thumbnail: (params: UniversalTypes.BotGetInput) => computerActionThumbnail(deps, params),
       touch: (params: UniversalTypes.BotGetInput) => computerActionTouch(deps, params),
-      release: (params: UniversalTypes.BotGetInput) => computerActionRelease(deps, params),
+      release: (params: ComputerReleaseParams) => computerActionRelease(deps, params),
       viewer: (params: ComputerViewerParams) => computerActionViewer(deps, params),
     },
     queries: {

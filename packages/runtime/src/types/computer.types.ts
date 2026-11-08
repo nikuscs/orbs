@@ -142,6 +142,10 @@ export interface ComputerViewerParams {
 
 export type ComputerTakeControlParams = UniversalTypes.ComputerControl;
 
+export interface ComputerReleaseControlParams {
+  deviceId: string | null;
+}
+
 export interface ComputerNextTransition {
   at: number;
   transition: 'sleep' | 'shutdown';
