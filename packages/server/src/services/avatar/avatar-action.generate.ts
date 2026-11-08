@@ -1,8 +1,9 @@
+import { match, P } from 'ts-pattern';
 import { avatarGenerateResponse } from '../../types/avatar.types';
 import { avatarActionSweep } from './avatar-action.sweep';
 import { avatarQuerySettings } from './avatar-query.settings';
 import { AVATAR_GENERATE } from './avatar.constants';
-import { avatarSrc, avatarUnavailable } from './avatar.utils';
+import { avatarGeneratorUrl, avatarSrc, avatarUnavailable } from './avatar.utils';
 import type { AvatarServiceDeps } from '../../types/avatar.types';
 import type { AvatarGenerateInput, BotAvatarImage } from '@repo/contracts/universal';
 
@@ -11,7 +12,7 @@ export async function avatarActionGenerate(deps: AvatarServiceDeps, { descriptio
 
   const { generatorUrl } = await avatarQuerySettings(deps);
 
-  const response = await fetch(new URL(AVATAR_GENERATE.path, generatorUrl), {
+  const response = await fetch(avatarGeneratorUrl(generatorUrl, AVATAR_GENERATE.path), {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'application/json' },
     body: JSON.stringify({
@@ -41,12 +42,12 @@ export async function avatarActionGenerate(deps: AvatarServiceDeps, { descriptio
   const base64 = body.data.images[0]?.replace(/^data:[^,]*,/, '') ?? '';
   const bytes = Buffer.from(base64, 'base64');
 
-  const imageId = await deps.images.actions
-    .save({ file: new File([bytes], 'avatar.png', { type: 'image/png' }) }).catch(() => null);
-
-  if (!imageId) {
-    avatarUnavailable('Image generator returned an unusable image');
-  }
+  const imageId = await deps.images.actions.save({ file: new File([bytes], 'avatar.png', { type: 'image/png' }) }).catch((error: unknown) =>
+    match(error)
+      .with({ syscall: P.string }, () => {
+        throw error;
+      })
+      .otherwise(() => avatarUnavailable('Image generator returned an unusable image', error)));
 
   return { kind: 'image', src: avatarSrc(imageId) };
 }

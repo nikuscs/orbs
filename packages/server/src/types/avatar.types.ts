@@ -31,6 +31,6 @@ export interface AvatarServiceDeps {
   settings: SettingsService;
 }
 
-export const avatarOptionsResponse = z.object({ sd_model_checkpoint: z.string().nullish().catch(null) });
+export const avatarOptionsResponse = z.object({ sd_model_checkpoint: z.string() });
 
 export const avatarGenerateResponse = z.object({ images: z.array(z.string().min(1)).min(1) });

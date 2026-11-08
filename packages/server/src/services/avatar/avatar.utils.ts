@@ -11,8 +11,16 @@ export function avatarImageIdFromSrc(src: string) {
   return src.slice(AVATAR.pathPrefix.length, -AVATAR_IMAGE.extension.length);
 }
 
-export function avatarUnavailable(message: string): never {
-  log.warn({ tag: 'avatar', message });
+export function avatarGeneratorUrl(generatorUrl: string, path: string) {
+  return new URL(path, generatorUrl.endsWith('/') ? generatorUrl : `${generatorUrl}/`);
+}
 
-  throw new Errors.UPSTREAM_UNAVAILABLE({ internal: message });
+export function avatarUnavailable(message: string, cause?: ErrorOptions['cause']): never {
+  log.warn({
+    tag: 'avatar',
+    message,
+    error: cause,
+  });
+
+  throw new Errors.UPSTREAM_UNAVAILABLE({ internal: message, cause });
 }

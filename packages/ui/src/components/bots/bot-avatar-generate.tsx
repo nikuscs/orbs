@@ -59,7 +59,7 @@ export function BotAvatarGenerate({ density = 'default', disabled, onGenerated }
       onOpenChange={(next) => {
         setOpen(next);
 
-        if (!next) {
+        if (!next && !generate.isPending) {
           generate.reset();
         }
       }}
