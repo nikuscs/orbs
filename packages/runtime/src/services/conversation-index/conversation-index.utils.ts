@@ -2,8 +2,10 @@ import { AssistantEntry, UserEntry } from '@earendil-works/pi-durable';
 import { ATTACHMENT, attachmentMessage, REPLY, replyMessage, replySilent } from '@repo/contracts/universal';
 import { Errors } from '@repo/errors/universal';
 import { match, P } from 'ts-pattern';
+import { COLLABORATION } from '../collaboration/collaboration.constants';
 import { CONVERSATION_INDEX } from './conversation-index.constants';
 import type { ConversationIndexDocument, ConversationIndexPreview, ConversationIndexSummary } from '../../types/conversation-index.types';
+import type { NotificationItem } from '../../types/notification.types';
 import type { Context } from '@earendil-works/chord/context';
 import type * as PiDurableTypes from '@earendil-works/pi-durable';
 import type { ConversationSummary } from '@repo/contracts/universal';
@@ -69,15 +71,22 @@ export async function conversationIndexLatest(
     .otherwise(() => ({ lastMessage: latest, lastAssistantEntryId: 0 }));
 }
 
-export function conversationIndexSummaries(index: Readonly<ConversationIndexDocument> | null | undefined, graph: PiDurableTypes.TaskGraph) {
-  const running = new Set<number>(Object.values(graph.tasks)
-    .filter((task) => !task.abortRequested && !task.background)
-    .map((task) => task.conversationId));
+export function conversationIndexSummaries(
+  index: Readonly<ConversationIndexDocument> | null | undefined,
+  graph: PiDurableTypes.TaskGraph,
+  pending: readonly NotificationItem[],
+) {
+  const live = Object.values(graph.tasks).filter((task) => !task.abortRequested);
+  const running = new Set<number>(live.filter((task) => !task.background).map((task) => task.conversationId));
+  const isWorking = live.some((task) => !task.background || task.kind === COLLABORATION.delivery);
+  const isWaiting = pending.length > 0;
 
   return Object.values(index?.conversations ?? {}).flatMap((conversation) => match(conversation)
     .with(P.nonNullable, (summary): ConversationIndexSummary[] => [{
       ...summary,
       isRunning: running.has(summary.conversationId),
+      isWorking,
+      isWaiting,
     }])
     .otherwise(() => []));
 }

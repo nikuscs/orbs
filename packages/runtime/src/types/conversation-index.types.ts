@@ -1,3 +1,4 @@
+import type { NotificationService } from '../services/notification/notification.service';
 import type { MutableReplicatedState } from '@earendil-works/chord';
 import type { Context } from '@earendil-works/chord/context';
 import type * as PiDurableTypes from '@earendil-works/pi-durable';
@@ -7,7 +8,7 @@ export type ConversationIndexItem = Pick<ConversationSummary, 'botId' | 'convers
   lastAssistantEntryId: number;
 };
 
-export type ConversationIndexSummary = ConversationIndexItem & { isRunning: boolean };
+export type ConversationIndexSummary = ConversationIndexItem & { isRunning: boolean; isWorking: boolean; isWaiting: boolean };
 
 export interface ConversationIndexPreview {
   lastMessage: ConversationSummary['lastMessage'];
@@ -20,6 +21,7 @@ export interface ConversationIndexDocument extends PiDurableTypes.JsonObject {
 
 export interface ConversationIndexServiceDeps {
   harness: PiDurableTypes.Harness;
+  notifications: NotificationService;
 }
 
 export interface ConversationIndexRestoreParams {

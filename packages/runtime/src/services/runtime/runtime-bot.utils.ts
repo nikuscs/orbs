@@ -81,6 +81,7 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
     }
 
     await routines.actions.recover(BACKGROUND_CONTEXT);
+    const notifications = makeNotificationService({ harness, botId });
 
     const deps: RuntimeTypes.RuntimeServiceDeps = {
       appName: shared.appName,
@@ -92,7 +93,7 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
       todos,
       artifacts,
       activity: makeActivityService({ harness, telemetry: telemetry.telemetry }),
-      index: await makeConversationIndexService({ harness }),
+      index: await makeConversationIndexService({ harness, notifications }),
       registry,
       models: shared.models,
       readOnlyTools,
@@ -106,7 +107,7 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
 
     return {
       deps,
-      notifications: makeNotificationService({ harness, botId }),
+      notifications,
       wake: () => {
         harness.resume();
         arm.schedule();
