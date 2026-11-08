@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { match } from 'ts-pattern';
 import { COMPUTER } from '../services/computer/computer.constants';
 import { useComputer } from './use-computer';
 import type { ComputerTicket } from '../types/computer.types';
+import type { ComputerViewerMode } from '@repo/contracts/universal';
 
 export function useComputerViewer(botId: string) {
   const computer = useComputer(botId);
@@ -11,15 +12,15 @@ export function useComputerViewer(botId: string) {
   const startedAt = computer.status?.startedAt ?? null;
   const { openViewer, touch } = computer;
   const release = useRef(computer.release);
-  const isHolding = useRef(false);
+  const held = useRef<ComputerTicket | null>(null);
 
   useEffect(() => {
     release.current = computer.release;
-    isHolding.current = ticket?.isControlling ?? false;
+    held.current = ticket;
   });
 
   useEffect(() => () => {
-    match(isHolding.current)
+    match(held.current?.isControlling ?? false)
       .with(true, () => {
         release.current().catch(() => undefined);
       })
@@ -27,51 +28,55 @@ export function useComputerViewer(botId: string) {
       .exhaustive();
   }, []);
 
+  const show = useCallback(async (mode: ComputerViewerMode, from: number | null) => {
+    const result = await openViewer(mode);
+
+    setTicket({
+      url: result.url,
+      startedAt: from,
+      expiresAt: result.expiresAt,
+      isControlling: mode === 'control',
+    });
+  }, [openViewer]);
+
   useEffect(() => {
     match(isRunning)
       .with(true, () => {
-        openViewer('watch').then(
-          (result) => setTicket({
-            url: result.url,
-            startedAt,
-            isControlling: false,
-          }),
-          () => setTicket(null),
-        );
+        show('watch', startedAt).catch(() => setTicket(null));
       })
       .with(false, () => undefined)
       .exhaustive();
-  }, [isRunning, startedAt, openViewer]);
+  }, [isRunning, startedAt, show]);
 
   useEffect(() => match(isRunning)
     .with(true, () => {
-      touch();
-      const timer = setInterval(touch, COMPUTER.touchMs);
+      const keep = () => {
+        touch();
+
+        match(held.current)
+          .with({ isControlling: true }, (current) => current.expiresAt - Date.now() < COMPUTER.renewControlMs, (current) => {
+            show('control', current.startedAt)
+              .catch(() => show('watch', current.startedAt))
+              .catch(() => setTicket(null));
+          })
+          .otherwise(() => undefined);
+      };
+
+      keep();
+      const timer = setInterval(keep, COMPUTER.touchMs);
 
       return () => clearInterval(timer);
     })
     .with(false, () => undefined)
-    .exhaustive(), [isRunning, touch]);
+    .exhaustive(), [isRunning, touch, show]);
 
   const current = isRunning && ticket?.startedAt === startedAt ? ticket : null;
 
-  const takeOver = async () => {
-    const result = await openViewer('control');
-    setTicket({
-      url: result.url,
-      startedAt,
-      isControlling: true,
-    });
-  };
+  const takeOver = () => show('control', startedAt);
 
   const finish = async () => {
     await computer.release();
-    const result = await openViewer('watch');
-    setTicket({
-      url: result.url,
-      startedAt,
-      isControlling: false,
-    });
+    await show('watch', startedAt);
   };
 
   return {

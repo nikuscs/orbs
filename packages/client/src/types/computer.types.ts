@@ -8,5 +8,6 @@ export interface ComputerLabel {
 export interface ComputerTicket {
   url: string
   startedAt: number | null
+  expiresAt: number
   isControlling: boolean
 }
