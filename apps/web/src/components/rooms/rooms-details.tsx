@@ -88,9 +88,9 @@ function RoomsDetailsPanel({ botId }: RoomsDetailsPanelProps) {
             <RoomsSettingsMenu align="center" chat={chat}>
               <span className="mb-1">
                 <BotAvatar
-                  isOrbSized
                   bot={bot}
                   size={88}
+                  variant="detail"
                 />
               </span>
             </RoomsSettingsMenu>
