@@ -7,6 +7,7 @@ import {
   computerHostDriverInspect,
   computerHostDriverList,
   computerHostDriverMessage,
+  computerHostDriverVolumes,
 } from '../../types/computer-host.types';
 import { COMPUTER_HOST } from './computer-host.constants';
 import type {
@@ -184,6 +185,21 @@ export async function computerDriverList(socket: string): Promise<string[]> {
 
     return botId ? [botId] : [];
   });
+}
+
+export async function computerDriverListVolumes(socket: string): Promise<string[]> {
+  const filters = JSON.stringify({ name: [COMPUTER_HOST.namePrefix] });
+
+  const response = await computerDriverRequest(socket, {
+    method: 'GET',
+    path: `/volumes?filters=${encodeURIComponent(filters)}`,
+  });
+
+  return (computerHostDriverVolumes.parse(await response.json()).Volumes ?? []).flatMap(({ Name: name }) => (
+    name.startsWith(COMPUTER_HOST.namePrefix) && name.endsWith(COMPUTER_HOST.homeVolumeSuffix)
+      ? [name.slice(COMPUTER_HOST.namePrefix.length, -COMPUTER_HOST.homeVolumeSuffix.length)]
+      : []
+  ));
 }
 
 export async function computerDriverInspect(socket: string, botId: string): Promise<ComputerHostDriverInspection | null> {

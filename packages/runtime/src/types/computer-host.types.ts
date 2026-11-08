@@ -26,6 +26,10 @@ export const computerHostDriverList = z.array(z.object({
   Labels: z.record(z.string(), z.string()).nullish(),
 }));
 
+export const computerHostDriverVolumes = z.object({
+  Volumes: z.array(z.object({ Name: z.string() })).nullish(),
+});
+
 export const computerHostDriverMessage = z.object({
   message: z.string().optional(),
   error: z.string().optional(),

@@ -227,8 +227,8 @@ export function makeRuntimeService({
       removeAttachment: runtimeBotCall(directory, runtimeActionRemoveAttachment),
       retainAttachments: runtimeBotCall(directory, runtimeActionRetainAttachments),
       expireAttachments: runtimeBotCall(directory, runtimeActionExpireAttachments),
-      sweepComputers: async () => {
-        await (computerHost ? runtimeActionSweepComputers({ directory, host: computerHost }) : Promise.resolve());
+      sweepComputers: async (params: RuntimeTypes.RuntimeComputerSweepParams) => {
+        await (computerHost ? runtimeActionSweepComputers({ directory, host: computerHost }, params) : Promise.resolve());
       },
       computerStart: runtimeBotCall(directory, runtimeActionStartComputer),
       computerSleep: runtimeBotCall(directory, runtimeActionSleepComputer),

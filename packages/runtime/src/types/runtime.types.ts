@@ -347,5 +347,9 @@ export interface RuntimeComputerSweepDeps {
   host: ComputerHost;
 }
 
+export interface RuntimeComputerSweepParams {
+  botIds: string[];
+}
+
 export type RuntimeComputerControlParams = UniversalTypes.BotGetInput & UniversalTypes.ComputerControl & RuntimeContextInput;
 export type RuntimeComputerViewerParams = UniversalTypes.ComputerViewerInput & ComputerViewerParams & RuntimeContextInput;

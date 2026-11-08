@@ -1,9 +1,9 @@
 import { BACKGROUND_CONTEXT } from '@earendil-works/chord/context';
 import { log } from '@repo/logger/server';
-import { match } from 'ts-pattern';
-import type { RuntimeComputerSweepDeps } from '../../types/runtime.types';
+import { match, P } from 'ts-pattern';
+import type { RuntimeComputerSweepDeps, RuntimeComputerSweepParams } from '../../types/runtime.types';
 
-export async function runtimeActionSweepComputers({ directory, host }: RuntimeComputerSweepDeps) {
+export async function runtimeActionSweepComputers({ directory, host }: RuntimeComputerSweepDeps, { botIds: existing }: RuntimeComputerSweepParams) {
   const botIds = await host.queries.list().catch((error: unknown) => {
     log.warn({
       tag: 'computer-sweep',
@@ -16,20 +16,27 @@ export async function runtimeActionSweepComputers({ directory, host }: RuntimeCo
 
   await Promise.all(botIds.map(async (botId) => {
     try {
-      const bot = await directory.bot(botId).catch(() => null);
+      await match(existing.includes(botId))
+        .with(false, () => host.actions.remove({ botId }))
+        .with(true, async () => {
+          const computers = await directory.bot(botId)
+            .then((opened) => opened.deps.computers)
+            .catch(() => undefined);
 
-      await match(bot?.deps.computers)
-        .with(undefined, () => host.actions.shutdown({ botId }))
-        .otherwise(async (computers) => {
-          await match(await computers.queries.live(BACKGROUND_CONTEXT))
-            .with(true, () => undefined)
-            .with(false, () => computers.actions.shutdown(BACKGROUND_CONTEXT))
-            .exhaustive();
-        });
+          await match(computers)
+            .with(P.nonNullable, async (service) => {
+              await match(await service.queries.live(BACKGROUND_CONTEXT))
+                .with(true, () => undefined)
+                .with(false, () => service.actions.shutdown(BACKGROUND_CONTEXT))
+                .exhaustive();
+            })
+            .otherwise(() => host.actions.shutdown({ botId }));
+        })
+        .exhaustive();
     } catch (error) {
       log.error({
         tag: 'computer-sweep',
-        message: 'Cannot shut down a leftover bot computer.',
+        message: 'Cannot clean up a leftover bot computer.',
         botId,
         error,
       });

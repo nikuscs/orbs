@@ -103,7 +103,7 @@ export async function makeServices({
 
     await bots.actions.restore();
     runtime.resume();
-    await runtime.actions.sweepComputers();
+    await runtime.actions.sweepComputers({ botIds: (await bots.queries.list()).map(({ id }) => id) });
 
     return {
       routines: makeRoutineService({ bots, runtime }),
