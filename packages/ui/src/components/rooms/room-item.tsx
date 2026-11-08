@@ -95,19 +95,19 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
               })
                 .with({ isWaiting: true }, () => (
                   <>
-                    <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-red-500 ring-1 ring-sidebar" />
+                    <span aria-hidden="true" className="absolute inset-e-0 top-0 size-2 rounded-full bg-red-500 ring-2 ring-sidebar" />
                     <span className="sr-only">{m.rooms_waiting()}</span>
                   </>
                 ))
                 .with({ isWorking: true }, () => (
                   <>
-                    <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-green-500 ring-1 ring-sidebar" />
+                    <span aria-hidden="true" className="absolute inset-e-0 top-0 size-2 rounded-full bg-green-500 ring-2 ring-sidebar" />
                     <span className="sr-only">{m.rooms_working()}</span>
                   </>
                 ))
                 .with({ isUnread: true }, () => (
                   <>
-                    <span aria-hidden="true" className="absolute inset-e-1.5 top-1.5 size-1.5 rounded-full bg-orange-400 ring-1 ring-sidebar" />
+                    <span aria-hidden="true" className="absolute inset-e-0 top-0 size-2 rounded-full bg-orange-400 ring-2 ring-sidebar" />
                     <span className="sr-only">{m.rooms_unread()}</span>
                   </>
                 ))
