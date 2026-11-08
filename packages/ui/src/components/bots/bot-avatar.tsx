@@ -1,12 +1,27 @@
 import { BOT_ACTIVITY_LABELS, botBlobPresentation } from '@repo/client/client';
 import { useBotCheer } from '@repo/client/react';
 import { m } from '@repo/i18n/client';
+import { cva } from 'cva';
 import { match } from 'ts-pattern';
 import { cn } from '../../lib/cn';
 import { AvatarBlob } from '../avatars/avatar-blob';
 import type { BotAvatar as BotAvatarValue, ChatActivity } from '@repo/client/client';
+import type { VariantProps } from 'cva';
 
-interface BotAvatarProps {
+// `detail` shrinks pictures to the orb's visual size; `row` grows the orb to fill a picture's circle.
+const botAvatarPictureVariants = cva({
+  base: 'size-full',
+  variants: { variant: { default: '', detail: 'scale-64', row: '' } },
+  defaultVariants: { variant: 'default' },
+});
+
+const botAvatarOrbVariants = cva({
+  base: 'size-full',
+  variants: { variant: { default: '', detail: '', row: 'scale-150' } },
+  defaultVariants: { variant: 'default' },
+});
+
+interface BotAvatarProps extends VariantProps<typeof botAvatarPictureVariants> {
   bot: { name: string; avatar?: BotAvatarValue }
   activity?: ChatActivity
   size?: number
@@ -15,13 +30,14 @@ interface BotAvatarProps {
   className?: string
 }
 
-export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = true, className }: BotAvatarProps) {
+export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = true, variant, className }: BotAvatarProps) {
   const avatar = bot.avatar;
   const busy = activity === 'thinking' || activity === 'working' || activity === 'writing' || activity === 'compacting';
   const cheering = useBotCheer();
   const idle = activity === 'idle';
   const moving = (idle && cheering.moving) || (animate ?? busy);
   const presentation = botBlobPresentation({ avatar, activity });
+  const isPicture = avatar?.kind === 'image' || avatar?.kind === 'color' || avatar?.kind === 'emoji';
 
   const image = match(avatar)
     .with({ kind: 'image' }, ({ src }) => (
@@ -39,7 +55,7 @@ export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = 
       <AvatarBlob
         {...presentation}
         animate={moving}
-        className="size-full"
+        className={botAvatarOrbVariants({ variant })}
         expression={idle && cheering.happy ? 'happy' : presentation.expression}
         fps={30}
         size={size}
@@ -56,7 +72,7 @@ export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = 
       {...(cheer ? cheering.handlers : {})}
     >
       <span className="sr-only">{label}</span>
-      <span aria-hidden="true" className="size-full">{image}</span>
+      <span aria-hidden="true" className={isPicture ? botAvatarPictureVariants({ variant }) : 'size-full'}>{image}</span>
     </span>
   );
 }

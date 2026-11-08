@@ -559,7 +559,7 @@ const sidebarMenuButtonVariants = cva({
       default: 'h-8 text-sm',
       sm: 'h-7 text-xs',
       lg: 'h-12 text-sm group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-12! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!',
-      chat: 'h-auto py-0.5 pl-0.5 text-sm group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-[max(3rem,calc(var(--sidebar-width-icon)-2rem))]! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!',
+      chat: 'h-auto gap-2.5 px-2 py-1 text-sm group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-[max(3rem,calc(var(--sidebar-width-icon)-2rem))]! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!',
     },
   },
   defaultVariants: {
