@@ -7,6 +7,8 @@ import { AvatarBlob } from '../avatars/avatar-blob';
 import type { BotAvatar as BotAvatarValue, ChatActivity } from '@repo/client/client';
 
 interface BotAvatarProps {
+  isOrbSized?: boolean
+  isPictureSized?: boolean
   bot: { name: string; avatar?: BotAvatarValue }
   activity?: ChatActivity
   size?: number
@@ -15,13 +17,14 @@ interface BotAvatarProps {
   className?: string
 }
 
-export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = true, className }: BotAvatarProps) {
+export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = true, isOrbSized = false, isPictureSized = false, className }: BotAvatarProps) {
   const avatar = bot.avatar;
   const busy = activity === 'thinking' || activity === 'working' || activity === 'writing' || activity === 'compacting';
   const cheering = useBotCheer();
   const idle = activity === 'idle';
   const moving = (idle && cheering.moving) || (animate ?? busy);
   const presentation = botBlobPresentation({ avatar, activity });
+  const isPicture = avatar?.kind === 'image' || avatar?.kind === 'color' || avatar?.kind === 'emoji';
 
   const image = match(avatar)
     .with({ kind: 'image' }, ({ src }) => (
@@ -39,7 +42,7 @@ export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = 
       <AvatarBlob
         {...presentation}
         animate={moving}
-        className="size-full"
+        className={cn('size-full', isPictureSized && 'scale-150')}
         expression={idle && cheering.happy ? 'happy' : presentation.expression}
         fps={30}
         size={size}
@@ -56,7 +59,7 @@ export function BotAvatar({ bot, activity = 'idle', size = 32, animate, cheer = 
       {...(cheer ? cheering.handlers : {})}
     >
       <span className="sr-only">{label}</span>
-      <span aria-hidden="true" className="size-full">{image}</span>
+      <span aria-hidden="true" className={cn('size-full', isOrbSized && isPicture && 'scale-64')}>{image}</span>
     </span>
   );
 }

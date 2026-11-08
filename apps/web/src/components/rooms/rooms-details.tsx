@@ -87,7 +87,11 @@ function RoomsDetailsPanel({ botId }: RoomsDetailsPanelProps) {
           <div className="contents electrobun-webkit-app-region-no-drag">
             <RoomsSettingsMenu align="center" chat={chat}>
               <span className="mb-1">
-                <BotAvatar bot={bot} size={56} />
+                <BotAvatar
+                  isOrbSized
+                  bot={bot}
+                  size={88}
+                />
               </span>
             </RoomsSettingsMenu>
             <h2 className="max-w-full truncate font-medium">{bot.name}</h2>
