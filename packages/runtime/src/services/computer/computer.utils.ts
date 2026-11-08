@@ -14,7 +14,11 @@ export function computerSchedule(record: ComputerRecord, now: number): ComputerS
   return match(record.state)
     .with('off', () => null)
     .with('running', () => {
-      const sleepAt = Math.max((record.lastActivityAt ?? startedAt) + COMPUTER.sleepAfterMs, record.control?.until ?? 0);
+      const sleepAt = Math.max(
+        (record.lastActivityAt ?? startedAt) + COMPUTER.sleepAfterMs,
+        record.control?.until ?? 0,
+        record.handoff?.until ?? 0,
+      );
 
       return {
         sleepAt: Math.min(sleepAt, lifetimeAt),
