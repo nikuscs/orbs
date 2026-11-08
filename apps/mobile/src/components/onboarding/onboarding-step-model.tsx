@@ -3,7 +3,7 @@ import { m } from '@repo/i18n/client';
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { View } from 'react-native';
-import { match } from 'ts-pattern';
+import { match, P } from 'ts-pattern';
 import { OnboardingSceneModel } from '@/components/onboarding/onboarding-scene-model';
 import { OnboardingStepLayout } from '@/components/onboarding/onboarding-step-layout';
 import { SettingsProviderLogo } from '@/components/settings/settings-provider-logo';
@@ -89,7 +89,12 @@ export function OnboardingStepModel() {
             isDisabled={isBusy}
             items={others.map((provider) => ({
               label: provider.name,
-              items: provider.authTypes.map((authType) => ({ label: authLabel(provider, authType), onSelect: () => login(provider.id, authType) })),
+              items: match(provider.loginCommand)
+                .with(P.string, (command) => [{ label: m.settings_providers_login_command_menu({ command }) }])
+                .otherwise(() => provider.authTypes.map((authType) => ({
+                  label: authLabel(provider, authType),
+                  onSelect: () => login(provider.id, authType),
+                }))),
             }))}
             title={m.onboarding_model_more()}
           >

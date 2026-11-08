@@ -139,6 +139,8 @@
   "settings_providers_link": "Open sign-in page",
   "settings_providers_device_code": "Enter code {code} at",
   "settings_providers_send": "Send",
+  "settings_providers_login_command": "Sign in from a terminal on the server:",
+  "settings_providers_login_command_menu": "Run {command} on the server",
   "settings_server": "Server",
   "settings_server_description": "Devices try these addresses in order and use the first one that answers.",
   "settings_server_kind_loopback": "This computer",

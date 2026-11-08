@@ -1,5 +1,5 @@
 import { m } from '@repo/i18n/client';
-import { match } from 'ts-pattern';
+import { match, P } from 'ts-pattern';
 import IconEllipsisVertical from '~icons/lucide/ellipsis-vertical';
 import IconKeyRound from '~icons/lucide/key-round';
 import IconLogIn from '~icons/lucide/log-in';
@@ -33,52 +33,61 @@ export function SettingsProviderRow({ provider, status, isBusy, onLogin, onSignO
           <span className="text-xxs text-muted-foreground">{provider.label ?? status.label}</span>
         </div>
       </PanelContent>
-      {provider.isConfigured ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              aria-label={m.settings_providers_actions({ provider: provider.name })}
-              disabled={isBusy}
-              size="icon-sm"
-              title={m.settings_providers_actions({ provider: provider.name })}
-              type="button"
-              variant="ghost"
-            >
-              <IconEllipsisVertical className="opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {provider.authTypes.map((authType) => (
-              <DropdownMenuItem key={authType} onSelect={() => onLogin(provider.id, authType)}>
-                <SettingsProviderRowLoginLabel authType={authType} provider={provider} />
-              </DropdownMenuItem>
-            ))}
-            {onSignOut ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onSelect={onSignOut}>
-                  <IconLogOut />
-                  {m.settings_providers_sign_out()}
+      {match(provider)
+        .with({ loginCommand: P.string }, ({ loginCommand }) => (
+          <p className="text-xxs text-muted-foreground">
+            {m.settings_providers_login_command()}
+            {' '}
+            <code className="font-mono">{loginCommand}</code>
+          </p>
+        ))
+        .with({ isConfigured: true }, () => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                aria-label={m.settings_providers_actions({ provider: provider.name })}
+                disabled={isBusy}
+                size="icon-sm"
+                title={m.settings_providers_actions({ provider: provider.name })}
+                type="button"
+                variant="ghost"
+              >
+                <IconEllipsisVertical className="opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {provider.authTypes.map((authType) => (
+                <DropdownMenuItem key={authType} onSelect={() => onLogin(provider.id, authType)}>
+                  <SettingsProviderRowLoginLabel authType={authType} provider={provider} />
                 </DropdownMenuItem>
-              </>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <ButtonGroup aria-label={m.settings_providers_actions({ provider: provider.name })}>
-          {provider.authTypes.map((authType) => (
-            <Button
-              disabled={isBusy}
-              key={authType}
-              size="sm"
-              variant="outline"
-              onClick={() => onLogin(provider.id, authType)}
-            >
-              <SettingsProviderRowLoginLabel authType={authType} provider={provider} />
-            </Button>
-          ))}
-        </ButtonGroup>
-      )}
+              ))}
+              {onSignOut ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem variant="destructive" onSelect={onSignOut}>
+                    <IconLogOut />
+                    {m.settings_providers_sign_out()}
+                  </DropdownMenuItem>
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ))
+        .otherwise(() => (
+          <ButtonGroup aria-label={m.settings_providers_actions({ provider: provider.name })}>
+            {provider.authTypes.map((authType) => (
+              <Button
+                disabled={isBusy}
+                key={authType}
+                size="sm"
+                variant="outline"
+                onClick={() => onLogin(provider.id, authType)}
+              >
+                <SettingsProviderRowLoginLabel authType={authType} provider={provider} />
+              </Button>
+            ))}
+          </ButtonGroup>
+        ))}
     </PanelRow>
   );
 }

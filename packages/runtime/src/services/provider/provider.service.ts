@@ -1,4 +1,5 @@
 import { registerBunOAuthFlows } from '@earendil-works/pi-ai/bun-oauth';
+import { createClaudeCodeProvider } from '@earendil-works/pi-claude-code/src/index';
 import { ModelRuntime } from '@earendil-works/pi-coding-agent';
 import { providerActionCancel } from './provider-action.cancel';
 import { providerActionCancelDevice } from './provider-action.cancel-device';
@@ -13,6 +14,7 @@ import type * as ProviderTypes from '../../types/provider.types';
 export async function makeProviderService(): Promise<ProviderTypes.ProviderService> {
   registerBunOAuthFlows();
   const models = await ModelRuntime.create();
+  models.registerNativeProvider(createClaudeCodeProvider());
   const deps: ProviderTypes.ProviderServiceDeps = { models, sessions: new Map() };
 
   return {

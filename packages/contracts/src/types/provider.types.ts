@@ -123,6 +123,7 @@ export const provider = z.object({
   name: z.string().min(1).max(PROVIDER.maxLabel),
   authTypes: z.array(providerAuthType).max(2),
   loginLabel: z.string().min(1).max(PROVIDER.maxMessage).optional(),
+  loginCommand: z.string().min(1).max(PROVIDER.maxLabel).optional(),
   isSubscription: z.boolean(),
   isConfigured: z.boolean(),
   credentialType: providerAuthType.optional(),
