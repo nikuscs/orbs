@@ -27,6 +27,7 @@ export function useSettingsProviderSession(started: ProviderSession) {
 
     void queryClient.invalidateQueries({ queryKey: rpc.providers.list.key() });
     void queryClient.invalidateQueries({ queryKey: rpc.models.list.key() });
+    void queryClient.invalidateQueries({ queryKey: rpc.avatars.generator.key() });
   }, [isPending, queryClient, rpc]);
 
   return {

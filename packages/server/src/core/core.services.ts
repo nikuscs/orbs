@@ -121,7 +121,11 @@ export async function makeServices({
         auth,
       }),
       attachments,
-      avatars: makeAvatarService({ bots, images: avatarImages }),
+      avatars: makeAvatarService({
+        bots,
+        images: avatarImages,
+        providers,
+      }),
       database,
       auth,
       credentials,
