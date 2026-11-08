@@ -36,12 +36,14 @@ export function useComputer(botId: string) {
   const release = useMutation(rpc.computers.release.mutationOptions({ onSuccess: sync }));
   const touch = useMutation(rpc.computers.touch.mutationOptions({ onSuccess: sync }));
   const viewer = useMutation(rpc.computers.viewer.mutationOptions());
+  const answer = useMutation(rpc.conversation.answerQuestion.mutationOptions({ meta: { invalidates: [rpc.conversation.questions.key()] } }));
+  const handoff = status.data?.handoff ?? null;
 
   const actionError = match({
     start: start.isError,
     sleep: sleep.isError,
     shutdown: shutdown.isError,
-    release: release.isError,
+    release: release.isError || answer.isError,
     takeOver: viewer.isError && viewer.variables.mode === 'control',
   })
     .with({ start: true }, () => m.rooms_computer_start_failed())
@@ -61,12 +63,22 @@ export function useComputer(botId: string) {
     thumbnail: thumbnail.data ?? null,
     isLoading: status.isPending,
     isError: status.isError,
-    isBusy: start.isPending || sleep.isPending || shutdown.isPending || release.isPending,
+    isBusy: start.isPending || sleep.isPending || shutdown.isPending || release.isPending || answer.isPending,
     actionError,
     start: () => start.mutateAsync(input),
     sleep: () => sleep.mutateAsync(input),
     shutdown: () => shutdown.mutateAsync(input),
     release: () => release.mutateAsync(input),
+    answerHandoff: async () => {
+      await match(handoff)
+        .with(null, () => undefined)
+        .otherwise(({ conversationId, questionId, choice }) => answer.mutateAsync({
+          botId,
+          conversationId,
+          id: questionId,
+          answer: { kind: 'choices', choices: [choice] },
+        }));
+    },
     touch: sendTouch,
     openViewer,
     hasViewerFailed: viewer.isError && viewer.variables.mode !== 'control',

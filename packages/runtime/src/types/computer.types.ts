@@ -108,6 +108,7 @@ export interface ComputerRecord extends PiTypes.JsonObject {
   lastActivityAt: number | null;
   sleptAt: number | null;
   control: UniversalTypes.ComputerControl | null;
+  handoff: UniversalTypes.ComputerHandoff | null;
 }
 
 export interface ComputerServiceDeps {
@@ -141,6 +142,8 @@ export interface ComputerViewerParams {
 }
 
 export type ComputerTakeControlParams = UniversalTypes.ComputerControl;
+
+export type ComputerHandoffParams = UniversalTypes.ComputerHandoff;
 
 export interface ComputerReleaseControlParams {
   deviceId: string | null;

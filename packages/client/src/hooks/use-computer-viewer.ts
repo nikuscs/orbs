@@ -75,6 +75,7 @@ export function useComputerViewer(botId: string) {
   const takeOver = () => show('control', startedAt);
 
   const finish = async () => {
+    await computer.answerHandoff();
     await computer.release();
     await show('watch', startedAt);
   };

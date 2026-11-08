@@ -1,5 +1,5 @@
 import { computerDocument } from './computer.constants';
-import { computerControlActive, computerSchedule } from './computer.utils';
+import { computerControlActive, computerHandoffActive, computerSchedule } from './computer.utils';
 import type { ComputerContextParams, ComputerServiceDeps } from '../../types/computer.types';
 import type { ComputerStatus } from '@repo/contracts/universal';
 
@@ -23,6 +23,7 @@ export async function computerQueryStatus({ harness, host, botId }: ComputerServ
     sleepsAt: schedule?.sleepAt ?? null,
     shutsDownAt: schedule?.shutdownAt ?? null,
     control: record ? computerControlActive(record, now) : null,
+    handoff: record ? computerHandoffActive(record, now) : null,
     thumbnailAt: thumbnail?.takenAt ?? null,
   };
 }

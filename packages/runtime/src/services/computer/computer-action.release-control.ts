@@ -12,6 +12,12 @@ export async function computerActionReleaseControl(
 
     const isHeldByOther = deviceId !== null && record.control !== null && record.control.deviceId !== deviceId;
 
+    match(deviceId)
+      .with(null, () => {
+        record.handoff = null;
+      })
+      .otherwise(() => undefined);
+
     return match({ isHeldByOther, state: record.state })
       .with({ isHeldByOther: true }, () => null)
       .with({ state: 'running' }, () => {

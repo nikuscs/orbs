@@ -38,6 +38,12 @@ export function computerControlActive(record: Pick<ComputerRecord, 'control'>, n
     .otherwise(() => null);
 }
 
+export function computerHandoffActive(record: Pick<ComputerRecord, 'handoff'>, now: number) {
+  return match(record.handoff)
+    .with({ until: P.number.gt(now) }, (handoff) => handoff)
+    .otherwise(() => null);
+}
+
 export function computerReset(record: ComputerRecord) {
   record.taskId = null;
   record.state = 'off';
@@ -45,6 +51,7 @@ export function computerReset(record: ComputerRecord) {
   record.lastActivityAt = null;
   record.sleptAt = null;
   record.control = null;
+  record.handoff = null;
 }
 
 export async function computerTaskIsLive(tx: PiDurableTypes.Tx, taskId: number | null) {

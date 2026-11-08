@@ -9,6 +9,13 @@ export const computerControl = z.object({
   until: z.number().int(),
 });
 
+export const computerHandoff = z.object({
+  conversationId: z.number().int().positive(),
+  questionId: z.number().int().positive(),
+  choice: z.string(),
+  until: z.number().int(),
+});
+
 export const computerStatus = z.object({
   botId: z.string(),
   state: computerState,
@@ -17,6 +24,7 @@ export const computerStatus = z.object({
   sleepsAt: z.number().int().nullable(),
   shutsDownAt: z.number().int().nullable(),
   control: computerControl.nullable(),
+  handoff: computerHandoff.nullable(),
   thumbnailAt: z.number().int().nullable(),
 });
 
@@ -38,6 +46,7 @@ export const computerViewerResult = z.object({
 
 export type ComputerState = z.infer<typeof computerState>;
 export type ComputerControl = z.infer<typeof computerControl>;
+export type ComputerHandoff = z.infer<typeof computerHandoff>;
 export type ComputerStatus = z.infer<typeof computerStatus>;
 export type ComputerThumbnail = z.infer<typeof computerThumbnail>;
 export type ComputerViewerMode = z.infer<typeof computerViewerMode>;

@@ -26,6 +26,7 @@ export const computerDocument = defineDoc<ComputerRecord>({
     lastActivityAt: null,
     sleptAt: null,
     control: null,
+    handoff: null,
   }),
   checkpointWhen: () => false,
 });

@@ -1,3 +1,4 @@
+import { computerActionHandoff } from './computer-action.handoff';
 import { computerActionReleaseControl } from './computer-action.release-control';
 import { computerActionShutdown } from './computer-action.shutdown';
 import { computerActionSleep } from './computer-action.sleep';
@@ -23,6 +24,7 @@ export function makeComputerService(deps: ComputerTypes.ComputerServiceDeps) {
       thumbnail: () => computerActionThumbnail(deps),
       touch: (context: Context) => computerActionTouch(actionDeps, { context }),
       takeControl: (params: ComputerTypes.ComputerTakeControlParams, context: Context) => computerActionTakeControl(deps, { ...params, context }),
+      handoff: (params: ComputerTypes.ComputerHandoffParams, context: Context) => computerActionHandoff(deps, { ...params, context }),
       releaseControl: (params: ComputerTypes.ComputerReleaseControlParams, context: Context) => (
         computerActionReleaseControl(actionDeps, { ...params, context })
       ),

@@ -18,6 +18,7 @@ import {
   computerToolReadParameters,
 } from '../../types/computer-tool.types';
 import { COMPUTER } from '../computer/computer.constants';
+import { QUESTION } from '../question/question.constants';
 import { runtimeComputerToolEnsure, runtimeComputerToolLifecycle, runtimeComputerToolText, runtimeComputerToolUse } from './runtime-computer-tool.utils';
 import { runtimeToolOutput, runtimeToolTarget } from './runtime-tool.utils';
 import type { ComputerToolDeps } from '../../types/computer-tool.types';
@@ -137,10 +138,19 @@ export function runtimeComputerToolsExtension(deps: ComputerToolDeps) {
       await runtimeComputerToolEnsure(deps, context);
       await deps.computers.actions.touch(context);
 
+      const done = m.ui_tool_bot_computer_handoff_done();
+
+      await deps.computers.actions.handoff({
+        conversationId: api.conversationId,
+        questionId: api.taskId,
+        choice: done,
+        until: Date.now() + QUESTION.timeoutMs,
+      }, context);
+
       const answer = await deps.questions.actions.ask({
         input: {
           text: m.ui_tool_bot_computer_handoff_question({ instructions: input.instructions }),
-          choices: [m.ui_tool_bot_computer_handoff_done()],
+          choices: [done],
         },
         api,
       }, context);
