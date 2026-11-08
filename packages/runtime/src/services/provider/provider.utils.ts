@@ -5,6 +5,12 @@ import type * as ProviderTypes from '../../types/provider.types';
 import type { AuthEvent, AuthPrompt } from '@earendil-works/pi-ai';
 import type * as UniversalTypes from '@repo/contracts/universal';
 
+export function providerLoginCommand(providerId: string) {
+  return match(providerId)
+    .with(PROVIDER.claudeCode.providerId, () => PROVIDER.claudeCode.loginCommand)
+    .otherwise(() => undefined);
+}
+
 export function providerSweep({ sessions }: ProviderTypes.ProviderServiceDeps) {
   const now = Date.now();
 

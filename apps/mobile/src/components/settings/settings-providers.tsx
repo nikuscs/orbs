@@ -3,7 +3,7 @@ import { m } from '@repo/i18n/client';
 import { useRouter } from 'expo-router';
 import { KeyRound, LogIn, LogOut, Plus, RefreshCw } from 'lucide-react-native';
 import { View } from 'react-native';
-import { match } from 'ts-pattern';
+import { match, P } from 'ts-pattern';
 import { BotDetailsSection } from '@/components/bots/bot-details-section';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -64,6 +64,13 @@ export function SettingsProviders() {
                 <StatusDot label={providers.status(provider).label} variant={providers.status(provider).tone} />
                 <Text tone="muted" variant="chat-status">{provider.label ?? providers.status(provider).label}</Text>
               </View>
+              {provider.loginCommand ? (
+                <ItemDescription numberOfLines={0}>
+                  {m.settings_providers_login_command()}
+                  {' '}
+                  <Text className="font-mono" tone="muted">{provider.loginCommand}</Text>
+                </ItemDescription>
+              ) : null}
             </ItemContent>
             <View className="flex-row gap-1">
               {actions(provider).map((action) => (
@@ -97,7 +104,9 @@ export function SettingsProviders() {
           isDisabled={providers.isBusy}
           items={providers.available.map((provider) => ({
             label: provider.name,
-            items: actions(provider).map((action) => ({ label: action.label, onSelect: () => providers.login(provider.id, action.authType) })),
+            items: match(provider.loginCommand)
+              .with(P.string, (command) => [{ label: m.settings_providers_login_command_menu({ command }) }])
+              .otherwise(() => actions(provider).map((action) => ({ label: action.label, onSelect: () => providers.login(provider.id, action.authType) }))),
           }))}
           title={m.settings_providers_add()}
         >
