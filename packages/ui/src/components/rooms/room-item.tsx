@@ -84,7 +84,8 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
                 animate={false}
                 bot={{ name: chat.name, avatar: chat.avatar ?? undefined }}
                 cheer={false}
-                size={state === 'collapsed' && !isMobile && buttonSize ? buttonSize : 48}
+                size={state === 'collapsed' && !isMobile && buttonSize ? buttonSize : 32}
+                variant="row"
               />
               {chat.hasUnread && !isActive ? (
                 <>
@@ -95,7 +96,7 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
             </span>
             <span className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
               <span className="flex min-w-0 items-center gap-1.5">
-                <span className="truncate font-medium">{chat.name}</span>
+                <span className="truncate text-[13px] font-medium">{chat.name}</span>
                 {chat.isPinned ? (
                   <>
                     <IconPin aria-hidden="true" className="size-3 shrink-0 text-muted-foreground" />
@@ -109,7 +110,7 @@ export function RoomItem({ chat, isSortable = true }: RoomItemProps) {
                   </>
                 ) : null}
               </span>
-              <span className="truncate text-xs text-muted-foreground">{draft && !isActive ? m.rooms_draft_preview({ text: draft.replaceAll(MENTION.link, '$1') }) : lastActivity}</span>
+              <span className="truncate text-xxs text-muted-foreground">{draft && !isActive ? m.rooms_draft_preview({ text: draft.replaceAll(MENTION.link, '$1') }) : lastActivity}</span>
             </span>
           </Link>
         </Sidebar.SidebarMenuButton>
