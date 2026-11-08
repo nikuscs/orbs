@@ -108,47 +108,48 @@ export function roomsReactionGroups({ reaction, bots }: RoomsTypes.RoomsReaction
 
 const roomsTimeFormats = new Map<string, Intl.DateTimeFormat>();
 
-export function roomsTimeLabel({ createdAt, previous, now, locale }: RoomsTypes.RoomsTimeLabelParams): string | undefined {
-  function roomsTimeFormat(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
-    const key = `${locale} ${JSON.stringify(options)}`;
-    const format = roomsTimeFormats.get(key) ?? new Intl.DateTimeFormat(locale, options);
+function roomsTimeFormat(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = `${locale} ${JSON.stringify(options)}`;
+  const format = roomsTimeFormats.get(key) ?? new Intl.DateTimeFormat(locale, options);
 
-    roomsTimeFormats.set(key, format);
+  roomsTimeFormats.set(key, format);
 
-    return format;
-  }
+  return format;
+}
 
-  function roomsDayStart(value: Date): number {
-    return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
-  }
+function roomsDayStart(value: Date): number {
+  return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
+}
 
+export function roomsMessageTime({ createdAt, locale }: RoomsTypes.RoomsMessageTimeParams): string {
+  return roomsTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(createdAt);
+}
+
+export function roomsDayLabel({ createdAt, previous, now, locale }: RoomsTypes.RoomsDayLabelParams): string | undefined {
   const date = new Date(createdAt);
   const before = match(previous).with(P.number, (value) => new Date(value)).otherwise(() => undefined);
 
-  if (before && date.getTime() - before.getTime() < ROOMS.timeGapMs && roomsDayStart(date) === roomsDayStart(before)) {
+  if (before && roomsDayStart(date) === roomsDayStart(before)) {
     return undefined;
   }
 
-  const time = roomsTimeFormat({ hour: 'numeric', minute: '2-digit' }).format(date);
   const days = Math.round((roomsDayStart(now) - roomsDayStart(date)) / ROOMS.dayMs);
 
   if (days === 0) {
-    return m.rooms_time_today({ time });
+    return m.rooms_day_today();
   }
 
   if (days === 1) {
-    return m.rooms_time_yesterday({ time });
+    return m.rooms_day_yesterday();
   }
 
-  const day = days < ROOMS.weekDays
-    ? roomsTimeFormat({ weekday: 'short' })
-    : roomsTimeFormat({
+  return (days < ROOMS.weekDays
+    ? roomsTimeFormat(locale, { weekday: 'long' })
+    : roomsTimeFormat(locale, {
       day: 'numeric',
       month: 'short',
       year: date.getFullYear() === now.getFullYear() ? undefined : 'numeric',
-    });
-
-  return m.rooms_time_on({ date: day.format(date), time });
+    })).format(date);
 }
 
 export function roomsFileKind(mediaType: string): RoomsTypes.RoomsFileRow['kind'] {

@@ -2,7 +2,7 @@ import { getLocale, m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
 import { CHAT } from '../services/chat/chat.constants';
 import { chatMessages } from '../services/chat/chat.utils';
-import { roomsFileImages, roomsTimeLabel } from '../services/rooms/rooms.utils';
+import { roomsDayLabel, roomsFileImages, roomsMessageTime } from '../services/rooms/rooms.utils';
 import { useRpc } from './use-rpc';
 import type { ChatViewerParams } from '../types/chat.types';
 import type { RoomsFilePart } from '../types/rooms.types';
@@ -28,11 +28,15 @@ export function useChatViewer({ bot, entryId, attachmentId }: ChatViewerParams) 
   const fallback: RoomsFilePart = { type: 'file', mediaType: 'image/*', url };
   const images = metadata ? found : [fallback];
 
-  const time = metadata ? roomsTimeLabel({
+  const locale = getLocale();
+
+  const day = metadata ? roomsDayLabel({
     createdAt: metadata.createdAt,
     now: new Date(),
-    locale: getLocale(),
+    locale,
   }) : undefined;
+
+  const time = metadata && day ? `${day} ${roomsMessageTime({ createdAt: metadata.createdAt, locale })}` : undefined;
 
   return {
     images,

@@ -1,4 +1,4 @@
-import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, chatPairMessages, roomsTimeLabel } from '@repo/client/client';
+import { botBubble, CHAT, chatActivityMessage, chatActivityStartedAt, chatPairMessages, roomsDayLabel, roomsMessageTime } from '@repo/client/client';
 import { chatQueries, useChatPendingSync, useChatRoom } from '@repo/client/react';
 import { getLocale, m } from '@repo/i18n/client';
 import { useQuery } from '@tanstack/react-query';
@@ -119,20 +119,21 @@ function ChatPairView({ session, asker, peer, bots, view }: ChatPairViewProps) {
               bot={peer}
               bots={bots}
               bubble={botBubble(peer)}
-              isCollapsible={index < messages.length - 1}
-              isLive={message.id === CHAT.liveMessageId}
-              isSending={false}
-              message={message}
-              reactions={[]}
-              session={session}
-              time={message.metadata
-                ? roomsTimeLabel({
+              day={message.metadata
+                ? roomsDayLabel({
                   createdAt: message.metadata.createdAt,
                   previous: previous?.metadata?.createdAt,
                   now,
                   locale: getLocale(),
                 })
                 : undefined}
+              isCollapsible={index < messages.length - 1}
+              isLive={message.id === CHAT.liveMessageId}
+              isSending={false}
+              message={message}
+              reactions={[]}
+              sentAt={message.metadata ? roomsMessageTime({ createdAt: message.metadata.createdAt, locale: getLocale() }) : undefined}
+              session={session}
               onLongPress={() => undefined}
               onReact={() => undefined}
             />

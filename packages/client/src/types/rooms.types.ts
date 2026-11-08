@@ -37,10 +37,15 @@ export interface RoomsApprovalText {
   description?: string;
 }
 
-export interface RoomsTimeLabelParams {
+export interface RoomsDayLabelParams {
   createdAt: number;
   previous?: number;
   now: Date;
+  locale: string;
+}
+
+export interface RoomsMessageTimeParams {
+  createdAt: number;
   locale: string;
 }
 
