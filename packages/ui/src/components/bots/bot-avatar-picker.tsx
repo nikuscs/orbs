@@ -12,6 +12,7 @@ import { cn } from '../../lib/cn';
 import { Button } from '../button';
 import { BotAvatar } from './bot-avatar';
 import { BotAvatarEmoji } from './bot-avatar-emoji';
+import { BotAvatarGenerate } from './bot-avatar-generate';
 import type { BotAvatar as BotAvatarValue } from '@repo/client/client';
 import type { MouseEvent } from 'react';
 
@@ -128,6 +129,11 @@ export function BotAvatarPicker({ name, value, onChange, disabled = false, densi
           <IconImageUp />
           {isCompact ? null : m.avatars_upload()}
         </Button>
+        <BotAvatarGenerate
+          density={density}
+          disabled={disabled}
+          onGenerated={onChange}
+        />
         <BotAvatarEmoji
           density={density}
           disabled={disabled}

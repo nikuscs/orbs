@@ -5,7 +5,11 @@ import type { SettingsDoneParams } from '../types/settings.types';
 
 export function useSettingsProviderLogout({ onDone }: SettingsDoneParams) {
   const { rpc } = useRpc();
-  const logout = useMutation(rpc.providers.logout.mutationOptions({ meta: { invalidates: [rpc.providers.list.key()] }, onSuccess: () => onDone() }));
+
+  const logout = useMutation(rpc.providers.logout.mutationOptions({
+    meta: { invalidates: [rpc.providers.list.key(), rpc.avatars.generator.key()] },
+    onSuccess: () => onDone(),
+  }));
 
   return {
     isPending: logout.isPending,

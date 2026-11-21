@@ -75,5 +75,13 @@
   "avatars_activity_failed": "Hit a snag",
   "avatars_upload": "Upload image",
   "avatars_emoji": "Choose emoji",
+  "avatars_generate": "Generate",
+  "avatars_generate_label": "Describe the avatar",
+  "avatars_generate_placeholder": "A cheerful robot fox with headphones",
+  "avatars_generate_submit": "Generate",
+  "avatars_generate_pending": "Painting…",
+  "avatars_generate_error": "Couldn’t generate this avatar. Try again, or try another description.",
+  "avatars_generate_model": "Uses {model}. Your provider charges for each image.",
+  "avatars_generate_unavailable": "To generate avatars, add a provider with image models, such as OpenRouter, in Settings, under Providers.",
   "avatars_upload_error": "Could not upload the image"
 }

@@ -6,6 +6,7 @@ export const AVATAR = {
   size: 512,
   notificationSize: 256,
   pathPrefix: '/avatars/',
+  generateDescriptionMaxLength: 500,
 } as const;
 
 export const avatarImageId = z.uuid();
@@ -17,3 +18,13 @@ export const avatarUpload = z.object({
 });
 
 export type AvatarUploadInput = z.infer<typeof avatarUpload>;
+
+export const avatarGenerate = z.object({
+  description: z.string().trim().min(1).max(AVATAR.generateDescriptionMaxLength),
+});
+
+export type AvatarGenerateInput = z.infer<typeof avatarGenerate>;
+
+export const avatarGenerator = z.object({ model: z.string().nullable() });
+
+export type AvatarGenerator = z.infer<typeof avatarGenerator>;
