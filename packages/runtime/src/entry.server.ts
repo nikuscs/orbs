@@ -16,3 +16,4 @@ export type { SkillLoaderService } from './services/skill/skill-loader.service';
 export type { PluginLoaderService } from './services/plugin/plugin-loader.service';
 export type { InstructionLoaderService } from './services/instruction/instruction-loader.service';
 export { notificationItemKey } from './services/notification/notification.utils';
+export type { ComputerHost } from './types/computer.types';

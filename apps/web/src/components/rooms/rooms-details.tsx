@@ -14,6 +14,7 @@ import { useEffect, useRef } from 'react';
 import { match, P } from 'ts-pattern';
 import { RoomsChatContextItem } from '@/components/rooms/rooms-chat-context';
 import { RoomsDetailsBot } from '@/components/rooms/rooms-details-bot';
+import { RoomsDetailsComputer } from '@/components/rooms/rooms-details-computer';
 import { RoomsDetailsMedia } from '@/components/rooms/rooms-details-media';
 import { RoutinesList } from '@/components/routines/routines-list';
 import { TodosList } from '@/components/todos/todos-list';
@@ -167,6 +168,9 @@ function RoomsDetailsContent({ bot, chat, page }: RoomsDetailsContentProps) {
     .with(undefined, () => (
       <>
         <RoomsDetailsBot bot={bot} chat={chat} />
+        <RoomsDetailsSection title={m.rooms_computer()}>
+          <RoomsDetailsComputer bot={bot} />
+        </RoomsDetailsSection>
         <ItemGroup variant="outline">
           {pages.map((item) => (
             <Item key={item.to} size="sm">

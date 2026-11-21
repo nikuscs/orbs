@@ -78,7 +78,7 @@ try {
     fetch: async (request, bun) => {
       const { pathname, search } = new URL(request.url);
 
-      if (pathname === '/rpc' || pathname === '/health' || pathname === '/mcp/callback' || pathname.startsWith('/rpc/') || pathname.startsWith('/files/') || pathname.startsWith('/avatars/')) {
+      if (pathname === '/rpc' || pathname === '/health' || pathname === '/mcp/callback' || pathname.startsWith('/rpc/') || pathname.startsWith('/files/') || pathname.startsWith('/avatars/') || pathname.startsWith('/computers/')) {
         const cookies = request.headers.get('cookie') ?? '';
         const picked = connectionHasAddresses(cookies) ? await connectionTarget(cookies) : { url: LOCAL_DAEMON, isMismatch: false };
         const daemon = picked.url;
@@ -99,9 +99,16 @@ try {
 
         if (request.headers.get('upgrade')?.toLowerCase() === 'websocket') {
           target.protocol = target.protocol === 'https:' ? 'wss:' : 'ws:';
-          const data: RpcProxySocket = { target: target.href, origin: request.headers.get('origin'), pending: [] };
+          const protocols = (request.headers.get('sec-websocket-protocol') ?? '').split(',').map((protocol) => protocol.trim()).filter(Boolean);
 
-          return bun.upgrade(request, { data }) ? undefined : new Response(null, { status: 426 });
+          const data: RpcProxySocket = {
+            target: target.href,
+            origin: request.headers.get('origin'),
+            protocols,
+            pending: [],
+          };
+
+          return bun.upgrade(request, { data, headers: protocols.length > 0 ? { 'sec-websocket-protocol': protocols[0] } : undefined }) ? undefined : new Response(null, { status: 426 });
         }
 
         return fetch(target, {
@@ -133,7 +140,7 @@ try {
     websocket: {
       open: (socket: ServerWebSocket<RpcProxySocket>) => {
         const options: WebSocketOptions = { headers: socket.data.origin ? { origin: socket.data.origin } : {} };
-        const upstream: WebSocket = Reflect.construct(WebSocket, [socket.data.target, options]);
+        const upstream: WebSocket = Reflect.construct(WebSocket, [socket.data.target, { ...options, protocols: socket.data.protocols }]);
 
         upstream.binaryType = 'arraybuffer';
         upstream.addEventListener('open', () => {

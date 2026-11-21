@@ -4,6 +4,7 @@ import { attachments } from './rpc.attachments';
 import { avatars } from './rpc.avatars';
 import { bots } from './rpc.bots';
 import { commands } from './rpc.commands';
+import { computers } from './rpc.computers';
 import { conversation } from './rpc.conversation';
 import { credentials } from './rpc.credentials';
 import { devices } from './rpc.devices';
@@ -42,6 +43,7 @@ export const router = rpcRouter.router({
   artifacts,
   bots,
   commands,
+  computers,
   devices,
   notifications,
   conversation,

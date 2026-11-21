@@ -4,12 +4,14 @@ import { log } from '@repo/logger/server';
 import { match, P } from 'ts-pattern';
 import { makeActivityService } from '../activity/activity.service';
 import { makeArtifactService } from '../artifact/artifact.service';
+import { makeComputerService } from '../computer/computer.service';
 import { makeConversationIndexService } from '../conversation-index/conversation-index.service';
 import { makeNotificationService } from '../notification/notification.service';
 import { makeQuestionService } from '../question/question.service';
 import { makeRoutineService } from '../routine/routine.service';
 import { makeTodoService } from '../todo/todo.service';
 import { runtimeArtifactToolsExtension } from './runtime-artifact-tools.extension';
+import { runtimeComputerToolsExtension } from './runtime-computer-tools.extension';
 import { runtimeQueryNextDeadline } from './runtime-query.next-deadline';
 import { runtimeRoutineToolsExtension } from './runtime-routine-tools.extension';
 import { runtimeTodoToolsExtension } from './runtime-todo-tools.extension';
@@ -60,13 +62,39 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
     const routineTools = runtimeRoutineToolsExtension({ harness, routines });
     const todos = makeTodoService({ harness });
     const todoTools = runtimeTodoToolsExtension({ harness, todos });
-    const readOnlyTools = [...shared.readOnlyTools, ...artifactTools.readOnlyTools, ...routineTools.readOnlyTools, ...todoTools.readOnlyTools];
+    const questions = makeQuestionService({ harness });
+    const host = shared.computers;
+
+    const computers = host ? makeComputerService({
+      harness,
+      host,
+      botId,
+    }) : undefined;
+
+    const computerTools = host && computers
+      ? runtimeComputerToolsExtension({
+        host,
+        computers,
+        questions,
+      })
+      : undefined;
+
+    const optionalExtensions = computerTools ? [computerTools.extension] : [];
+
+    const readOnlyTools = [
+      ...shared.readOnlyTools,
+      ...artifactTools.readOnlyTools,
+      ...routineTools.readOnlyTools,
+      ...todoTools.readOnlyTools,
+      ...(computerTools?.readOnlyTools ?? []),
+    ];
 
     const ownTools = [
       ...shared.ownTools,
       ...(artifactTools.extension.tools ?? []),
       ...(routineTools.extension.tools ?? []),
       ...(todoTools.extension.tools ?? []),
+      ...(computerTools?.extension.tools ?? []),
     ];
 
     const permissionExtension = runtimeToolsExtension({
@@ -76,7 +104,7 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
       permissions: shared.permissions,
     });
 
-    for (const extension of [artifactTools.extension, routineTools.extension, todoTools.extension, permissionExtension]) {
+    for (const extension of [artifactTools.extension, routineTools.extension, todoTools.extension, ...optionalExtensions, permissionExtension]) {
       registry.install(extension);
     }
 
@@ -87,17 +115,18 @@ export async function runtimeBotOpen(shared: RuntimeTypes.RuntimeSharedDeps, bot
       botId,
       directory: shared.directory,
       harness,
-      questions: makeQuestionService({ harness }),
+      questions,
       routines,
       todos,
       artifacts,
+      computers,
       activity: makeActivityService({ harness, telemetry: telemetry.telemetry }),
       index: await makeConversationIndexService({ harness }),
       registry,
       models: shared.models,
       readOnlyTools,
       ownTools,
-      extensions: [...shared.extensions, artifactTools.extension, routineTools.extension, todoTools.extension, permissionExtension],
+      extensions: [...shared.extensions, artifactTools.extension, routineTools.extension, todoTools.extension, ...optionalExtensions, permissionExtension],
     };
 
     const arm = runtimeBotAlarm(shared, deps);

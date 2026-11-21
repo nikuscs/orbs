@@ -1,4 +1,6 @@
 import { match, P } from 'ts-pattern';
+import { COMPUTER, computerDocument } from '../computer/computer.constants';
+import { computerTaskWakeAt } from '../computer/computer.utils';
 import { questionDocument } from '../question/question.constants';
 import { ROUTINE, routineDocument } from '../routine/routine.constants';
 import { SUBAGENT } from '../subagent/subagent.constants';
@@ -14,6 +16,7 @@ export async function runtimeQueryNextDeadline({ harness, botId }: RuntimeServic
     .with(P.nonNullable, (id) => harness.snapshot(routineDocument, id, context))
     .otherwise(() => undefined);
 
+  const computer = await harness.snapshot(computerDocument, context);
   const graph = await harness.taskGraph(context);
 
   try {
@@ -25,12 +28,15 @@ export async function runtimeQueryNextDeadline({ harness, botId }: RuntimeServic
       (await harness.snapshot(questionDocument, task.id, context))?.question,
     ]));
 
-    const isLive = tasks.some((task) => task.kind !== ROUTINE.task && task.kind !== SUBAGENT.anchor);
+    const isLive = tasks.some((task) => task.kind !== ROUTINE.task && task.kind !== SUBAGENT.anchor && task.kind !== COMPUTER.task);
 
     const deadlines = [
       ...Object.values(routines?.routines ?? {}).flatMap((routine) => match(routine)
         .with({ isEnabled: true, nextRunAt: P.number }, ({ nextRunAt }) => [nextRunAt])
         .otherwise(() => [])),
+      ...match(computerTaskWakeAt(graph.value.tasks, computer?.taskId))
+        .with(P.number, (until) => [until])
+        .otherwise(() => []),
       ...waits.flat().flatMap((wait) => match(wait)
         .with({ status: 'pending', expiresAt: P.number }, ({ expiresAt }) => [expiresAt])
         .otherwise(() => [])),

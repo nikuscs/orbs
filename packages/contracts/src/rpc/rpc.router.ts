@@ -25,6 +25,7 @@ import {
 import { avatarUpload } from '../types/avatar.types';
 import { bot, botAvatarImage, botCatalog, botCreate, botDeleteResult, botGet, botList, botSwapModels, botSwapModelsResult, botUpdate } from '../types/bot.types';
 import { commandCatalog, commandExecute, commandExecuteResult, commandList } from '../types/command.types';
+import { computerStatus, computerThumbnail, computerViewer, computerViewerResult } from '../types/computer.types';
 import { conversationContextUsage } from '../types/conversation-context-usage.types';
 import { conversationUsage } from '../types/conversation-usage.types';
 import {
@@ -182,6 +183,16 @@ export const contract = {
     update: ocValidate.input(routineUpdate).output(routine),
     run: ocBusy.input(routineTarget).output(routine),
     remove: ocFind.input(routineTarget).output(routineRemoveResult),
+  },
+  computers: {
+    status: ocFind.input(botGet).output(computerStatus),
+    start: ocBusy.input(botGet).output(computerStatus),
+    sleep: ocBusy.input(botGet).output(computerStatus),
+    shutdown: ocBusy.input(botGet).output(computerStatus),
+    touch: ocFind.input(botGet).output(computerStatus),
+    release: ocFind.input(botGet).output(computerStatus),
+    thumbnail: ocFind.input(botGet).output(computerThumbnail),
+    viewer: ocBusy.input(computerViewer).output(computerViewerResult),
   },
   todos: {
     list: ocFind.input(botGet).output(todoList),
