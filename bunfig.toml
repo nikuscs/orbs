@@ -1,3 +1,4 @@
 [install]
 linker = "isolated"
 globalStore = true
+publicHoistPattern = ["eslint-import-resolver-node"]
