@@ -6,6 +6,7 @@ import { match, P } from 'ts-pattern';
 import { PROVIDER } from './provider.constants';
 import {
   providerFinish,
+  providerLoginCommand,
   providerPromptView,
   providerPruneTerminal,
   providerPushEvent,
@@ -32,7 +33,7 @@ export function providerActionLogin(deps: ProviderTypes.ProviderServiceDeps, par
     .exhaustive();
 
   match(method)
-    .when((value) => value?.login !== undefined, () => undefined)
+    .when((value) => value?.login !== undefined && providerLoginCommand(params.providerId) === undefined, () => undefined)
     .otherwise(() => {
       throw new Errors.VALIDATION_ERROR({
         fields: { authType: { message: 'validation_provider_login_unsupported' } },

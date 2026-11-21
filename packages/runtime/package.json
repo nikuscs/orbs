@@ -26,6 +26,7 @@
   "dependencies": {
     "@earendil-works/chord": "catalog:",
     "@earendil-works/pi-ai": "catalog:",
+    "@earendil-works/pi-claude-code": "catalog:",
     "@earendil-works/pi-durable": "catalog:",
     "@repo/errors": "workspace:*",
     "@repo/i18n": "workspace:*",

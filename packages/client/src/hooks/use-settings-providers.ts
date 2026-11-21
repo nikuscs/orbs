@@ -31,7 +31,7 @@ export function useSettingsProviders() {
     .filter((provider) => provider.id !== 'openai-codex')
     .sort((a, b) => rank(a) - rank(b));
 
-  const available = providers.filter((provider) => !provider.isConfigured && provider.authTypes.length > 0);
+  const available = providers.filter((provider) => !provider.isConfigured && (provider.authTypes.length > 0 || provider.loginCommand !== undefined));
 
   const session = latest && latest.id !== dismissedId && (latest.status === 'pending' || latest.status === 'failed') ? latest : null;
 

@@ -1,19 +1,11 @@
+import { createHmac } from 'node:crypto';
 import { SECRET_PROXY } from './secret-proxy.constants';
 import type { SecretRule } from '../../types/secret.types';
 import type { CompletedRequest, Headers } from 'mockttp';
 
-export function secretProxyPassword(token: string) {
-  return Buffer.from(JSON.stringify({ tags: [token] })).toString('base64url');
-}
-
-export function secretProxyRedact(token: string, text: string) {
-  const password = secretProxyPassword(token);
-  return [Buffer.from(`metadata:${password}`).toString('base64'), password, token]
-    .reduce((result, value) => result.replaceAll(value, '[proxy credential]'), text);
-}
-
-export function secretProxyPlaceholder(name: string) {
-  return `${SECRET_PROXY.placeholderPrefix}${name}${SECRET_PROXY.placeholderSuffix}`;
+export function secretProxyPlaceholder(token: string, name: string) {
+  const tag = createHmac('sha256', token).update(name).digest('hex').slice(0, SECRET_PROXY.placeholderTagLength);
+  return `${SECRET_PROXY.placeholderPrefix}${name}-${tag}${SECRET_PROXY.placeholderSuffix}`;
 }
 
 export function secretProxyAllows(rule: SecretRule, host: string) {

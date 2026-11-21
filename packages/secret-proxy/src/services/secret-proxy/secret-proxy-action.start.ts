@@ -1,5 +1,4 @@
 import { generateCACertificate, getLocal } from 'mockttp';
-import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { rootCertificates } from 'node:tls';
@@ -10,14 +9,11 @@ import { secretProxyCarries, secretProxyIsLocal } from './secret-proxy.utils';
 import type { SecretProxyServiceDeps } from '../../types/secret-proxy.types';
 import type { CompletedRequest } from 'mockttp';
 
-const refused = { response: { statusCode: 403, body: 'Proxy authorization required.\n' } };
+const refused = { response: { statusCode: 403, body: 'The secret proxy only accepts local connections.\n' } };
 
 export function secretProxyActionStart(deps: SecretProxyServiceDeps) {
   async function secretProxyStart() {
-    deps.state.token = randomBytes(32).toString('hex');
-
-    const secretProxyAuthorized = (request: CompletedRequest) => secretProxyIsLocal(request.remoteIpAddress)
-      && request.tags.includes(`socket-metadata:${deps.state.token}`);
+    const secretProxyAuthorized = (request: CompletedRequest) => secretProxyIsLocal(request.remoteIpAddress);
 
     const ca = await generateCACertificate();
     const server = getLocal({ https: ca });
