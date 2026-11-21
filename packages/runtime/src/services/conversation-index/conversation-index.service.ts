@@ -10,9 +10,9 @@ import { conversationIndexMessage } from './conversation-index.utils';
 import type * as ConversationIndexTypes from '../../types/conversation-index.types';
 
 export async function makeConversationIndexService(
-  { harness }: ConversationIndexTypes.ConversationIndexServiceDeps,
+  { harness, notifications }: ConversationIndexTypes.ConversationIndexServiceDeps,
 ): Promise<ConversationIndexTypes.ConversationIndexService> {
-  const deps: ConversationIndexTypes.ConversationIndexDeps = { harness, conversations: new Set() };
+  const deps: ConversationIndexTypes.ConversationIndexDeps = { harness, notifications, conversations: new Set() };
   await harness.commit(async (tx) => {
     await tx.doc(conversationIndex);
   }, BACKGROUND_CONTEXT);

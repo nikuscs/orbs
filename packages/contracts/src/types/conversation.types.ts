@@ -168,6 +168,8 @@ export const conversationSummary = conversationPreferences.extend({
     createdAt: z.number(),
   }).nullable(),
   isRunning: z.boolean(),
+  isWorking: z.boolean(),
+  isWaiting: z.boolean(),
 });
 
 export const conversationList = z.array(conversationSummary.extend({
