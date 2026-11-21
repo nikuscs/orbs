@@ -30,7 +30,6 @@ export const ROOMS = {
   prefillEvent: 'bots.prefill',
   chime: { notesHz: [660, 880], noteSeconds: 0.12, volume: 0.12, fadeTo: 0.0001, closeMs: 1000 },
   recommendedChoice: '(Recommended)',
-  timeGapMs: 60 * 60 * 1000,
   dayMs: 24 * 60 * 60 * 1000,
   weekDays: 7,
 } as const;

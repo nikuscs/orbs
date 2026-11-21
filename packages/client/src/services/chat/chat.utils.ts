@@ -281,6 +281,7 @@ function chatAssistantEntry(messages: ChatTypes.ChatMessage[], entry: ChatTypes.
           current.metadata = {
             ...current.metadata,
             entryId: hasText ? entry.id : current.metadata.entryId,
+            createdAt: hasText ? createdAt : current.metadata.createdAt,
             entryIds: [...current.metadata.entryIds, entry.id],
             usage: chatUsageAdd(current.metadata.usage, answer.usage),
             endedAt: createdAt,
